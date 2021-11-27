@@ -5,25 +5,15 @@ import functools
 import subprocess
 from contextlib import redirect_stdout
 
-#import cython as cthn      #
-#import numba               #not_working
-
-#import pandas as pand      #
-#import dask                #
-#import pyspark             #not_working #not need yet
-
 ##customImport
 from configs.CFGNames import GLOBAL_LOG_FILE
 from configs.CFGNames import ERASE_NAME_BASE_INIT_FLAG 
 from configs.CFGNames import MAKE_PROFILING_FLAG
-from configs.CFGNames import MAKE_UNITTESTS_FLAG 
 
 from modules import nameGen
 from modules import nameReader
 from modules import nameAnalysis
 from modules.diagnostics import Profiling
-
-from tests import test_Common
 ###FINISH ImportBlock
 
 ###START GlobalConstantBlock
@@ -72,11 +62,6 @@ def makeMainFunctionsList() -> typing.List[typing.Callable]:
         nameReader.main,
         nameAnalysis.main,
     ])
-
-    if MAKE_UNITTESTS_FLAG:
-        functionsList.append(
-            test_Common.main,
-        )
 
     return functionsList
 
