@@ -4,14 +4,18 @@ import ast
 import os
 import hashlib
 import copy
+import functools
 import typing
 from typing import Union
 from pathlib import Path as PathType
+from contextlib import redirect_stdout
 
 ##customImport
 from configs.CFGNames import DB_NAMES_DIRECTORY
 from configs.CFGNames import NAMES_BASE_INITIALIZE_FILE, CHECK_SUM_FILE
 from configs.CFGNames import DB_NAMES_FILENAME_FLAG, CHECKSUM_DB_GLOBAL_FLAG
+from configs.CFGNames import LOCAL_NAMES_LOG_FILE
+from configs.CFGNames import USING_FILE_STORING_FLAG
 from templates.templateAnalysis import TEMPLATE_LOCAL_RACE, TEMPLATE_GLOBAL_RACE
 
 ###FINISH ImportBlock
@@ -20,6 +24,22 @@ from templates.templateAnalysis import TEMPLATE_LOCAL_RACE, TEMPLATE_GLOBAL_RACE
 ###FINISH GlobalConstantBlock
 
 ###START DecoratorBlock
+def redirectOutput(redirectedFunction: typing.Callable) -> typing.Callable:
+    '''
+    Redirects output to log file for #redirectedFunction. After returns stdout back.
+    '''
+    @functools.wraps(redirectedFunction)
+    def wrapper(*args, **kwargs):
+        logFilePath = LOCAL_NAMES_LOG_FILE
+        
+        with open(logFilePath, 'w') as f, redirect_stdout(f):
+            print("---NAMEREADER-STARTED---\n")
+            res = redirectedFunction(*args, **kwargs)
+            print("\n---NAMEREADER-FINISHED---")
+
+        return res
+
+    return wrapper
 ###FINISH DecoratorBlock
 
 
@@ -379,7 +399,9 @@ class WithNamesWork:
             return "\nNamesDB: Canceled", "INF: Checksum exists"
 
         #begin_test_case_block
+        passingTest = False
         if 'initializeFile' in kwargs:
+            passingTest = True
             initializeFile = kwargs['initializeFile']
 
         if 'dataBaseOfNames' in kwargs:
@@ -391,19 +413,44 @@ class WithNamesWork:
         for fullPath in dbNamesFiles:
             dataBaseOfNames = WithNamesWork.formatNames(
                 fullPath, dataBaseOfNames)
-        
-        FileWork.overwriteDataFile(dataBaseOfNames, initializeFile)
-        CheckSumWork.writeCheckSumDB(**kwargs)
 
-        return "\nNamesDB: Created", "INF: done"
+        answers = 'Empty answer.'
+        if passingTest or USING_FILE_STORING_FLAG:
+            answ = FileWork.overwriteDataFile(dataBaseOfNames, initializeFile)
+            if not answ:
+                answers = "ERR: Can't write data to file."
+                return "\nNamesDB: Failed", answers
+            answers = "INF: db file created, mongodb skipped."
+            
+        else:
+            from database.dbtest import ME_DBService
+            tool = ME_DBService()
+            answers = tool.insertNames(dataBaseOfNames)
+            
+        
+        #FileWork.overwriteDataFile(dataBaseOfNames, initializeFile)
+        #CheckSumWork.writeCheckSumDB(**kwargs)
+
+        return "\nNamesDB: Created", answers
 
 ###FINISH FunctionalBlock
 
 
 ###START MainBlock
+@redirectOutput
+def printResponds(responds):
+    '''
+    Function for printing responds in log file.
+    '''
+    if isinstance(responds, list):
+        for res in responds:
+            print(res)
+    else:
+        print(responds)
 
 def main():
-    globRresp = WithNamesWork.createNamesDB()
+    globRresp, locResp = WithNamesWork.createNamesDB()
+    printResponds(locResp)
     
     return globRresp
 ###FINISH Mainblock

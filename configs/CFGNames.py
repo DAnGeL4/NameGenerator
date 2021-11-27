@@ -26,6 +26,7 @@ GLOBAL_GRAPH_FILE = os.path.join(GLOBAL_GRAPH_DIR, 'prof-graph.png')
 GLOBAL_TEST_DIRECTORY = os.path.join(GLOBAL_LOG_DIR,'tests/')
 
 GLOBAL_LOG_FILE = os.path.join(GLOBAL_LOG_DIR, 'LOGCommon.log')
+LOCAL_NAMES_LOG_FILE = os.path.join(GLOBAL_LOG_DIR, 'LOGNames.log')
 LOCAL_ANALYSIS_LOG_FILE = os.path.join(GLOBAL_LOG_DIR, 
                             'LOGAnalysis.log')
 GLOBAL_TEST_LOG_FILE = os.path.join(GLOBAL_TEST_DIRECTORY, 
@@ -46,6 +47,9 @@ CHECKSUM_DB_GLOBAL_FLAG = "GLOB_EXIST"
 
 #Type True to reinitialize database
 ERASE_NAME_BASE_INIT_FLAG = True
+#Type True to use storing in files
+#or type False to use MongoDB
+USING_FILE_STORING_FLAG = False
 #Type True to make unittests
 MAKE_UNITTESTS_FLAG = bool(
                             True
@@ -59,6 +63,25 @@ MAKE_PROFILING_FLAG = bool(
 #####END FlagsBlock
 
 #####BEGIN MongoengineBlock
+class ME_SETTINGS():
+    '''
+    Contains settings for mongoengine.
+    '''
+    mdbUser = os.environ['mongoDBALogin']
+    mdbPass = os.environ['mongoDBAPass']
+    mdbCluster = os.environ['mongoDBACluster']
+
+    MDB_n_Aliases = dict({
+                'mdbName': {
+                    'db_name': os.environ['mongoDBANamedb'],
+                    'alias': 'mdbName'},
+                'mdbAnalytic': {
+                    'db_name': os.environ['mongoDBAAnlyticdb'],
+                    'alias': 'mdbAnalytic'},
+                'mdbCheckSum': {
+                    'db_name': os.environ['mongoDBACheckSumdb'],
+                    'alias': 'mdbCheckSum'}
+                })
 #####END MongoengineBlock
 
 #####BEGIN FunctionalLetterVariablesBlock

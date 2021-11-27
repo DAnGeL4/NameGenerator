@@ -5,15 +5,28 @@ import functools
 import subprocess
 from contextlib import redirect_stdout
 
+#import cython as cthn      #
+#import numba               #not_working
+
+#import pandas as pand      #
+#import dask                #
+#import pyspark             #not_working #not need yet
+
 ##customImport
 from configs.CFGNames import GLOBAL_LOG_FILE
 from configs.CFGNames import ERASE_NAME_BASE_INIT_FLAG 
 from configs.CFGNames import MAKE_PROFILING_FLAG
+from configs.CFGNames import MAKE_UNITTESTS_FLAG 
+from configs.CFGNames import USING_FILE_STORING_FLAG
 
 from modules import nameGen
 from modules import nameReader
 from modules import nameAnalysis
 from modules.diagnostics import Profiling
+
+from database import dbtest
+
+from tests import test_Common
 ###FINISH ImportBlock
 
 ###START GlobalConstantBlock
@@ -63,6 +76,11 @@ def makeMainFunctionsList() -> typing.List[typing.Callable]:
         nameAnalysis.main,
     ])
 
+    if MAKE_UNITTESTS_FLAG:
+        functionsList.append(
+            test_Common.main,
+        )
+
     return functionsList
 
 
@@ -107,8 +125,13 @@ def globalRun() -> typing.NoReturn:
     This is the base function.
     '''    
     if ERASE_NAME_BASE_INIT_FLAG:
-        res = eraseNamesBaseInitializeFile()
-        print(res)
+        if not USING_FILE_STORING_FLAG:
+            res = eraseNamesBaseInitializeFile()
+            print(res)
+        else:
+            pass
+        tools = dbtest.MongoDBWork()
+        tools.eraseNamesME_DB()
 
     responds = runMainFunctionsList()
     for respond in responds:
@@ -123,6 +146,10 @@ def main() -> typing.NoReturn:
     if checkDependencies() in errors:
         return
 
+    if not USING_FILE_STORING_FLAG:
+        tools = dbtest.ME_DBService()
+        _ = tools.registerDataBases()
+
     if not MAKE_PROFILING_FLAG:
         globalRun()
 
@@ -131,7 +158,13 @@ def main() -> typing.NoReturn:
         #Hope updates soon :)
         Profiling.makeProfileNGraph('globalRun')
 
+
     ##TESTED_AREA_BEGIN
+    print("\n#BEGIN TEST CODE...\n")
+    #from database import dbtest
+    dbtest.main()
+
+    print("\n#...END TEST CODE")
     ##TESTED_AREA_END
     
     return
