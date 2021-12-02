@@ -43,7 +43,7 @@ ANALYTIC_DB_FILE = os.path.join(DB_NAMES_DIRECTORY, "DBAnalytic.cfg")
 
 #####BEGIN FlagsBlock
 DB_NAMES_FILENAME_FLAG = "DBNames"
-CHECKSUM_DB_GLOBAL_FLAG = "GLOB_EXIST"
+CHECKSUM_DB_GLOBAL_FLAG = "globalExist"
 
 #Type True to reinitialize database
 ERASE_NAME_BASE_INIT_FLAG = True

@@ -16,7 +16,7 @@ import mongoengine as medb
 class GlobalFlags(medb.Document):
     globalExist = medb.BooleanField(default=False)
 
-    meta = {'collection': 'GlobFlags',
+    meta = {'collection': 'GlobalFlags',
             'max_documents': 1,
             'db_alias': 'mdbCheckSum'}
 
