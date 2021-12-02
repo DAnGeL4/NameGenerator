@@ -1,12 +1,13 @@
 ###START ImportBlock
 ##systemImport
-import os
+import json
 import typing
 #import pymongo as pymdb
 import mongoengine as medb
 
 ##customImport
 from configs.CFGNames import ME_SETTINGS
+from configs.CFGNames import CHECKSUM_DB_GLOBAL_FLAG
 
 from database.medbNameSchemas import Race, Female, Male, Surname
 
@@ -31,23 +32,29 @@ class MongoDBWork:
     '''
     A class containing tools for working with MongoDB using mongoEngine.
     '''
-    @classmethod
-    def eraseNamesME_DB(cls):
+    @staticmethod
+    def getMDBObject(mdb: str):
         '''
-        
+        Returns mongodb object.
         '''
+        if not mdb:
+            return None, "ERR: mdb is not defined"
+
         mdbNAliases = ME_SETTINGS.MDB_n_Aliases
-        mdbNameAlias = mdbNAliases['mdbName']['alias']
+        mdbAlias = mdbNAliases[mdb]['alias']
 
-        mdbName = medb.get_db(mdbNameAlias)
-        listCollections = mdbName.list_collection_names()
-        
-        for collectionName in listCollections:
-            mdbName.drop_collection(collectionName)
-            mdbName.create_collection(collectionName)
+        if not mdbAlias:
+            return None, "ERR: Have not alias for mdb."
 
-    @classmethod
-    def getReferenceID(cls, collectionField, data):
+        mdbObject = medb.get_db(mdbAlias)
+
+        if not mdbObject:
+            return None, "ERR: Have not database by alias."
+
+        return mdbObject, None
+
+    @staticmethod
+    def getReferenceID(collectionField, data):
         '''
         
         '''
@@ -57,18 +64,79 @@ class MongoDBWork:
                                     __raw__={field: data[field]})
         return referenceDocument.id
 
+    @staticmethod
+    def getReferenceFields():
+        '''
+        Returns tuple of mongoengine reference fields.
+        '''
+        referenceFields = tuple( (medb.GenericReferenceField, 
+                                medb.LazyReferenceField, 
+                                medb.ReferenceField) )
+        return referenceFields
+        
+    @staticmethod
+    def getFieldsContainersCollections():
+        '''
+        Returns tuple of mongoengine fields of collections containers.
+        '''
+        fieldsContainersCollections = tuple( (medb.DynamicField,
+                                    medb.EmbeddedDocumentField,
+                                    medb.GenericEmbeddedDocumentField) )
+        return fieldsContainersCollections
+
+    @staticmethod
+    def getUniqueRAWData(collection, data):
+        '''
+        
+        '''
+        rawData = dict()
+        uniqueFieldsData = collection._unique_with_indexes()
+        if not uniqueFieldsData:
+            return None
+
+        uniqueFieldsData = uniqueFieldsData[0]
+
+        uniqueFields = uniqueFieldsData['fields']
+        if uniqueFields:
+
+            for fieldIndex in uniqueFields:
+                field = fieldIndex[0]
+
+                if field in data:
+                    rawData.update({field: data[field]})
+
+        return rawData
+
+    @classmethod
+    def eraseME_DB(cls, mdb: str = None):
+        '''
+        
+        '''
+        mdbObject, answ = cls.getMDBObject(mdb)
+        if not mdbObject:
+            return answ
+
+        listCollections = mdbObject.list_collection_names()
+        
+        for collectionName in listCollections:
+            mdbObject.drop_collection(collectionName)
+            mdbObject.create_collection(collectionName)
+
+        return "INF: Erased. Recreated empty."
+
     @classmethod
     def insertData(cls, collection, data) -> bool:
         '''
 
         '''
-        document = collection()
-        referenceFields = tuple( (medb.GenericReferenceField, 
-                                medb.LazyReferenceField, 
-                                medb.ReferenceField) )
-        fieldContainedCollections = tuple( (medb.DynamicField,
-                                    medb.EmbeddedDocumentField,
-                                    medb.GenericEmbeddedDocumentField) )
+        document = None
+        if collection._initialised is True:
+            document = collection
+        else:
+            document = collection()
+
+        referenceFields = cls.getReferenceFields()
+        fieldsContainersCollections = cls.getFieldsContainersCollections()
                                     
         for field in data.keys():
 
@@ -76,17 +144,17 @@ class MongoDBWork:
                 collectionField = getattr(collection, field, None)
                 
                 if isinstance(collectionField, referenceFields): 
-                    document[field] = cls.getReferenceID(collectionField, data)
+                    setattr(document, field, cls.getReferenceID(collectionField, data))
                     continue
 
-                elif isinstance(collectionField, fieldContainedCollections):
+                elif isinstance(collectionField, fieldsContainersCollections):
 
                     if type(data[field]) is dict:
                         cls.insertData(collection[field], data[field])
                     continue
                     
                 else:
-                    document[field] = data[field]
+                    setattr(document, field, data[field])
                 
         return document
 
@@ -107,13 +175,69 @@ class MongoDBWork:
         return answer
 
     @classmethod
-    def insertDocuments(cls, collection, listOfData):
+    def updateDocument(cls, documents, data):
         '''
         
         '''
         answers = list()
-        for data in listOfData:
+        for document in documents:
+            document = cls.insertData(document, data)
+
+            answer = None
+            try:
+                document.save()
+                
+            except medb.NotUniqueError as err:
+                answer = err
+            answers.append(answer)
+
+        return answers
+
+    @classmethod
+    def checkDocExist(cls, collection, data):
+        '''
+        Checks if documents already exists in db.
+        '''
+        uniqueRawData = cls.getUniqueRAWData(collection, data)
+
+        rawQuery = uniqueRawData if uniqueRawData else data
+        objs = collection.objects(__raw__=rawQuery).all()
+
+        if objs:
+            return objs
+        return None
+
+    @classmethod
+    def updateOrInsertDocument(cls, collection, data):
+        '''
+
+        '''
+        answer = ''
+
+        documents = cls.checkDocExist(collection, data)
+        if not documents:
             answer = cls.insertDocument(collection, data)
+        else:
+            answer = cls.updateDocument(documents, data)
+            
+        return str(answer)
+
+    @classmethod
+    def writeDocuments(cls, collection, listOfData, operation):
+        '''
+        
+        '''
+        answers = list()
+        operations = {'insert_only': cls.insertDocument, 
+                        'update_or_insert': cls.updateOrInsertDocument, 
+                        'update_only': cls.insertDocument}              #need to do
+
+        if operation not in operations:
+            answers.append('ERR: Unknown operation.')
+            return answers
+
+        for data in listOfData:
+            answer = operations[operation](collection, data)
 
             if answer:
                 answers.append(answer)
@@ -123,14 +247,16 @@ class MongoDBWork:
         return answers
 
     @classmethod
-    def insertDatabase(cls, collectionsData):
+    def writeDatabase(cls, collectionsData):
         '''
         
         '''
         for collectionName in collectionsData.keys():
             collection = collectionsData[collectionName]['collection']
             listOfData = collectionsData[collectionName]['data']
-            answers = cls.insertDocuments(collection, listOfData)
+            operation = collectionsData[collectionName]['operation']
+            answers = cls.writeDocuments(collection, listOfData, 
+                                                        operation)
 
         return answers
 
@@ -204,6 +330,58 @@ class ME_DBService():
                 'race': str(race)})
         
         return collectionData
+        
+    def readChecksumDB_ME(self):
+        '''
+        
+        '''
+        ChecksumDB = dict()
+
+        flagData = GlobalFlags.objects.first()
+        if flagData:
+            flagData = flagData.to_json()
+            flagData = json.loads(flagData)
+            _ = flagData.pop('_id')
+            ChecksumDB.update(flagData)
+
+        allData = ChecksumFiles.objects.all()
+        if allData:
+            allData = allData.to_json()
+            allData = json.loads(allData)
+
+            for filedata in allData:
+                ChecksumDB.update({filedata["file"]: filedata["checksum"]})
+
+        return ChecksumDB
+        
+    def writeChecksumDB_ME(self, checksumDB):
+        '''
+        
+        '''
+        flagData = dict({CHECKSUM_DB_GLOBAL_FLAG: 
+                        checksumDB.pop(CHECKSUM_DB_GLOBAL_FLAG)})
+        globFlagDB_ME = list([flagData])
+
+        checksumDB_ME = list()
+        for fileName in checksumDB.keys():
+            data = dict({'file': fileName, 
+                        'checksum': checksumDB[fileName]})
+            checksumDB_ME.append(data)
+            
+        collectionsData = dict({
+            'GlobalFlags': {
+                'collection': GlobalFlags,
+                'data': globFlagDB_ME,
+                'operation': 'update_or_insert'},
+            'ChecksumFiles': {
+                'collection': ChecksumFiles,
+                'data': checksumDB_ME,
+                'operation': 'update_or_insert'},
+                })
+
+        MongoDBWork.writeDatabase(collectionsData)
+
+        return True
 
     def insertNames(self, namesDict):
         '''
@@ -218,7 +396,7 @@ class ME_DBService():
         for race in namesDict['Races']:
             raceName = str(next(iter(race)))
             maleNames =  race[raceName]['Genders']['Male']['Names']
-            femaleNames =  race[raceName]['Genders']['Female']['Names']
+            femaleNames = race[raceName]['Genders']['Female']['Names']
             surnames = race[raceName]['Surnames']
 
             racesData.append({'race': raceName})
@@ -229,19 +407,23 @@ class ME_DBService():
             collectionsData = dict({
                 'Race': {
                     'collection': Race,
-                    'data': racesData},
+                    'data': racesData,
+                    'operation': 'insert_only'},
                 'Male':{
                     'collection': Male,
-                    'data': malesData}, 
+                    'data': malesData,
+                    'operation': 'insert_only'}, 
                 'Female':{
                     'collection': Female,
-                    'data': femalesData}, 
+                    'data': femalesData,
+                    'operation': 'insert_only'}, 
                 'Surname':{
                     'collection': Surname,
-                    'data': surnamesData},
+                    'data': surnamesData,
+                    'operation': 'insert_only'},
                     })
 
-            answer = MongoDBWork.insertDatabase(collectionsData)
+            answer = MongoDBWork.writeDatabase(collectionsData)
             if answer:
                 answers.append(answer)
 

@@ -18,6 +18,8 @@ from configs.CFGNames import LOCAL_NAMES_LOG_FILE
 from configs.CFGNames import USING_FILE_STORING_FLAG
 from templates.templateAnalysis import TEMPLATE_LOCAL_RACE, TEMPLATE_GLOBAL_RACE
 
+from database.dbtest import ME_DBService
+
 ###FINISH ImportBlock
 
 ###START GlobalConstantBlock
@@ -147,8 +149,8 @@ class FileWork:
 
         return dbDirFiles
 
-    @staticmethod
-    def findValidDBNamesFiles(**kwargs) -> typing.List[PathType]:
+    @classmethod
+    def findValidDBNamesFiles(cls, **kwargs) -> typing.List[PathType]:
         '''
         Checks for a flag in the file names from list. Return list of files path's with a flag.
         
@@ -156,10 +158,10 @@ class FileWork:
         '''
 
         validFiles = []
-        dbDirFiles = FileWork.findDBNamesFiles(**kwargs)
+        dbDirFiles = cls.findDBNamesFiles(**kwargs)
 
         for fullPath in dbDirFiles:
-            fileName = FileWork.getFileNameFromPath(fullPath)
+            fileName = cls.getFileNameFromPath(fullPath)
             tmp_FileWords = fileName.split("_")
             tmp_FileNameFlag = tmp_FileWords[0]
 
@@ -197,42 +199,56 @@ class CheckSumWork:
         return checkSum
 
     @staticmethod
-    def createFileCheckSum(fullPath: Union[str, PathType]
+    def getOldCheckSumDB(checkSumDBFile: Union[str, PathType], **kwargs
+                         ) -> typing.Dict[str, Union[typing.Hashable, bool]]:
+        '''
+        Gets checksum database from file if #USING_FILE_STORING_FLAG true,
+        else gets from mongoDB.
+        '''
+        oldCheckSumDB = None
+        if USING_FILE_STORING_FLAG:
+            oldCheckSumDB = FileWork.readDataFile(checkSumDBFile)
+        else:
+            tool = ME_DBService()
+            oldCheckSumDB = tool.readChecksumDB_ME()
+        
+        if not oldCheckSumDB:
+            oldCheckSumDB = {}
+        
+        return oldCheckSumDB
+
+    @classmethod
+    def createFileCheckSum(cls, fullPath: Union[str, PathType]
                            ) -> typing.Tuple[PathType, typing.Hashable]:
         '''
         Creates check sum for the file from path.
         '''
 
-        checkSum = CheckSumWork.calculateCheckSum(fullPath)
+        checkSum = cls.calculateCheckSum(fullPath)
         fileName = FileWork.getFileNameFromPath(fullPath)
 
         return fileName, checkSum
 
-    @staticmethod
-    def createCheckSumDB(checkSumDBFile: Union[str, PathType] = CHECK_SUM_FILE,
+    @classmethod
+    def createCheckSumDB(cls, checkSumDBFile: Union[str, PathType] = CHECK_SUM_FILE,
                          **kwargs
                          ) -> typing.Dict[str, Union[typing.Hashable, bool]]:
         '''
         Creates a checksum DB from #DBNames files.
         '''
-
-        oldCheckSumDB = FileWork.readDataFile(checkSumDBFile)
-        if not oldCheckSumDB:
-            oldCheckSumDB = {}
-
-        checkSumDB = oldCheckSumDB
+        checkSumDB = cls.getOldCheckSumDB(checkSumDBFile)
         dbNamesFiles = FileWork.findValidDBNamesFiles(**kwargs)
 
         for fullPath in dbNamesFiles:
-            fileName, checkSum = CheckSumWork.createFileCheckSum(fullPath)
+            fileName, checkSum = cls.createFileCheckSum(fullPath)
             checkSumDB[fileName] = checkSum
 
         checkSumDB[CHECKSUM_DB_GLOBAL_FLAG] = True
 
         return checkSumDB
 
-    @staticmethod
-    def writeCheckSumDB(
+    @classmethod
+    def writeCheckSumDB(cls,
             checkSumDB: typing.Dict[str, typing.Hashable] = None,
             checkSumDBFile: Union[str, PathType] = CHECK_SUM_FILE,
             **kwargs) -> bool:
@@ -246,14 +262,18 @@ class CheckSumWork:
         #end_test_case_block
 
         if not checkSumDB:
-            checkSumDB = CheckSumWork.createCheckSumDB(checkSumDBFile, **kwargs)
+            checkSumDB = cls.createCheckSumDB(checkSumDBFile, **kwargs)
 
-        answer: bool = FileWork.overwriteDataFile(checkSumDB, checkSumDBFile)
+        if USING_FILE_STORING_FLAG:
+            answer: bool = FileWork.overwriteDataFile(checkSumDB, checkSumDBFile)
+        else:
+            tool = ME_DBService()
+            answer: bool = tool.writeChecksumDB_ME(checkSumDB)
 
         return answer
 
-    @staticmethod
-    def checkValidHash(fileNamePath: Union[str, PathType] = None,
+    @classmethod
+    def checkValidHash(cls, fileNamePath: Union[str, PathType] = None,
                        **kwargs) -> bool:
         '''
         Compares DB of all files checksums from file and recently calculated. If #fileNamePath defined then include file name in check sum database and compare.
@@ -266,10 +286,10 @@ class CheckSumWork:
         #end_test_case_block
 
         oldCheckSumDB = FileWork.readDataFile(checkSumDBFile)
-        curCheckSumDB = CheckSumWork.createCheckSumDB(checkSumDBFile, **kwargs)
+        curCheckSumDB = cls.createCheckSumDB(checkSumDBFile, **kwargs)
 
         if fileNamePath:
-            fileName, checkSum = CheckSumWork.createFileCheckSum(fileNamePath)
+            fileName, checkSum = cls.createFileCheckSum(fileNamePath)
             curCheckSumDB[fileName] = checkSum
 
         return oldCheckSumDB == curCheckSumDB
@@ -306,53 +326,6 @@ class WithNamesWork:
         return list(raceList)
 
     @staticmethod
-    def prepareGlobalRaceTemplate(dataBaseOfNames: typing.Dict[str, dict],
-                                  raceName: str) -> typing.Dict[str, dict]:
-        '''
-        Prepares a global race template. Inserts #TEMPLATE_GLOBAL_RACE if database of names is empty.
-        '''
-
-        if dataBaseOfNames is None:
-            dataBaseOfNames = FileWork.readDataFile()
-
-        if len(dataBaseOfNames.keys()) == 0:
-            dataBaseOfNames = copy.deepcopy(TEMPLATE_GLOBAL_RACE)
-
-        raceList = WithNamesWork.makeRaceList(dataBaseOfNames["Races"])
-        if raceName not in raceList:
-            tmp_emptyRace = dict({raceName: {}})
-            dataBaseOfNames["Races"].append(tmp_emptyRace)
-
-        return dict(dataBaseOfNames)
-
-    @staticmethod
-    def insertNames(keyName: str, raceNameDict: typing.Dict[str, dict],
-                    listOfNames: list) -> str:
-        '''
-        Selected insert of key in dictionary.
-
-        #keyName have value "Male", "Female" or "Surnames"
-        '''
-
-        state = "Done"
-
-        #Case of first initialize
-        if not raceNameDict:
-            tmpRace = WithNamesWork.prepareLocalRaceTemplate('tmp')
-            raceNameDict.update(tmpRace['tmp'])
-
-        if keyName in raceNameDict:
-            raceNameDict[keyName] = list(listOfNames)
-
-        elif keyName in raceNameDict["Genders"]:
-            raceNameDict["Genders"][keyName]["Names"] = list(listOfNames)
-
-        else:
-            state = "Failure"
-
-        return state
-
-    @staticmethod
     def getRaceAndKeyFormFileNamePath(
             fullPath: Union[str, PathType]) -> typing.Tuple[str, str]:
         '''
@@ -367,8 +340,55 @@ class WithNamesWork:
 
         return raceName, keyName
 
-    @staticmethod
-    def formatNames(
+    @classmethod
+    def prepareGlobalRaceTemplate(cls, dataBaseOfNames: typing.Dict[str, dict],
+                                  raceName: str) -> typing.Dict[str, dict]:
+        '''
+        Prepares a global race template. Inserts #TEMPLATE_GLOBAL_RACE if database of names is empty.
+        '''
+
+        if dataBaseOfNames is None:
+            dataBaseOfNames = FileWork.readDataFile()
+
+        if len(dataBaseOfNames.keys()) == 0:
+            dataBaseOfNames = copy.deepcopy(TEMPLATE_GLOBAL_RACE)
+
+        raceList = cls.makeRaceList(dataBaseOfNames["Races"])
+        if raceName not in raceList:
+            tmp_emptyRace = dict({raceName: {}})
+            dataBaseOfNames["Races"].append(tmp_emptyRace)
+
+        return dict(dataBaseOfNames)
+
+    @classmethod
+    def insertNames(cls, keyName: str, raceNameDict: typing.Dict[str, dict],
+                    listOfNames: list) -> str:
+        '''
+        Selected insert of key in dictionary.
+
+        #keyName have value "Male", "Female" or "Surnames"
+        '''
+
+        state = "Done"
+
+        #Case of first initialize
+        if not raceNameDict:
+            tmpRace = cls.prepareLocalRaceTemplate('tmp')
+            raceNameDict.update(tmpRace['tmp'])
+
+        if keyName in raceNameDict:
+            raceNameDict[keyName] = list(listOfNames)
+
+        elif keyName in raceNameDict["Genders"]:
+            raceNameDict["Genders"][keyName]["Names"] = list(listOfNames)
+
+        else:
+            state = "Failure"
+
+        return state
+
+    @classmethod
+    def formatNames(cls,
             fullPath: Union[str, PathType],
             dataBaseOfNames: typing.Dict[str, dict]) -> typing.Dict[str, dict]:
         '''
@@ -376,19 +396,19 @@ class WithNamesWork:
         '''
 
         listOfNames = FileWork.readFile(fullPath)
-        raceName, keyName = WithNamesWork.getRaceAndKeyFormFileNamePath(
+        raceName, keyName = cls.getRaceAndKeyFormFileNamePath(
             fullPath)
-        dataBaseOfNames = WithNamesWork.prepareGlobalRaceTemplate(
+        dataBaseOfNames = cls.prepareGlobalRaceTemplate(
             dataBaseOfNames, raceName)
 
         for race in dataBaseOfNames["Races"]:
             if raceName in list(race.keys()):
-                WithNamesWork.insertNames(keyName, race[raceName], listOfNames)
+                cls.insertNames(keyName, race[raceName], listOfNames)
 
         return dict(dataBaseOfNames)
 
-    @staticmethod
-    def createNamesDB(**kwargs):
+    @classmethod
+    def createNamesDB(cls, **kwargs):
         '''
         Formates DB of names, writes to file and updates a checksum DB.
         '''
@@ -411,7 +431,7 @@ class WithNamesWork:
         dbNamesFiles = FileWork.findValidDBNamesFiles(**kwargs)
 
         for fullPath in dbNamesFiles:
-            dataBaseOfNames = WithNamesWork.formatNames(
+            dataBaseOfNames = cls.formatNames(
                 fullPath, dataBaseOfNames)
 
         answers = 'Empty answer.'
@@ -423,7 +443,6 @@ class WithNamesWork:
             answers = "INF: db file created, mongodb skipped."
             
         else:
-            from database.dbtest import ME_DBService
             tool = ME_DBService()
             answers = tool.insertNames(dataBaseOfNames)
             
@@ -442,7 +461,7 @@ def printResponds(responds):
     '''
     Function for printing responds in log file.
     '''
-    if isinstance(responds, list):
+    if responds is list:
         for res in responds:
             print(res)
     else:

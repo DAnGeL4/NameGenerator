@@ -14,7 +14,7 @@ from contextlib import redirect_stdout
 
 ##customImport
 from configs.CFGNames import GLOBAL_LOG_FILE
-from configs.CFGNames import ERASE_NAME_BASE_INIT_FLAG 
+from configs.CFGNames import ERASE_NAME_BASE_INIT_FLAG
 from configs.CFGNames import MAKE_PROFILING_FLAG
 from configs.CFGNames import MAKE_UNITTESTS_FLAG 
 from configs.CFGNames import USING_FILE_STORING_FLAG
@@ -125,13 +125,14 @@ def globalRun() -> typing.NoReturn:
     This is the base function.
     '''    
     if ERASE_NAME_BASE_INIT_FLAG:
+
         if not USING_FILE_STORING_FLAG:
             res = eraseNamesBaseInitializeFile()
             print(res)
         else:
-            pass
-        tools = dbtest.MongoDBWork()
-        tools.eraseNamesME_DB()
+            tools = dbtest.MongoDBWork()
+            res = tools.eraseME_DB('mdbName')
+            print(res)
 
     responds = runMainFunctionsList()
     for respond in responds:
@@ -161,7 +162,7 @@ def main() -> typing.NoReturn:
 
     ##TESTED_AREA_BEGIN
     print("\n#BEGIN TEST CODE...\n")
-    #from database import dbtest
+    
     dbtest.main()
 
     print("\n#...END TEST CODE")
