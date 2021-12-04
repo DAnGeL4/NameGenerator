@@ -146,7 +146,11 @@ cython_debug/
 #Custom files
 logs/*.log
 logs/tests/*.log
+!logs/tests/.gitkeep
 logs/stats/graph/*.png
+!logs/stats/graph/.gitkeep
 logs/stats/profile/*.dot
 logs/stats/profile/*.prof
-DBNames/
+!logs/stats/profile/.gitkeep
+DBNames/*
+!DBNames/.gitkeep
