@@ -9,7 +9,7 @@ import time
 
 ##customImport
 from configs.CFGNames import GLOBAL_PROFILE_FILE, GLOBAL_PROFILE_DOT_FILE 
-from configs.CFGNames import GLOBAL_GRAPH_FILE
+from configs.CFGNames import GLOBAL_GRAPH_FILE, MAKE_UNITTESTS_FLAG
 ###FINISH ImportBlock
 
 ###START GlobalConstantBlock
@@ -64,17 +64,40 @@ class Profiling:
     '''Diagnostics with profiling.'''
 
     @staticmethod
-    def makeProfileNGraph(generalFunction: str) -> typing.NoReturn:
+    def getFileName(globalFileName):
+        '''
+        Makes correct file name if tests run.
+        '''
+        if MAKE_UNITTESTS_FLAG:
+            fullFileName = str(globalFileName)
+            testsFlag = '-test'
+
+            fileName = fullFileName.split('.')[0]
+            fileExtension = fullFileName.split('.')[1]
+
+            fileName = str(fileName) + str(testsFlag)
+            fullFileName = str(fileName) + str(fileExtension)
+
+            return fullFileName
+
+        else:
+            return globalFileName
+
+    @classmethod
+    def makeProfileNGraph(cls, generalFunction: str) -> typing.NoReturn:
         '''
         Makes profiling and create call tree graph (with other data).
         '''
+        profileFile = cls.getFileName(GLOBAL_PROFILE_FILE)
+        profileDotFile = cls.getFileName(GLOBAL_PROFILE_DOT_FILE)
+        graphFile = cls.getFileName(GLOBAL_GRAPH_FILE)
 
-        cProfile.run(''+ generalFunction +'()', GLOBAL_PROFILE_FILE)
-        os.system('gprof2dot -f pstats ' + GLOBAL_PROFILE_FILE + 
-                                    ' > ' + GLOBAL_PROFILE_DOT_FILE)
+        cProfile.run(''+ generalFunction +'()', profileFile)
+        os.system('gprof2dot -f pstats ' + profileFile + 
+                                    ' > ' + profileDotFile)
 
-        (graph,) = pydot.graph_from_dot_file(GLOBAL_PROFILE_DOT_FILE)
-        graph.write_png(GLOBAL_GRAPH_FILE)
+        (graph,) = pydot.graph_from_dot_file(profileDotFile)
+        graph.write_png(graphFile)
 ###FINISH FunctionalBlock
 
 ###START MainBlock
