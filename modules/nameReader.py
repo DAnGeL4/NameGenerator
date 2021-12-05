@@ -205,8 +205,15 @@ class CheckSumWork:
         Gets checksum database from file if #USING_FILE_STORING_FLAG true,
         else gets from mongoDB.
         '''
+
+        #begin_test_case_block
+        usingFileStoringFlag = USING_FILE_STORING_FLAG
+        if 'usingFileStoringFlag' in kwargs:
+            usingFileStoringFlag = kwargs['usingFileStoringFlag']
+        #end_test_case_block
+
         oldCheckSumDB = None
-        if USING_FILE_STORING_FLAG:
+        if usingFileStoringFlag:
             oldCheckSumDB = FileWork.readDataFile(checkSumDBFile)
         else:
             tool = ME_DBService()
@@ -236,7 +243,7 @@ class CheckSumWork:
         '''
         Creates a checksum DB from #DBNames files.
         '''
-        checkSumDB = cls.getOldCheckSumDB(checkSumDBFile)
+        checkSumDB = cls.getOldCheckSumDB(checkSumDBFile, **kwargs)
         dbNamesFiles = FileWork.findValidDBNamesFiles(**kwargs)
 
         for fullPath in dbNamesFiles:
@@ -257,6 +264,10 @@ class CheckSumWork:
         '''
 
         #begin_test_case_block
+        usingFileStoringFlag = USING_FILE_STORING_FLAG
+        if 'usingFileStoringFlag' in kwargs:
+            usingFileStoringFlag = kwargs['usingFileStoringFlag']
+
         if 'checkSumDBFile' in kwargs:
             checkSumDBFile = kwargs.pop('checkSumDBFile')
         #end_test_case_block
@@ -264,7 +275,7 @@ class CheckSumWork:
         if not checkSumDB:
             checkSumDB = cls.createCheckSumDB(checkSumDBFile, **kwargs)
 
-        if USING_FILE_STORING_FLAG:
+        if usingFileStoringFlag:
             answer: bool = FileWork.overwriteDataFile(checkSumDB, checkSumDBFile)
         else:
             tool = ME_DBService()
@@ -284,8 +295,8 @@ class CheckSumWork:
         if 'checkSumDBFile' in kwargs:
             checkSumDBFile = kwargs.pop('checkSumDBFile')
         #end_test_case_block
-
-        oldCheckSumDB = FileWork.readDataFile(checkSumDBFile)
+        
+        oldCheckSumDB = cls.getOldCheckSumDB(checkSumDBFile, **kwargs)
         curCheckSumDB = cls.createCheckSumDB(checkSumDBFile, **kwargs)
 
         if fileNamePath:
@@ -419,9 +430,11 @@ class WithNamesWork:
             return "\nNamesDB: Canceled", "INF: Checksum exists"
 
         #begin_test_case_block
-        passingTest = False
+        usingFileStoringFlag = USING_FILE_STORING_FLAG
+        if 'usingFileStoringFlag' in kwargs:
+            usingFileStoringFlag = kwargs['usingFileStoringFlag']
+
         if 'initializeFile' in kwargs:
-            passingTest = True
             initializeFile = kwargs['initializeFile']
 
         if 'dataBaseOfNames' in kwargs:
@@ -435,7 +448,7 @@ class WithNamesWork:
                 fullPath, dataBaseOfNames)
 
         answers = 'Empty answer.'
-        if passingTest or USING_FILE_STORING_FLAG:
+        if usingFileStoringFlag:
             answ = FileWork.overwriteDataFile(dataBaseOfNames, initializeFile)
             if not answ:
                 answers = "ERR: Can't write data to file."

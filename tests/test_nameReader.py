@@ -141,7 +141,8 @@ class FileWork_Test(FunctionalClass):
         res = sorted(res, key=lambda x: os.path.splitext(x)[0])
 
         self.assertListEqual(
-            res, ["tests/tmp/DBNames_Test_Data", "tests/tmp/TMP_Test_Data"])
+            res, ['tests/tmp/.gitkeep', "tests/tmp/DBNames_Test_Data", 
+                    "tests/tmp/TMP_Test_Data"])
 
     @FunctionalClass.descript
     def test_findValidDBNamesFiles_findFilesWithDBNames_expectedListOfDBNamesFiles(
@@ -246,12 +247,13 @@ class CheckSumWork_Test(FunctionalClass):
 
         res: typing.Dict = CheckSumWork.createCheckSumDB(
             checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'),
-            directory="tests/tmp/")
+            directory="tests/tmp/",
+            usingFileStoringFlag=True)
         self.assertDictEqual(
             res,
             dict({
                 'DBNames_Test_Data': 'f8ecbed43362ae6ecf00726de6ae17ea',
-                'GLOB_EXIST': True
+                'globalExist': True
             }))
 
     @FunctionalClass.descript
@@ -264,7 +266,7 @@ class CheckSumWork_Test(FunctionalClass):
         checkSumData: dict = dict({
             'DBNames_Test_Data':
             'f8ecbed43362ae6ecf00726de6ae17ea',
-            'GLOB_EXIST':
+            'globalExist':
             True
         })
 
@@ -284,12 +286,13 @@ class CheckSumWork_Test(FunctionalClass):
         checkSumData: dict = dict({
             'DBNames_Test_Data':
             'f8ecbed43362ae6ecf00726de6ae17ea',
-            'GLOB_EXIST':
+            'globalExist':
             True
         })
         CheckSumWork.writeCheckSumDB(
             checkSumData,
-            checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'))
+            checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'),
+            usingFileStoringFlag=True)
 
         res: dict = FileWork.readDataFile(
             str(self.TestFileDirectory + 'CheckSumDB.cfg'))
@@ -297,7 +300,7 @@ class CheckSumWork_Test(FunctionalClass):
             res,
             dict({
                 'DBNames_Test_Data': 'f8ecbed43362ae6ecf00726de6ae17ea',
-                'GLOB_EXIST': True
+                'globalExist': True
             }))
 
     @FunctionalClass.descript
@@ -311,12 +314,13 @@ class CheckSumWork_Test(FunctionalClass):
         checkSumData: dict = dict({
             'DBNames_Test_Data':
             'f8ecbed43362ae6ecf00726de6ae17ea',
-            'GLOB_EXIST':
+            'globalExist':
             True
         })
         CheckSumWork.writeCheckSumDB(
             checkSumData,
-            checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'))
+            checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'),
+            usingFileStoringFlag=True)
 
         #Comparing checksum value of #DBNames_Test_Data file with value from database
         res: bool = CheckSumWork.checkValidHash(
@@ -612,9 +616,10 @@ class WithNamesWork_Test(FunctionalClass):
             checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'),
             initializeFile=str(self.TestFileDirectory + 'InitializeFile.cfg'),
             directory="tests/tmp/",
-            dataBaseOfNames={})
+            dataBaseOfNames={},
+            usingFileStoringFlag=True)
         self.assertEqual(res, ('\nNamesDB: Created', 
-                                "INF: done"))
+                                'INF: db file created, mongodb skipped.'))
 
     @FunctionalClass.descript
     def test_createNamesDB_creatingDatabase_expectedCorrectWritedData(
@@ -629,7 +634,8 @@ class WithNamesWork_Test(FunctionalClass):
             checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'),
             initializeFile=str(self.TestFileDirectory + 'InitializeFile.cfg'),
             directory="tests/tmp/",
-            dataBaseOfNames={})
+            dataBaseOfNames={},
+            usingFileStoringFlag=True)
 
         data: typing.Dict[str, dict] = FileWork.readDataFile(
             str(self.TestFileDirectory + 'InitializeFile.cfg'))
