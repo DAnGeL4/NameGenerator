@@ -1,6 +1,7 @@
 #!/bin/sh
 answer='WRONG'
 echo "\nCHECKING dependencies:"
+#python3 -m poetry install
 python -m pip list 2>/dev/null | grep -q dnspython
 if [ $? -eq 0 ] ; then
     answer="DONE"

@@ -3,12 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-configs/__pycache__/
-database/__pycache__/
-modules/__pycache__/
-templates/__pycache__/
-tests/__pycache__/
-
 # C extensions
 *.so
 
@@ -144,6 +138,14 @@ dmypy.json
 cython_debug/
 
 #Custom files
+.breakpoints
+
+configs/__pycache__/
+database/__pycache__/
+modules/__pycache__/
+templates/__pycache__/
+tests/__pycache__/
+
 logs/*.log
 logs/tests/*.log
 !logs/tests/.gitkeep
