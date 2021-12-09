@@ -64,7 +64,7 @@ class Profiling:
     '''Diagnostics with profiling.'''
 
     @staticmethod
-    def getFileName(globalFileName):
+    def getFileName(globalFileName: str) -> str:
         '''
         Makes correct file name if tests run.
         '''

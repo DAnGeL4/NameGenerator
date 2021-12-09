@@ -419,7 +419,7 @@ class WithNamesWork:
         return dict(dataBaseOfNames)
 
     @classmethod
-    def createNamesDB(cls, **kwargs):
+    def createNamesDB(cls, **kwargs) -> typing.Tuple[str, Union[str, list]]:
         '''
         Formates DB of names, writes to file and updates a checksum DB.
         '''
@@ -470,7 +470,7 @@ class WithNamesWork:
 
 ###START MainBlock
 @redirectOutput
-def printResponds(responds):
+def printResponds(responds: Union[str, list]) -> typing.NoReturn:
     '''
     Function for printing responds in log file.
     '''
@@ -480,7 +480,7 @@ def printResponds(responds):
     else:
         print(responds)
 
-def main():
+def main() -> str:
     globRresp, locResp = WithNamesWork.createNamesDB()
     printResponds(locResp)
     

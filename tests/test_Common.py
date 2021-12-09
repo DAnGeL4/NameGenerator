@@ -36,7 +36,7 @@ def redirectOutput(redirectedFunction: typing.Callable) -> typing.Callable:
 ###FINISH DecoratorBlock
 
 ###START FunctionalBlock
-def createTestSuites():
+def createTestSuites() -> unittest.suite.TestSuite:
     '''
     Makes and returns TestSuite object.
     '''    
@@ -49,13 +49,13 @@ def createTestSuites():
     
     tests = testLoad.loadTestsFromModule(test_nameAnalysis)
     suites.addTests(tests)
-
+    
     return suites
 ###FINISH FunctionalBlock
 
 ###START MainBlock
 @redirectOutput
-def main():
+def main() -> str:
     runner = unittest.TextTestRunner()
     testSuites = createTestSuites()
     

@@ -1,9 +1,12 @@
 ###START ImportBlock
 ##systemImport
 import json
-import typing
-#import pymongo as pymdb
+import typing as typ
 import mongoengine as medb
+
+from bson.objectid import ObjectId
+from pymongo.mongo_client import MongoClient
+from pymongo.database import Database
 
 ##customImport
 from configs.CFGNames import ME_SETTINGS
@@ -21,6 +24,9 @@ from database.medbCheckSumSchemas import GlobalFlags, ChecksumFiles
 ###FINISH ImportBlock
 
 ###START GlobalConstantBlock
+MEField = typ.NewType('MongoEngineField', medb.Document)
+MECollection = typ.NewType('MongoEngineCollection', medb.Document)
+MEDocument = typ.NewType('MongoEngineDocument', MECollection)
 ###FINISH GlobalConstantBlock
 
 ###START DecoratorBlock
@@ -32,8 +38,9 @@ class MongoDBWork:
     '''
     A class containing tools for working with MongoDB using mongoEngine.
     '''
+
     @staticmethod
-    def getMDBObject(mdb: str):
+    def getMDBObject(mdb: str) -> Database:
         '''
         Returns mongodb object.
         '''
@@ -50,22 +57,24 @@ class MongoDBWork:
 
         if not mdbObject:
             return None, "ERR: Have not database by alias."
-
+        
         return mdbObject, None
 
     @staticmethod
-    def getReferenceID(collectionField, data):
+    def getReferenceID(collectionField: MEField, data: typ.Dict[str, dict]) -> ObjectId:
         '''
-        
+        Gets id for reference field of document.
         '''
         field = collectionField.db_field
         referenceCollection = collectionField.document_type_obj
         referenceDocument = referenceCollection.objects.get(
                                     __raw__={field: data[field]})
-        return referenceDocument.id
+        if referenceDocument:
+            return referenceDocument.id
+        return None
 
     @staticmethod
-    def getReferenceFields():
+    def getReferenceFields() -> typ.Tuple[MEField]:
         '''
         Returns tuple of mongoengine reference fields.
         '''
@@ -75,7 +84,7 @@ class MongoDBWork:
         return referenceFields
         
     @staticmethod
-    def getFieldsContainersCollections():
+    def getFieldsContainersCollections() -> typ.Tuple[MEField]:
         '''
         Returns tuple of mongoengine fields of collections containers.
         '''
@@ -85,9 +94,9 @@ class MongoDBWork:
         return fieldsContainersCollections
 
     @staticmethod
-    def getUniqueRAWData(collection, data):
+    def getUniqueRAWData(collection: MECollection, data: typ.Dict[str, dict]) -> typ.Dict[str, dict]:
         '''
-        
+        Gets unique fields and makes raw data from them.
         '''
         rawData = dict()
         uniqueFieldsData = collection._unique_with_indexes()
@@ -108,9 +117,9 @@ class MongoDBWork:
         return rawData
 
     @classmethod
-    def eraseME_DB(cls, mdb: str = None):
+    def eraseME_DB(cls, mdb: str = None) -> str:
         '''
-        
+        Drops and recreates empty all collections from the target database.
         '''
         mdbObject, answ = cls.getMDBObject(mdb)
         if not mdbObject:
@@ -122,79 +131,89 @@ class MongoDBWork:
             mdbObject.drop_collection(collectionName)
             mdbObject.create_collection(collectionName)
 
-        return "INF: Erased. Recreated empty."
+        return "INF: Target Mongo db erased. Recreated empty."
 
     @classmethod
-    def insertData(cls, collection, data) -> bool:
+    def insertField(cls, document: MEDocument, collection: MECollection, field: str, data: typ.Dict[str, dict]) -> MEDocument:
         '''
+        Checks the field and data, and inserts into the document.
+        '''
+        referenceFields = cls.getReferenceFields()
+        fieldsContainersCollections = cls.getFieldsContainersCollections()
+        collectionField = getattr(collection, field, None)
+        
+        if isinstance(collectionField, referenceFields): 
+            setattr(document, field, cls.getReferenceID(collectionField, data))
 
+        elif isinstance(collectionField, fieldsContainersCollections):
+            if type(data[field]) is dict:
+                document = cls.setDocument(document[field], data[field])
+            
+        else:
+            setattr(document, field, data[field])
+
+        return document
+
+
+    @classmethod
+    def setDocument(cls, collection: MECollection, data: typ.Dict[str, dict]) -> MEDocument:
+        '''
+        Prepraires and inserts data into the document.
         '''
         document = None
         if collection._initialised is True:
             document = collection
         else:
             document = collection()
-
-        referenceFields = cls.getReferenceFields()
-        fieldsContainersCollections = cls.getFieldsContainersCollections()
                                     
         for field in data.keys():
 
             if hasattr(collection, field):
-                collectionField = getattr(collection, field, None)
-                
-                if isinstance(collectionField, referenceFields): 
-                    setattr(document, field, cls.getReferenceID(collectionField, data))
-                    continue
-
-                elif isinstance(collectionField, fieldsContainersCollections):
-
-                    if type(data[field]) is dict:
-                        cls.insertData(collection[field], data[field])
-                    continue
-                    
-                else:
-                    setattr(document, field, data[field])
+                document = cls.insertField(document, collection, 
+                                            field, data)
                 
         return document
 
     @classmethod
-    def insertDocument(cls, collection, data):
+    def insertDocument(cls, collection: MECollection, data: typ.Dict[str, dict]) -> typ.Union[str, None]:
         '''
-        
-        '''        
-        document = cls.insertData(collection, data)
+        Prepraires and saves document.
+        '''
+        documents = cls.checkDocExist(collection, data)
+        if documents:
+            return "INF: Document already exist. Insert canceled"
 
+        document = cls.setDocument(collection, data)
         answer = None
         try:
             document.save()
             
         except medb.NotUniqueError as err:
-            answer = err
+            answer = getattr(err, 'message', str(err))
 
         return answer
 
     @classmethod
-    def updateDocument(cls, documents, data):
+    def updateDocument(cls, documents: typ.List[MEDocument], data: typ.Dict[str, dict]) -> typ.List[str]:
         '''
-        
+        Prepraires and updates document.
         '''
         answers = list()
         for document in documents:
-            document = cls.insertData(document, data)
+            document = cls.setDocument(document, data)
 
             answer = None
             try:
                 document.save()
                 
             except medb.NotUniqueError as err:
-                answer = err
+                answer = getattr(err, 'message', str(err))
             answers.append(answer)
 
         return answers
 
     @classmethod
-    def checkDocExist(cls, collection, data):
+    def checkDocExist(cls, collection: MECollection, data: typ.Dict[str, dict]) -> typ.Union[typ.List[MEDocument], None]:
         '''
         Checks if documents already exists in db.
         '''
@@ -208,9 +227,10 @@ class MongoDBWork:
         return None
 
     @classmethod
-    def updateOrInsertDocument(cls, collection, data):
+    def updateOrInsertDocument(cls, collection: MECollection, data: typ.Dict[str, dict]) -> str:
         '''
-
+        Updates the document if it exists, 
+        otherwise prepares and inserts a new one.
         '''
         answer = ''
 
@@ -223,9 +243,9 @@ class MongoDBWork:
         return str(answer)
 
     @classmethod
-    def writeDocuments(cls, collection, listOfData, operation):
+    def writeDocuments(cls, collection: MECollection, listOfData: typ.List[dict], operation: str) -> typ.Union[list, None]:
         '''
-        
+        Writes document data for the entire collection.
         '''
         answers = list()
         operations = {'insert_only': cls.insertDocument, 
@@ -247,9 +267,9 @@ class MongoDBWork:
         return answers
 
     @classmethod
-    def writeDatabase(cls, collectionsData):
+    def writeDatabase(cls, collectionsData: typ.Dict[str, dict]) -> typ.Union[list, None]:
         '''
-        
+        Writes prepared data for all collections in the database.
         '''
         for collectionName in collectionsData.keys():
             collection = collectionsData[collectionName]['collection']
@@ -261,7 +281,7 @@ class MongoDBWork:
         return answers
 
     @classmethod
-    def printCollection(cls, collection) -> list:
+    def printCollection(cls, collection: MECollection) -> typ.NoReturn:
         '''
         Custom print on demand for collection fields.
         '''
@@ -287,7 +307,7 @@ class ME_DBService():
     mdbCluster = ME_SETTINGS.mdbCluster
     mdbNAliases = ME_SETTINGS.MDB_n_Aliases
 
-    def getConnectString(self, mdb):
+    def getConnectString(self, mdb: str) -> str:
         '''
         Makes connection string for mongodb.
         '''
@@ -297,7 +317,7 @@ class ME_DBService():
 
         return connectString
 
-    def getConnect(self, mdb, mdb_alias):
+    def getConnect(self, mdb: str, mdb_alias: str) -> MongoClient:
         '''
         Connects to database and sets the alias.
         '''
@@ -305,7 +325,7 @@ class ME_DBService():
         client = medb.connect(host=connectString, alias=mdb_alias)
         return client
 
-    def registerDataBases(self):
+    def registerDataBases(self) -> typ.Dict[str, MongoClient]:
         '''
         Connects to all databases by dictionary.
         '''
@@ -319,9 +339,9 @@ class ME_DBService():
         return clients
 
     
-    def prepareNamesData(self, race: str, data: list) -> dict:
+    def prepareNamesData(self, race: str, data: list) -> typ.Dict[str, dict]:
         '''
-        
+        Adapts the names database to the mongoengine schema.
         '''
         collectionData = list({})
         for name in data:
@@ -331,9 +351,9 @@ class ME_DBService():
         
         return collectionData
         
-    def readChecksumDB_ME(self):
+    def readChecksumDB_ME(self) -> typ.Dict[str, dict]:
         '''
-        
+        Reads and adapts the checksum database to the dictionary format.
         '''
         ChecksumDB = dict()
 
@@ -354,9 +374,10 @@ class ME_DBService():
 
         return ChecksumDB
         
-    def writeChecksumDB_ME(self, checksumDB):
+    def writeChecksumDB_ME(self, checksumDB: typ.Dict[str, dict]) -> typ.List[str]:
         '''
-        
+        Adapts the checksum database to the database format 
+        and writes it out.
         '''
         flagData = dict({CHECKSUM_DB_GLOBAL_FLAG: 
                         checksumDB.pop(CHECKSUM_DB_GLOBAL_FLAG)})
@@ -378,14 +399,17 @@ class ME_DBService():
                 'data': checksumDB_ME,
                 'operation': 'update_or_insert'},
                 })
+                
+        answers = MongoDBWork.writeDatabase(collectionsData)
 
-        MongoDBWork.writeDatabase(collectionsData)
+        if not answers:
+            answers =list(["Checksun db writed in mongoDB."])
+        return answers
 
-        return True
-
-    def insertNames(self, namesDict):
+    def insertNames(self, namesDict: typ.Dict[str, dict]) -> typ.List[str]:
         '''
-        
+        Adapts the names database to the database format 
+        and writes it out.
         '''
         answers = list([])
         racesData = list({})
@@ -425,13 +449,13 @@ class ME_DBService():
 
             answer = MongoDBWork.writeDatabase(collectionsData)
             if answer:
-                answers.append(answer)
+                answers.extend(answer)
 
         if not answers:
-            answers = "Names inserted in mongoDB."
+            answers =list(["Names inserted in mongoDB."])
         return answers
 
-    def printDatabases(self, modelsByAliases):
+    def printDatabases(self, modelsByAliases: typ.Dict[str, list]) -> typ.NoReturn:
         '''
         Custom data printing for database.
         '''
@@ -442,7 +466,7 @@ class ME_DBService():
             for model in models:
                 MongoDBWork.printCollection(model)
 
-    def showDBData(self) -> typing.NoReturn:
+    def showDBData(self) -> typ.NoReturn:
         '''
         Shows data for all databases by aliases.
         '''
@@ -460,11 +484,11 @@ class ME_DBService():
                         })
 
         self.printDatabases(modelsByAliases)
-        return
+
 ###FINISH FunctionalBlock
 
 ###START MainBlock
-def main():
+def main() -> typ.NoReturn:
     '''
     Entry point for working with databases.
     '''

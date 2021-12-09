@@ -13,6 +13,8 @@
 
 ###START FunctionalBlock
 
+#pstr = "*---TESTCASE TYPES funcName: {funcName} objName: {objName}\n objType: {objType}"
+#print(pstr.format(funcName='getConnect', objName='medb.StringField', objType=type(medb.StringField())))
 #####BEGIN InsideBlock
 #####END InsideBlock
 

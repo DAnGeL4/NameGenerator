@@ -326,7 +326,8 @@ class CheckSumWork_Test(FunctionalClass):
         res: bool = CheckSumWork.checkValidHash(
             fileNamePath=str(self.TestFileDirectory + 'DBNames_Test_Data'),
             checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'),
-            directory="tests/tmp/")
+            directory="tests/tmp/",
+            usingFileStoringFlag=True)
         self.assertTrue(res)
 
 
@@ -661,4 +662,6 @@ class WithNamesWork_Test(FunctionalClass):
 ###FINISH FunctionalBlock
 
 ###START MainBlock
+def main() -> typing.NoReturn:
+    pass
 ###FINISH Mainblock

@@ -2994,6 +2994,6 @@ class Analysis_Test(FunctionalClass):
 ###FINISH FunctionalBlock
 
 ###START MainBlock
-def main():
+def main() -> typing.NoReturn:
     pass
 ###FINISH Mainblock

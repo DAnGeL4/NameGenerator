@@ -144,7 +144,7 @@ def countLinesInFiles(listPathNames: typing.List[PathType]) -> int:
 ###FINISH FunctionalBlock
 
 ###START MainBlock
-def main():
+def main() -> typing.NoReturn:
     allDirs = getDirectories()
     allFiles = getFiles()
 

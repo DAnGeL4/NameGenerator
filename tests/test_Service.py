@@ -129,6 +129,6 @@ class FunctionalClass(unittest.TestCase):
 ###FINISH FunctionalBlock
 
 ###START MainBlock
-def main():
+def main() -> typing.NoReturn:
     pass
 ###FINISH Mainblock

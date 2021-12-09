@@ -30,7 +30,7 @@ LOCAL_NAMES_LOG_FILE = os.path.join(GLOBAL_LOG_DIR, 'LOGNames.log')
 LOCAL_ANALYSIS_LOG_FILE = os.path.join(GLOBAL_LOG_DIR, 
                             'LOGAnalysis.log')
 GLOBAL_TEST_LOG_FILE = os.path.join(GLOBAL_TEST_DIRECTORY, 
-                        'LOGTESTNames.log')
+                        'LOGTESTCommon.log')
 
 
 DB_NAMES_DIRECTORY = os.path.join(ROOT_DIRECTORY, "DBNames/")

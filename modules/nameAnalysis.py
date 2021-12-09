@@ -1399,7 +1399,7 @@ class Analysis(AnalysysService):
 
 
 ###START MainBlock
-def main():
+def main() -> str:
     analysis: typing.instance = Analysis()
     res: str = analysis.makeAnalyticDB()
 
