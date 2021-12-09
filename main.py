@@ -7,11 +7,9 @@ import subprocess
 from contextlib import redirect_stdout
 
 #import cython as cthn      #
-#import numba               #not_working
 
 #import pandas as pand      #
 #import dask                #
-#import pyspark             #not_working #not need yet
 
 ##customImport
 from configs.CFGNames import GLOBAL_LOG_FILE
@@ -56,15 +54,22 @@ def redirectOutput(redirectedFunction: typing.Callable) -> typing.Callable:
 ###FINISH DecoratorBlock
 
 ###START FunctionalBlock
-def eraseNamesBaseInitializeFile() -> typing.Text:
+def eraseNamesBaseInitializeFile(mdb='mdbName') -> typing.Text:
     '''
     Erases database of names and checksum. After this initializes default values.
     '''
-    nameReader.FileWork.overwriteDataFile({})
+    if USING_FILE_STORING_FLAG:
+        res = nameReader.FileWork.overwriteDataFile({})
+        answer = "Main: DB file erased" if res else "Main: Erase fail"
+        
+    else:
+        answer = dbtest.MongoDBWork.eraseME_DB(mdb)
+
     checkSumDB = nameReader.CheckSumWork.createCheckSumDB()
     checkSumDB[nameReader.CHECKSUM_DB_GLOBAL_FLAG] = False
     nameReader.CheckSumWork.writeCheckSumDB(checkSumDB)
-    return "Main: DB erased"
+        
+    return answer
     
 
 def makeMainFunctionsList() -> typing.List[typing.Callable]:
@@ -126,14 +131,8 @@ def globalRun() -> typing.NoReturn:
     This is the base function.
     '''    
     if ERASE_NAME_BASE_INIT_FLAG:
-
-        if not USING_FILE_STORING_FLAG:
-            res = eraseNamesBaseInitializeFile()
-            print(res)
-        else:
-            tools = dbtest.MongoDBWork()
-            res = tools.eraseME_DB('mdbName')
-            print(res)
+        res = eraseNamesBaseInitializeFile()
+        print(res)
 
     responds = runMainFunctionsList()
     for respond in responds:
