@@ -1,9 +1,8 @@
 ###START ImportBlock
 ##ident                                                                                              |
 ##systemImport
-import typing
+import typing as typ
 import functools
-import subprocess
 from contextlib import redirect_stdout
 
 #import cython as cthn      #
@@ -21,18 +20,18 @@ from configs.CFGNames import USING_FILE_STORING_FLAG
 from modules import nameGen
 from modules import nameReader
 from modules import nameAnalysis
-from modules.diagnostics import Profiling
-
-from database import dbtest
+from modules import dbTools
 
 from tests import test_Common
+
+from diagnostic.modules.diagnostics import Profiling, checkDependencies
 ###FINISH ImportBlock
 
 ###START GlobalConstantBlock
 ###FINISH GlobalConstantBlock
 
 ###START DecoratorBlock
-def redirectOutput(redirectedFunction: typing.Callable) -> typing.Callable:
+def redirectOutput(redirectedFunction: typ.Callable) -> typ.Callable:
     '''
     Redirects output to log file for #redirectedFunction. After returns stdout back.
     '''
@@ -54,25 +53,7 @@ def redirectOutput(redirectedFunction: typing.Callable) -> typing.Callable:
 ###FINISH DecoratorBlock
 
 ###START FunctionalBlock
-def eraseNamesBaseInitializeFile(mdb='mdbName') -> typing.Text:
-    '''
-    Erases database of names and checksum. After this initializes default values.
-    '''
-    if USING_FILE_STORING_FLAG:
-        res = nameReader.FileWork.overwriteDataFile({})
-        answer = "Main: DB file erased" if res else "Main: Erase fail"
-        
-    else:
-        answer = dbtest.MongoDBWork.eraseME_DB(mdb)
-
-    checkSumDB = nameReader.CheckSumWork.createCheckSumDB()
-    checkSumDB[nameReader.CHECKSUM_DB_GLOBAL_FLAG] = False
-    nameReader.CheckSumWork.writeCheckSumDB(checkSumDB)
-        
-    return answer
-    
-
-def makeMainFunctionsList() -> typing.List[typing.Callable]:
+def makeMainFunctionsList() -> typ.List[typ.Callable]:
     '''
     Makes runable functions list from main functions of all modules.
     '''
@@ -89,8 +70,7 @@ def makeMainFunctionsList() -> typing.List[typing.Callable]:
 
     return functionsList
 
-
-def runMainFunctionsList() -> typing.List[str]:
+def runMainFunctionsList() -> typ.List[str]:
     '''
     Runs the list of main functions from other modules.
     Returns list of responds.
@@ -104,41 +84,22 @@ def runMainFunctionsList() -> typing.List[str]:
 
     return responds
 
-
-def checkDependencies():
-    '''
-    Checking the dependencies and external ip for atlas mongodb.
-    '''
-    print("\n")
-
-    setUpFile = "./bashscripts/setup.sh"
-    returnValues = subprocess.check_output([setUpFile])
-    returnValues = returnValues.decode('utf-8')
-
-    answers = returnValues.split('\n')
-    for answer in answers:
-        print(answer)
-
-    answerFlag = answers[-2].split(' ')[0]
-    return answerFlag
-
-###FINISH FunctionalBlock
-
-###START MainBlock
 @redirectOutput
-def globalRun() -> typing.NoReturn:
+def globalRun() -> typ.NoReturn:
     '''
     This is the base function.
     '''    
     if ERASE_NAME_BASE_INIT_FLAG:
-        res = eraseNamesBaseInitializeFile()
+        res = nameReader.NamesTools.eraseNamesBase()
         print(res)
 
     responds = runMainFunctionsList()
     for respond in responds:
         print(respond)
+###FINISH FunctionalBlock
 
-def main() -> typing.NoReturn:
+###START MainBlock
+def main() -> typ.NoReturn:
     '''
     Main function.
     Uses profiling if #MAKE_PROFILING_FLAG is true.
@@ -148,7 +109,7 @@ def main() -> typing.NoReturn:
         return
 
     if not USING_FILE_STORING_FLAG:
-        tools = dbtest.ME_DBService()
+        tools = dbTools.MongoDBTools()
         _ = tools.registerDataBases()
 
     if not MAKE_PROFILING_FLAG:
@@ -163,7 +124,7 @@ def main() -> typing.NoReturn:
     ##TESTED_AREA_BEGIN
     print("\n#BEGIN TEST CODE...\n")
     
-    dbtest.main()
+    dbTools.main()
 
     print("\n#...END TEST CODE")
     ##TESTED_AREA_END

@@ -27,17 +27,22 @@ from database.medbCheckSumSchemas import GlobalFlags, ChecksumFiles
 MEField = typ.NewType('MongoEngineField', medb.Document)
 MECollection = typ.NewType('MongoEngineCollection', medb.Document)
 MEDocument = typ.NewType('MongoEngineDocument', MECollection)
+
 ###FINISH GlobalConstantBlock
 
 ###START DecoratorBlock
 ###FINISH DecoratorBlock
 
-###START FunctionalBlock
 
-class MongoDBWork:
+###START FunctionalBlock
+class MongoDBTools:
     '''
     A class containing tools for working with MongoDB using mongoEngine.
     '''
+    mdbUser = ME_SETTINGS.mdbUser
+    mdbPass = ME_SETTINGS.mdbPass
+    mdbCluster = ME_SETTINGS.mdbCluster
+    mdbNAliases = ME_SETTINGS.MDB_n_Aliases
 
     @staticmethod
     def getMDBObject(mdb: str) -> Database:
@@ -57,18 +62,19 @@ class MongoDBWork:
 
         if not mdbObject:
             return None, "ERR: Have not database by alias."
-        
+
         return mdbObject, None
 
     @staticmethod
-    def getReferenceID(collectionField: MEField, data: typ.Dict[str, dict]) -> ObjectId:
+    def getReferenceID(collectionField: MEField,
+                       data: typ.Dict[str, dict]) -> ObjectId:
         '''
         Gets id for reference field of document.
         '''
         field = collectionField.db_field
         referenceCollection = collectionField.document_type_obj
         referenceDocument = referenceCollection.objects.get(
-                                    __raw__={field: data[field]})
+            __raw__={field: data[field]})
         if referenceDocument:
             return referenceDocument.id
         return None
@@ -78,23 +84,23 @@ class MongoDBWork:
         '''
         Returns tuple of mongoengine reference fields.
         '''
-        referenceFields = tuple( (medb.GenericReferenceField, 
-                                medb.LazyReferenceField, 
-                                medb.ReferenceField) )
+        referenceFields = tuple((medb.GenericReferenceField,
+                                 medb.LazyReferenceField, medb.ReferenceField))
         return referenceFields
-        
+
     @staticmethod
     def getFieldsContainersCollections() -> typ.Tuple[MEField]:
         '''
         Returns tuple of mongoengine fields of collections containers.
         '''
-        fieldsContainersCollections = tuple( (medb.DynamicField,
-                                    medb.EmbeddedDocumentField,
-                                    medb.GenericEmbeddedDocumentField) )
+        fieldsContainersCollections = tuple(
+            (medb.DynamicField, medb.EmbeddedDocumentField,
+             medb.GenericEmbeddedDocumentField))
         return fieldsContainersCollections
 
     @staticmethod
-    def getUniqueRAWData(collection: MECollection, data: typ.Dict[str, dict]) -> typ.Dict[str, dict]:
+    def getUniqueRAWData(collection: MECollection,
+                         data: typ.Dict[str, dict]) -> typ.Dict[str, dict]:
         '''
         Gets unique fields and makes raw data from them.
         '''
@@ -117,6 +123,40 @@ class MongoDBWork:
         return rawData
 
     @classmethod
+    def getConnectString(cls, mdb: str) -> str:
+        '''
+        Makes connection string for mongodb.
+        '''
+        connectString = "mongodb+srv://" + cls.mdbUser + ":" + cls.mdbPass + \
+                        "@" + cls.mdbCluster + ".9wwxd.mongodb.net/" + \
+                        mdb + "?retryWrites=true&w=majority"
+
+        return connectString
+
+    @classmethod
+    def getConnect(cls, mdb: str, mdb_alias: str) -> MongoClient:
+        '''
+        Connects to database and sets the alias.
+        '''
+        connectString = cls.getConnectString(mdb)
+        client = medb.connect(host=connectString, alias=mdb_alias)
+        return client
+
+    @classmethod
+    def registerDataBases(cls) -> typ.Dict[str, MongoClient]:
+        '''
+        Connects to all databases by dictionary.
+        '''
+        clients = dict({})
+        for database in cls.mdbNAliases:
+            db = cls.mdbNAliases[database]['db_name']
+            alias = cls.mdbNAliases[database]['alias']
+            client = cls.getConnect(db, alias)
+            clients.update({alias: client})
+
+        return clients
+
+    @classmethod
     def eraseME_DB(cls, mdb: str = None) -> str:
         '''
         Drops and recreates empty all collections from the target database.
@@ -126,7 +166,7 @@ class MongoDBWork:
             return answ
 
         listCollections = mdbObject.list_collection_names()
-        
+
         for collectionName in listCollections:
             mdbObject.drop_collection(collectionName)
             mdbObject.create_collection(collectionName)
@@ -134,29 +174,30 @@ class MongoDBWork:
         return "INF: Target Mongo db erased. Recreated empty."
 
     @classmethod
-    def insertField(cls, document: MEDocument, collection: MECollection, field: str, data: typ.Dict[str, dict]) -> MEDocument:
+    def insertField(cls, document: MEDocument, collection: MECollection,
+                    field: str, data: typ.Dict[str, dict]) -> MEDocument:
         '''
         Checks the field and data, and inserts into the document.
         '''
         referenceFields = cls.getReferenceFields()
         fieldsContainersCollections = cls.getFieldsContainersCollections()
         collectionField = getattr(collection, field, None)
-        
-        if isinstance(collectionField, referenceFields): 
+
+        if isinstance(collectionField, referenceFields):
             setattr(document, field, cls.getReferenceID(collectionField, data))
 
         elif isinstance(collectionField, fieldsContainersCollections):
             if type(data[field]) is dict:
                 document = cls.setDocument(document[field], data[field])
-            
+
         else:
             setattr(document, field, data[field])
 
         return document
 
-
     @classmethod
-    def setDocument(cls, collection: MECollection, data: typ.Dict[str, dict]) -> MEDocument:
+    def setDocument(cls, collection: MECollection,
+                    data: typ.Dict[str, dict]) -> MEDocument:
         '''
         Prepraires and inserts data into the document.
         '''
@@ -165,17 +206,17 @@ class MongoDBWork:
             document = collection
         else:
             document = collection()
-                                    
+
         for field in data.keys():
 
             if hasattr(collection, field):
-                document = cls.insertField(document, collection, 
-                                            field, data)
-                
+                document = cls.insertField(document, collection, field, data)
+
         return document
 
     @classmethod
-    def insertDocument(cls, collection: MECollection, data: typ.Dict[str, dict]) -> typ.Union[str, None]:
+    def insertDocument(cls, collection: MECollection,
+                       data: typ.Dict[str, dict]) -> typ.Union[str, None]:
         '''
         Prepraires and saves document.
         '''
@@ -187,14 +228,15 @@ class MongoDBWork:
         answer = None
         try:
             document.save()
-            
+
         except medb.NotUniqueError as err:
             answer = getattr(err, 'message', str(err))
 
         return answer
 
     @classmethod
-    def updateDocument(cls, documents: typ.List[MEDocument], data: typ.Dict[str, dict]) -> typ.List[str]:
+    def updateDocument(cls, documents: typ.List[MEDocument],
+                       data: typ.Dict[str, dict]) -> typ.List[str]:
         '''
         Prepraires and updates document.
         '''
@@ -205,7 +247,7 @@ class MongoDBWork:
             answer = None
             try:
                 document.save()
-                
+
             except medb.NotUniqueError as err:
                 answer = getattr(err, 'message', str(err))
             answers.append(answer)
@@ -213,7 +255,10 @@ class MongoDBWork:
         return answers
 
     @classmethod
-    def checkDocExist(cls, collection: MECollection, data: typ.Dict[str, dict]) -> typ.Union[typ.List[MEDocument], None]:
+    def checkDocExist(
+            cls, collection: MECollection,
+            data: typ.Dict[str, dict]
+            ) -> typ.Union[typ.List[MEDocument], None]:
         '''
         Checks if documents already exists in db.
         '''
@@ -227,7 +272,8 @@ class MongoDBWork:
         return None
 
     @classmethod
-    def updateOrInsertDocument(cls, collection: MECollection, data: typ.Dict[str, dict]) -> str:
+    def updateOrInsertDocument(cls, collection: MECollection,
+                               data: typ.Dict[str, dict]) -> str:
         '''
         Updates the document if it exists, 
         otherwise prepares and inserts a new one.
@@ -239,18 +285,22 @@ class MongoDBWork:
             answer = cls.insertDocument(collection, data)
         else:
             answer = cls.updateDocument(documents, data)
-            
+
         return str(answer)
 
     @classmethod
-    def writeDocuments(cls, collection: MECollection, listOfData: typ.List[dict], operation: str) -> typ.Union[list, None]:
+    def writeDocuments(cls, collection: MECollection,
+                       listOfData: typ.List[dict],
+                       operation: str) -> typ.Union[list, None]:
         '''
         Writes document data for the entire collection.
         '''
         answers = list()
-        operations = {'insert_only': cls.insertDocument, 
-                        'update_or_insert': cls.updateOrInsertDocument, 
-                        'update_only': cls.insertDocument}              #need to do
+        operations = {
+            'insert_only': cls.insertDocument,
+            'update_or_insert': cls.updateOrInsertDocument,
+            'update_only': cls.insertDocument
+        }  #need to do
 
         if operation not in operations:
             answers.append('ERR: Unknown operation.')
@@ -261,13 +311,14 @@ class MongoDBWork:
 
             if answer:
                 answers.append(answer)
-        
+
         if not answers:
             answers = None
         return answers
 
     @classmethod
-    def writeDatabase(cls, collectionsData: typ.Dict[str, dict]) -> typ.Union[list, None]:
+    def writeDatabase(cls, collectionsData: typ.Dict[str, dict]
+                                        ) -> typ.Union[list, None]:
         '''
         Writes prepared data for all collections in the database.
         '''
@@ -275,8 +326,7 @@ class MongoDBWork:
             collection = collectionsData[collectionName]['collection']
             listOfData = collectionsData[collectionName]['data']
             operation = collectionsData[collectionName]['operation']
-            answers = cls.writeDocuments(collection, listOfData, 
-                                                        operation)
+            answers = cls.writeDocuments(collection, listOfData, operation)
 
         return answers
 
@@ -285,16 +335,17 @@ class MongoDBWork:
         '''
         Custom print on demand for collection fields.
         '''
-        print("\n #MEDATA_module.1 {0} len: {1}".format(collection._class_name, 
-                                                len(collection.objects)))
+        print("\n #MEDATA_module.1 {0} len: {1}".format(
+            collection._class_name, len(collection.objects)))
         for obj in collection.objects:
-            printString = ""#\n  ##MEDATA_module.1.1 \n"
+            printString = ""  #\n  ##MEDATA_module.1.1 \n"
 
             for field in obj._fields:
-                printString += "   *" + str(field) + ": " + str(obj[field]) + "\n"
+                printString += "   *" + str(field) + ": " + str(
+                    obj[field]) + "\n"
 
             print(printString)
-        
+
         return None
 
 
@@ -302,55 +353,18 @@ class ME_DBService():
     '''
     Contains tools for working with mongoengine and mongodb.
     '''
-    mdbUser = ME_SETTINGS.mdbUser
-    mdbPass = ME_SETTINGS.mdbPass
-    mdbCluster = ME_SETTINGS.mdbCluster
     mdbNAliases = ME_SETTINGS.MDB_n_Aliases
 
-    def getConnectString(self, mdb: str) -> str:
-        '''
-        Makes connection string for mongodb.
-        '''
-        connectString = "mongodb+srv://" + self.mdbUser + ":" + self.mdbPass + \
-                        "@" + self.mdbCluster + ".9wwxd.mongodb.net/" + \
-                        mdb + "?retryWrites=true&w=majority"
-
-        return connectString
-
-    def getConnect(self, mdb: str, mdb_alias: str) -> MongoClient:
-        '''
-        Connects to database and sets the alias.
-        '''
-        connectString = self.getConnectString(mdb)
-        client = medb.connect(host=connectString, alias=mdb_alias)
-        return client
-
-    def registerDataBases(self) -> typ.Dict[str, MongoClient]:
-        '''
-        Connects to all databases by dictionary.
-        '''
-        clients = dict({})
-        for database in self.mdbNAliases:
-            db = self.mdbNAliases[database]['db_name']
-            alias = self.mdbNAliases[database]['alias']
-            client = self.getConnect(db, alias)
-            clients.update({alias: client})
-
-        return clients
-
-    
     def prepareNamesData(self, race: str, data: list) -> typ.Dict[str, dict]:
         '''
         Adapts the names database to the mongoengine schema.
         '''
         collectionData = list({})
         for name in data:
-            collectionData.append({
-                'name': str(name),
-                'race': str(race)})
-        
+            collectionData.append({'name': str(name), 'race': str(race)})
+
         return collectionData
-        
+
     def readChecksumDB_ME(self) -> typ.Dict[str, dict]:
         '''
         Reads and adapts the checksum database to the dictionary format.
@@ -373,37 +387,39 @@ class ME_DBService():
                 ChecksumDB.update({filedata["file"]: filedata["checksum"]})
 
         return ChecksumDB
-        
-    def writeChecksumDB_ME(self, checksumDB: typ.Dict[str, dict]) -> typ.List[str]:
+
+    def writeChecksumDB_ME(self, checksumDB: typ.Dict[str, dict]
+                                                    ) -> typ.List[str]:
         '''
         Adapts the checksum database to the database format 
         and writes it out.
         '''
-        flagData = dict({CHECKSUM_DB_GLOBAL_FLAG: 
-                        checksumDB.pop(CHECKSUM_DB_GLOBAL_FLAG)})
+        flagData = dict(
+            {CHECKSUM_DB_GLOBAL_FLAG: checksumDB.pop(CHECKSUM_DB_GLOBAL_FLAG)})
         globFlagDB_ME = list([flagData])
 
         checksumDB_ME = list()
         for fileName in checksumDB.keys():
-            data = dict({'file': fileName, 
-                        'checksum': checksumDB[fileName]})
+            data = dict({'file': fileName, 'checksum': checksumDB[fileName]})
             checksumDB_ME.append(data)
-            
+
         collectionsData = dict({
             'GlobalFlags': {
                 'collection': GlobalFlags,
                 'data': globFlagDB_ME,
-                'operation': 'update_or_insert'},
+                'operation': 'update_or_insert'
+            },
             'ChecksumFiles': {
                 'collection': ChecksumFiles,
                 'data': checksumDB_ME,
-                'operation': 'update_or_insert'},
-                })
-                
-        answers = MongoDBWork.writeDatabase(collectionsData)
+                'operation': 'update_or_insert'
+            },
+        })
+
+        answers = MongoDBTools.writeDatabase(collectionsData)
 
         if not answers:
-            answers =list(["Checksun db writed in mongoDB."])
+            answers = list(["Checksun db writed in mongoDB."])
         return answers
 
     def insertNames(self, namesDict: typ.Dict[str, dict]) -> typ.List[str]:
@@ -419,7 +435,7 @@ class ME_DBService():
 
         for race in namesDict['Races']:
             raceName = str(next(iter(race)))
-            maleNames =  race[raceName]['Genders']['Male']['Names']
+            maleNames = race[raceName]['Genders']['Male']['Names']
             femaleNames = race[raceName]['Genders']['Female']['Names']
             surnames = race[raceName]['Surnames']
 
@@ -432,30 +448,35 @@ class ME_DBService():
                 'Race': {
                     'collection': Race,
                     'data': racesData,
-                    'operation': 'insert_only'},
-                'Male':{
+                    'operation': 'insert_only'
+                },
+                'Male': {
                     'collection': Male,
                     'data': malesData,
-                    'operation': 'insert_only'}, 
-                'Female':{
+                    'operation': 'insert_only'
+                },
+                'Female': {
                     'collection': Female,
                     'data': femalesData,
-                    'operation': 'insert_only'}, 
-                'Surname':{
+                    'operation': 'insert_only'
+                },
+                'Surname': {
                     'collection': Surname,
                     'data': surnamesData,
-                    'operation': 'insert_only'},
-                    })
+                    'operation': 'insert_only'
+                },
+            })
 
-            answer = MongoDBWork.writeDatabase(collectionsData)
+            answer = MongoDBTools.writeDatabase(collectionsData)
             if answer:
                 answers.extend(answer)
 
         if not answers:
-            answers =list(["Names inserted in mongoDB."])
+            answers = list(["Names inserted in mongoDB."])
         return answers
 
-    def printDatabases(self, modelsByAliases: typ.Dict[str, list]) -> typ.NoReturn:
+    def printDatabases(self, modelsByAliases: typ.Dict[str, list]
+                                                    ) -> typ.NoReturn:
         '''
         Custom data printing for database.
         '''
@@ -464,7 +485,7 @@ class ME_DBService():
 
             models = modelsByAliases[alias]
             for model in models:
-                MongoDBWork.printCollection(model)
+                MongoDBTools.printCollection(model)
 
     def showDBData(self) -> typ.NoReturn:
         '''
@@ -472,20 +493,23 @@ class ME_DBService():
         '''
         glob_db = self.mdbNAliases
         modelsByAliases = dict({
-                        glob_db['mdbName']['alias']: list([
-                            Race, Male, Female, Surname]),
-                        glob_db['mdbAnalytic']['alias']: list([
-                            GlobalCounts, NameLettersCount, VowelsCount, 
-                            ConsonantsCount, FirstLetters, Letters,
-                            ChainsCombinations, NameEndings, 
-                            VowelsChains, ConsonantsChains]),
-                        glob_db['mdbCheckSum']['alias']: list([
-                            GlobalFlags, ChecksumFiles]),
-                        })
+            glob_db['mdbName']['alias']:
+            list([Race, Male, Female, Surname]),
+            glob_db['mdbAnalytic']['alias']:
+            list([
+                GlobalCounts, NameLettersCount, VowelsCount, ConsonantsCount,
+                FirstLetters, Letters, ChainsCombinations, NameEndings,
+                VowelsChains, ConsonantsChains
+            ]),
+            glob_db['mdbCheckSum']['alias']:
+            list([GlobalFlags, ChecksumFiles]),
+        })
 
         self.printDatabases(modelsByAliases)
 
+
 ###FINISH FunctionalBlock
+
 
 ###START MainBlock
 def main() -> typ.NoReturn:
@@ -493,7 +517,8 @@ def main() -> typ.NoReturn:
     Entry point for working with databases.
     '''
     tools = ME_DBService()
-    #_ = tools.registerDataBases()
-    
+
     #tools.showDBData()
+
+
 ###FINISH Mainblock

@@ -2,7 +2,7 @@
 ##systemImport
 import os
 from pprint import pprint
-import typing
+import typing as typ
 from pathlib import Path as PathType
 
 ##customImport
@@ -31,7 +31,7 @@ ignoreList = [
 
 #####BEGIN InsideBlock
 #####END InsideBlock
-def getAll(inDir: PathType) -> typing.List[PathType]:
+def getAll(inDir: PathType) -> typ.List[PathType]:
     '''
     Gets list of directories and files from target directory.
     '''
@@ -41,7 +41,7 @@ def getAll(inDir: PathType) -> typing.List[PathType]:
     ]
     return all
 
-def getDirectories(inDir: PathType='.') -> typing.List[PathType]:   
+def getDirectories(inDir: PathType='.') -> typ.List[PathType]:   
     '''
     Gets list of only diretories from target directory.
     ''' 
@@ -52,7 +52,7 @@ def getDirectories(inDir: PathType='.') -> typing.List[PathType]:
     ]
     return allDirs
 
-def getFiles(inDir: PathType='.') -> typing.List[PathType]:
+def getFiles(inDir: PathType='.') -> typ.List[PathType]:
     '''
     Gets list of only files from target directory.
     '''
@@ -63,7 +63,7 @@ def getFiles(inDir: PathType='.') -> typing.List[PathType]:
     ]
     return dirFiles
 
-def getFilesInDirs(allDirs: typing.List[PathType]) -> typing.List[PathType]:
+def getFilesInDirs(allDirs: typ.List[PathType]) -> typ.List[PathType]:
     '''
     Gets all code files from target directodies.
     '''
@@ -100,7 +100,7 @@ def isIgnore(pathName: PathType) -> bool:
         return True
     return False
 
-def checkIfIgnore(dirsOrFiles: typing.List[PathType]) -> typing.List[PathType]:
+def checkIfIgnore(dirsOrFiles: typ.List[PathType]) -> typ.List[PathType]:
     '''
     Checks if list of files in ignore list.
     '''
@@ -112,7 +112,7 @@ def checkIfIgnore(dirsOrFiles: typing.List[PathType]) -> typing.List[PathType]:
 
     return returnList
 
-def removeIgnores(listOfPaths: typing.List[PathType]) -> typing.List[PathType]:
+def removeIgnores(listOfPaths: typ.List[PathType]) -> typ.List[PathType]:
     '''
     Removes files or dirs from list of paths if in ignore list.
     '''
@@ -129,7 +129,7 @@ def countLinesInFile(pathName: PathType) -> int:
     countLines = len(open(pathName).readlines(  ))
     return countLines
 
-def countLinesInFiles(listPathNames: typing.List[PathType]) -> int:
+def countLinesInFiles(listPathNames: typ.List[PathType]) -> int:
     '''
     Count code lines in target list of files.
     '''
@@ -144,7 +144,7 @@ def countLinesInFiles(listPathNames: typing.List[PathType]) -> int:
 ###FINISH FunctionalBlock
 
 ###START MainBlock
-def main() -> typing.NoReturn:
+def main() -> typ.NoReturn:
     allDirs = getDirectories()
     allFiles = getFiles()
 

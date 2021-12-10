@@ -1,7 +1,6 @@
 ###START ImportBlock
 import unittest
-import typing
-import sys
+import typing as typ
 import functools
 from contextlib import redirect_stdout
 
@@ -16,7 +15,7 @@ from tests import test_nameAnalysis
 
 ###START DecoratorBlock
 
-def redirectOutput(redirectedFunction: typing.Callable) -> typing.Callable:
+def redirectOutput(redirectedFunction: typ.Callable) -> typ.Callable:
     '''
     Redirects output to log file for #redirectedFunction. After returns stdout back.
     '''

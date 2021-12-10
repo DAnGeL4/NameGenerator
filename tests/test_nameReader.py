@@ -1,11 +1,11 @@
 ###START ImportBlock
 ##systemImport
 import os
-import typing
+import typing as typ
 
 ##customImport
 from tests.test_Service import FunctionalClass
-from modules.nameReader import FileWork, CheckSumWork, WithNamesWork
+from modules.nameReader import FileTools, ChecksumTools, NamesTools
 
 ###FINISH ImportBlock
 
@@ -19,7 +19,7 @@ from modules.nameReader import FileWork, CheckSumWork, WithNamesWork
 ###START FunctionalBlock
 class FileWork_Test(FunctionalClass):
     '''
-    Testing next methods of class #FileWork:
+    Testing next methods of class #FileTools:
     readFile;
     readDataFile;
     overwriteDataFile;
@@ -41,25 +41,25 @@ class FileWork_Test(FunctionalClass):
 
     ##BEGIN PrepareBlock
     @classmethod
-    def setUpClass(cls) -> typing.NoReturn:
+    def setUpClass(cls) -> typ.NoReturn:
         '''Set up for class.'''
 
         cls.printSetUpClassMsg()
         cls.createTestFiles()
 
     @classmethod
-    def tearDownClass(cls) -> typing.NoReturn:
+    def tearDownClass(cls) -> typ.NoReturn:
         '''Tear down for class.'''
 
         cls.removeTestFiles()
         cls.printTearDownClassMsg()
 
-    def setUp(self) -> typing.NoReturn:
+    def setUp(self) -> typ.NoReturn:
         '''Set up for test.'''
 
         self.printSetUpMethodMsg()
 
-    def tearDown(self) -> typing.NoReturn:
+    def tearDown(self) -> typ.NoReturn:
         '''Tear down for test.'''
 
         self.printTearDownMethodMsg()
@@ -68,35 +68,35 @@ class FileWork_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_readFile_checkingReadedData_expectedListOfLines(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing read data from file.
         '''
 
         #Must be list of lines without last symbol in each line
-        res = FileWork.readFile(
+        res = FileTools.readFile(
             str(self.TestFileDirectory + 'DBNames_Test_Data'))
         self.assertEqual(res, ["{'test_key': 'test_data'}"])
 
     @FunctionalClass.descript
     def test_readDataFile_checkingReadedData_expectedDictData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing read dictionary data from file.
         '''
 
-        res = FileWork.readDataFile(
+        res = FileTools.readDataFile(
             str(self.TestFileDirectory + 'DBNames_Test_Data'))
         self.assertDictEqual(res, {'test_key': 'test_data'})
 
     @FunctionalClass.descript
     def test_overwriteDataFile_checkingReturn_expectedTrue(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing writing to file method.
         '''
 
-        res = FileWork.overwriteDataFile(
+        res = FileTools.overwriteDataFile(
             self.TestFiles['DBNames_Test_Data'],
             fileName=str(self.TestFileDirectory + 'DBNames_Test_Data'))
 
@@ -104,39 +104,39 @@ class FileWork_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_overwriteDataFile_checkingWritedData_expectedEqualData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing data written to a file.
         '''
 
-        FileWork.overwriteDataFile(
+        FileTools.overwriteDataFile(
             dict({
                 'test_key': 'test_data'
             }),
             fileName=str(self.TestFileDirectory + 'DBNames_Test_Data'))
 
-        res: dict = FileWork.readDataFile(
+        res: dict = FileTools.readDataFile(
             str(self.TestFileDirectory + 'DBNames_Test_Data'))
         self.assertDictEqual(res, {'test_key': 'test_data'})
 
     @FunctionalClass.descript
     def test_getFileNameFromPath_splitPath_expectedFileName(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing getting filename from full path.
         '''
 
-        res = FileWork.getFileNameFromPath("tests/tmp/DBNames_Test_Data")
+        res = FileTools.getFileNameFromPath("tests/tmp/DBNames_Test_Data")
         self.assertEqual(res, "DBNames_Test_Data")
 
     @FunctionalClass.descript
     def test_findDBNamesFiles_findAllFilesInDirectory_expectedListOfAllFiles(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of finding files in a folder.
         '''
 
-        res = FileWork.findDBNamesFiles(directory="tests/tmp/")
+        res = FileTools.findDBNamesFiles(directory="tests/tmp/")
         #sort the list of files alphabetically
         res = sorted(res, key=lambda x: os.path.splitext(x)[0])
 
@@ -146,18 +146,18 @@ class FileWork_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_findValidDBNamesFiles_findFilesWithDBNames_expectedListOfDBNamesFiles(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of finding valid (with flag DB_NAMES_FILENAME_FLAG = "DBNames") files in a folder.
         '''
 
-        res = FileWork.findValidDBNamesFiles(directory="tests/tmp/")
+        res = FileTools.findValidDBNamesFiles(directory="tests/tmp/")
         self.assertListEqual(res, ["tests/tmp/DBNames_Test_Data"])
 
 
 class CheckSumWork_Test(FunctionalClass):
     '''
-    Testing next methods of class #CheckSumWork:
+    Testing next methods of class #ChecksumTools:
     calculateCheckSum;
     createFileCheckSum;
     createCheckSumDB;
@@ -179,25 +179,25 @@ class CheckSumWork_Test(FunctionalClass):
 
     ##BEGIN PrepareBlock
     @classmethod
-    def setUpClass(cls) -> typing.NoReturn:
+    def setUpClass(cls) -> typ.NoReturn:
         '''Set up for class.'''
 
         cls.printSetUpClassMsg()
         cls.createTestFiles()
 
     @classmethod
-    def tearDownClass(cls) -> typing.NoReturn:
+    def tearDownClass(cls) -> typ.NoReturn:
         '''Tear down for class.'''
 
         cls.removeTestFiles()
         cls.printTearDownClassMsg()
 
-    def setUp(self) -> typing.NoReturn:
+    def setUp(self) -> typ.NoReturn:
         '''Set up for test.'''
 
         self.printSetUpMethodMsg()
 
-    def tearDown(self) -> typing.NoReturn:
+    def tearDown(self) -> typ.NoReturn:
         '''Tear down for test.'''
 
         self.printTearDownMethodMsg()
@@ -206,46 +206,46 @@ class CheckSumWork_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calculateCheckSum_calcDataMD5_expectedMD5Hash(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method for calculating md5 hash from data.
         '''
 
-        res: typing.Hashable = CheckSumWork.calculateCheckSum(
+        res: typ.Hashable = ChecksumTools.calculateCheckSum(
             data="Some testing data")
         self.assertEqual(res, 'b5ec912b4a44962563c97b37817757af')
 
     @FunctionalClass.descript
     def test_calculateCheckSum_calcFileMD5_expectedMD5Hash(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method for calculating md5 hash for data from file.
         '''
 
-        res: typing.Hashable = CheckSumWork.calculateCheckSum(
+        res: typ.Hashable = ChecksumTools.calculateCheckSum(
             str(self.TestFileDirectory + 'TMP_Test_Data'))
         self.assertEqual(res, 'f8ecbed43362ae6ecf00726de6ae17ea')
 
     @FunctionalClass.descript
     def test_createFileCheckSum_makeMD5ForFile_expectedFilenameAndMD5(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method for preparing file checksum to write in database.
         '''
 
-        res: typing.Tuple = CheckSumWork.createFileCheckSum(
+        res: typ.Tuple = ChecksumTools.createFileCheckSum(
             str(self.TestFileDirectory + 'TMP_Test_Data'))
         self.assertTupleEqual(
             res, tuple(('TMP_Test_Data', 'f8ecbed43362ae6ecf00726de6ae17ea')))
 
     @FunctionalClass.descript
     def test_createCheckSumDB_makeDictDataOfDirectoryFiles_expectedDictData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of creates database (dict) for DB_NAMES_FILENAME_FLAG files in directory.
         '''
 
-        res: typing.Dict = CheckSumWork.createCheckSumDB(
+        res: typ.Dict = ChecksumTools.createCheckSumDB(
             checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'),
             directory="tests/tmp/",
             usingFileStoringFlag=True)
@@ -258,7 +258,7 @@ class CheckSumWork_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_writeCheckSumDB_writeChecksumDataToFile_expectedTrueAnsw(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the answer of the method of writes database (dict) to database file.
         '''
@@ -270,14 +270,14 @@ class CheckSumWork_Test(FunctionalClass):
             True
         })
 
-        res: bool = CheckSumWork.writeCheckSumDB(
+        res: bool = ChecksumTools.writeCheckSumDB(
             checkSumData,
             checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'))
         self.assertTrue(res)
 
     @FunctionalClass.descript
     def test_writeCheckSumDB_checkingWritedData_expectedEqualData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the data written to a checksum database file.
         '''
@@ -289,12 +289,12 @@ class CheckSumWork_Test(FunctionalClass):
             'globalExist':
             True
         })
-        CheckSumWork.writeCheckSumDB(
+        ChecksumTools.writeCheckSumDB(
             checkSumData,
             checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'),
             usingFileStoringFlag=True)
 
-        res: dict = FileWork.readDataFile(
+        res: dict = FileTools.readDataFile(
             str(self.TestFileDirectory + 'CheckSumDB.cfg'))
         self.assertDictEqual(
             res,
@@ -305,7 +305,7 @@ class CheckSumWork_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_checkValidHash_compareCurrentHashWithOld_expectedTrue(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method comparing checksum from file and recently calculated.
         '''
@@ -317,13 +317,13 @@ class CheckSumWork_Test(FunctionalClass):
             'globalExist':
             True
         })
-        CheckSumWork.writeCheckSumDB(
+        ChecksumTools.writeCheckSumDB(
             checkSumData,
             checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'),
             usingFileStoringFlag=True)
 
         #Comparing checksum value of #DBNames_Test_Data file with value from database
-        res: bool = CheckSumWork.checkValidHash(
+        res: bool = ChecksumTools.checkValidHash(
             fileNamePath=str(self.TestFileDirectory + 'DBNames_Test_Data'),
             checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'),
             directory="tests/tmp/",
@@ -333,7 +333,7 @@ class CheckSumWork_Test(FunctionalClass):
 
 class WithNamesWork_Test(FunctionalClass):
     '''
-    Testing next methods of class #WithNamesWork:
+    Testing next methods of class #NamesTools:
     prepareLocalRaceTemplate;
     makeRaceList;
     prepareGlobalRaceTemplate;
@@ -359,25 +359,25 @@ class WithNamesWork_Test(FunctionalClass):
 
     ##BEGIN PrepareBlock
     @classmethod
-    def setUpClass(cls) -> typing.NoReturn:
+    def setUpClass(cls) -> typ.NoReturn:
         '''Set up for class.'''
 
         cls.printSetUpClassMsg()
         cls.createTestFiles()
 
     @classmethod
-    def tearDownClass(cls) -> typing.NoReturn:
+    def tearDownClass(cls) -> typ.NoReturn:
         '''Tear down for class.'''
 
         cls.removeTestFiles()
         cls.printTearDownClassMsg()
 
-    def setUp(self) -> typing.NoReturn:
+    def setUp(self) -> typ.NoReturn:
         '''Set up for test.'''
 
         self.printSetUpMethodMsg()
 
-    def tearDown(self) -> typing.NoReturn:
+    def tearDown(self) -> typ.NoReturn:
         '''Tear down for test.'''
 
         self.printTearDownMethodMsg()
@@ -386,12 +386,12 @@ class WithNamesWork_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_prepareLocalRaceTemplate_insertRaceInTemplate_expectedPreparingTemplate(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of inserts the race key into template.
         '''
 
-        res: typing.Dict = WithNamesWork.prepareLocalRaceTemplate('testedRace')
+        res: typ.Dict = NamesTools.prepareLocalRaceTemplate('testedRace')
         self.assertDictEqual(
             res, {
                 "testedRace": {
@@ -409,12 +409,12 @@ class WithNamesWork_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeRaceList_gettingRaceKeyFromDict_expectedListOfRaces(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of getting a list race names from dictionary database.
         '''
 
-        res: typing.List = WithNamesWork.makeRaceList(
+        res: typ.List = NamesTools.makeRaceList(
             list([{
                 'testedRace1': {}
             }, {
@@ -424,12 +424,12 @@ class WithNamesWork_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_prepareGlobalRaceTemplate_preparingDataWithTemplates_expectedPreparedData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of preparing the global race template.
         '''
 
-        res: dict = WithNamesWork.prepareGlobalRaceTemplate({}, "testedRace")
+        res: dict = NamesTools.prepareGlobalRaceTemplate({}, "testedRace")
         self.assertDictEqual(res, {"Races": [{"testedRace": {}}]})
 
     @FunctionalClass.descript
@@ -455,7 +455,7 @@ class WithNamesWork_Test(FunctionalClass):
             'Surnames': []
         }
 
-        res: str = WithNamesWork.insertNames("Female", raceNameDict,
+        res: str = NamesTools.insertNames("Female", raceNameDict,
                                              ['tmp_1', 'tmp_2', 'tmp_3'])
         self.assertEqual(res, 'Done')
 
@@ -472,7 +472,7 @@ class WithNamesWork_Test(FunctionalClass):
 
         raceNameDict = {}
 
-        res: str = WithNamesWork.insertNames("Male", raceNameDict,
+        res: str = NamesTools.insertNames("Male", raceNameDict,
                                              ['tmp_1', 'tmp_2', 'tmp_3'])
         self.assertDictEqual(
             raceNameDict, {
@@ -509,7 +509,7 @@ class WithNamesWork_Test(FunctionalClass):
             'Surnames': []
         }
 
-        res: str = WithNamesWork.insertNames("Surnames", raceNameDict,
+        res: str = NamesTools.insertNames("Surnames", raceNameDict,
                                              ['tmp_1', 'tmp_2', 'tmp_3'])
         self.assertDictEqual(
             raceNameDict, {
@@ -526,25 +526,25 @@ class WithNamesWork_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_getRaceAndKeyFormFileName_gettingsKeysFromFilename_expectedCorrectKeys(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of gettings race key and gender/surname key from full path of file.
         '''
 
-        res: typing.Tuple[str,
-                          str] = WithNamesWork.getRaceAndKeyFormFileNamePath(
+        res: typ.Tuple[str,
+                          str] = NamesTools.getRaceAndKeyFormFileNamePath(
                               "./DBTest/DBNames_TestRace_TestGender")
         self.assertTupleEqual(res, ('TestRace', 'TestGender'))
 
     @FunctionalClass.descript
     def test_formatNames_preparingDataForEmptyDatabaseVar_expectedPreparedAndFilledData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of creates and formats the data for database.
 
         Initial database variable is empty.
         '''
-        res: typing.Dict[str, dict] = WithNamesWork.formatNames(
+        res: typ.Dict[str, dict] = NamesTools.formatNames(
             str(self.TestFileDirectory + 'DBNames_testRace_Surnames'), {})
         self.assertDictEqual(
             res, {
@@ -565,13 +565,13 @@ class WithNamesWork_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_formatNames_preparingDataForFilledDatabaseVar_expectedPreparedAndFilledData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of creates and formats the data for database.
 
         Initial database variable is filled according to the template with the changed race key.
         '''
-        res: typing.Dict[str, dict] = WithNamesWork.formatNames(
+        res: typ.Dict[str, dict] = NamesTools.formatNames(
             str(self.TestFileDirectory + 'DBNames_testRace_Surnames'), {
                 'Races': [{
                     'testRace': {
@@ -606,14 +606,14 @@ class WithNamesWork_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_createNamesDB_creatingDatabase_expectedCorrectResponse(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method creating Database of names and writing in DB file with verification of checksum.
 
         Testing a correct responce.
         '''
 
-        res: str = WithNamesWork.createNamesDB(
+        res: str = NamesTools.createNamesDB(
             checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'),
             initializeFile=str(self.TestFileDirectory + 'InitializeFile.cfg'),
             directory="tests/tmp/",
@@ -624,21 +624,21 @@ class WithNamesWork_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_createNamesDB_creatingDatabase_expectedCorrectWritedData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method creating Database of names and writing in DB file with verification of checksum.
 
         Testing a correct writed data in DB file.
         '''
 
-        res: str = WithNamesWork.createNamesDB(
+        res: str = NamesTools.createNamesDB(
             checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'),
             initializeFile=str(self.TestFileDirectory + 'InitializeFile.cfg'),
             directory="tests/tmp/",
             dataBaseOfNames={},
             usingFileStoringFlag=True)
 
-        data: typing.Dict[str, dict] = FileWork.readDataFile(
+        data: typ.Dict[str, dict] = FileTools.readDataFile(
             str(self.TestFileDirectory + 'InitializeFile.cfg'))
 
         self.assertDictEqual(
@@ -662,6 +662,6 @@ class WithNamesWork_Test(FunctionalClass):
 ###FINISH FunctionalBlock
 
 ###START MainBlock
-def main() -> typing.NoReturn:
+def main() -> typ.NoReturn:
     pass
 ###FINISH Mainblock

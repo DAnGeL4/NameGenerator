@@ -3,7 +3,7 @@
 import functools
 import pickle as cPickle
 
-import typing
+import typing as typ
 from contextlib import redirect_stdout
 from typing import Union
 from pathlib import Path as PathType
@@ -19,7 +19,7 @@ from templates.templateAnalysis import TEMPLATE_NAMES_ANALYTIC
 from templates.templateAnalysis import TEMPLATE_RATING_ANALYTIC
 from templates.templateAnalysis import TEMPLATE_CHAINS_ANALYTIC
 
-from modules.nameReader import FileWork
+from modules.nameReader import FileTools
 
 ###FINISH ImportBlock
 
@@ -28,7 +28,7 @@ from modules.nameReader import FileWork
 
 
 ###START DecoratorBlock
-def redirectOutput(redirectedFunction: typing.Callable) -> typing.Callable:
+def redirectOutput(redirectedFunction: typ.Callable) -> typ.Callable:
     '''
     Redirects output to log file for #redirectedFunction. After returns stdout back.
     '''
@@ -51,7 +51,7 @@ def redirectOutput(redirectedFunction: typing.Callable) -> typing.Callable:
 ###START FunctionalBlock
 class AnalysysService:
     def __init__(self,
-                 testFile: Union[str, PathType] = None) -> typing.NoReturn:
+                 testFile: Union[str, PathType] = None) -> typ.NoReturn:
         self.logFilePath = LOCAL_ANALYSIS_LOG_FILE
         
         self.baseOfNames = dict(
@@ -87,7 +87,7 @@ class AnalysysService:
         self.ratingAnalytic_CountKey = "Count"
         self.ratingAnalytic_ChanceKey = "Chance"
 
-    def initNamesAnalytics(self) -> typing.NoReturn:
+    def initNamesAnalytics(self) -> typ.NoReturn:
         '''
         Initializing #tmp_NamesAnalytic by value #TEMPLATE_NAMES_ANALYTIC.
         '''
@@ -96,7 +96,7 @@ class AnalysysService:
         _tmpDump = cPickle.dumps(TEMPLATE_NAMES_ANALYTIC, -1)
         self.tmp_NamesAnalytic = cPickle.loads(_tmpDump)
 
-    def initGlobNamesAnalytics(self) -> typing.NoReturn:
+    def initGlobNamesAnalytics(self) -> typ.NoReturn:
         '''
         Initializing instance variables by initial values.
         '''
@@ -105,7 +105,7 @@ class AnalysysService:
 
         self.initNamesAnalytics()
 
-    def isiterable(self, checkedObject: typing.Any) -> bool:
+    def isiterable(self, checkedObject: typ.Any) -> bool:
         '''Checks if object is iterable.'''
         try:
             iter(checkedObject)
@@ -122,7 +122,7 @@ class AnalysysService:
             return True
         return False
 
-    def copyObjectData(self, obj: object) -> typing.NoReturn:
+    def copyObjectData(self, obj: object) -> typ.NoReturn:
         '''Copies object data to global variables.'''
         self.globNamesAnalytic = obj.globNamesAnalytic
         self.tmp_NamesAnalytic = obj.tmp_NamesAnalytic
@@ -133,14 +133,14 @@ class AnalysysService:
         self.FirstOnly = obj.FirstOnly
 
     def renameDictKey(self, tmp_dict: dict, key1: str,
-                      key2: str) -> typing.NoReturn:
+                      key2: str) -> typ.NoReturn:
         '''Renames first key name on second in dictionary.'''
         tmp_dict[key1] = tmp_dict.pop(key2)
 
     def increaceCountforAllSubkeys(self,
-                                         destinationData: typing.Dict[str,
+                                         destinationData: typ.Dict[str,
                                                                       dict],
-                                         sourceData: typing.Dict[str, dict]):
+                                         sourceData: typ.Dict[str, dict]):
         '''
         Increaces count by all subkeys inside current local analytic key.
         '''
@@ -149,17 +149,17 @@ class AnalysysService:
 
     def getBaseOfNames(self,
                        testFile: Union[str,
-                                       PathType] = None) -> typing.NoReturn:
+                                       PathType] = None) -> typ.NoReturn:
         '''
         Gets base of names from file and saves data to #self.baseOfNames.
         '''
         if not testFile:
-            self.baseOfNames = FileWork.readDataFile()
+            self.baseOfNames = FileTools.readDataFile()
         else:
-            self.baseOfNames = FileWork.readDataFile(fileName=testFile)
+            self.baseOfNames = FileTools.readDataFile(fileName=testFile)
 
     def getFirstUnknownDictKeyName(self,
-                                   tmp_dict: dict) -> typing.Union[str, None]:
+                                   tmp_dict: dict) -> typ.Union[str, None]:
         '''
         Returns key name from dictionary if have only one key.
         '''
@@ -170,7 +170,7 @@ class AnalysysService:
 
         return None
 
-    def getLocalAnalyticData(self) -> typing.Dict[str, dict]:
+    def getLocalAnalyticData(self) -> typ.Dict[str, dict]:
         '''
         Returns local analytic data for current local analytic key.
         Used deepcopy analogue.
@@ -216,7 +216,7 @@ class AnalysysService:
         '''
         return self.getMaxCountByKey(self.maxNamesCountKey)
 
-    def setCommonGroupKey(self) -> typing.NoReturn:
+    def setCommonGroupKey(self) -> typ.NoReturn:
         '''
         Sets current the group key to common.
         The current group key is stored in tmp var.
@@ -224,7 +224,7 @@ class AnalysysService:
         self._tmp_groupKey = self.groupKey
         self.groupKey = self.GroupSubKey_Common
 
-    def unsetCommonGroupKey(self) -> typing.NoReturn:
+    def unsetCommonGroupKey(self) -> typ.NoReturn:
         '''
         Restores group key from tmp var.
         '''
@@ -233,7 +233,7 @@ class AnalysysService:
             self._tmp_groupKey = None
 
     def setRatingDataByLocalAnalytic(self,
-                                     ratingData: typing.Dict[str, dict],
+                                     ratingData: typ.Dict[str, dict],
                                      subKey: str = None) -> bool:
         '''
         Sets the new local data to temporary Names AnalyticDB by local key.
@@ -251,7 +251,7 @@ class AnalysysService:
         return False
 
     def setCommonRattingData(self,
-                             ratingData: typing.Dict[str, dict],
+                             ratingData: typ.Dict[str, dict],
                              subKey: str = None) -> bool:
         '''
         Sets the new only common data to temporary Names AnalyticDB by local key.
@@ -265,7 +265,7 @@ class AnalysysService:
             return False
         return True
 
-    def prepareRatingAnalytic(self, newKey: str) -> typing.Dict[str, dict]:
+    def prepareRatingAnalytic(self, newKey: str) -> typ.Dict[str, dict]:
         '''
         Returns prepared template of rating analytic (#TEMPLATE_RATING_ANALYTIC) 
         for the certain key (#newKey).
@@ -287,7 +287,7 @@ class AnalysysService:
         return chance
 
     def calculateNamesCountByLocalAnalytic(
-            self, namesCount: int, localAnalyticKey: str) -> typing.NoReturn:
+            self, namesCount: int, localAnalyticKey: str) -> typ.NoReturn:
         '''
         Calculates how much names by the group key.
         '''
@@ -322,7 +322,7 @@ class AnalysysService:
 
         return "calcMaxNamesCount: Done"
 
-    def calcAllChances(self, count: int) -> typing.Tuple[float, float]:
+    def calcAllChances(self, count: int) -> typ.Tuple[float, float]:
         '''
         Calculates chance and common chance by count key of the current group key.
         '''
@@ -348,7 +348,7 @@ class AnalysysService:
 
     def calculateCountByKey(
             self, key: str,
-            ratingData: typing.Dict[str, dict]) -> typing.Dict[str, dict]:
+            ratingData: typ.Dict[str, dict]) -> typ.Dict[str, dict]:
         '''
         Creates rating data by calculating the key count.
         Used keys: self.groupKey.
@@ -365,7 +365,7 @@ class AnalysysService:
 
     def calculateRatingByKey(
             self, key: str,
-            ratingData: typing.Dict[str, dict]) -> typing.Dict[str, dict]:
+            ratingData: typ.Dict[str, dict]) -> typ.Dict[str, dict]:
         '''
         Calculating chance of occurrence key.
         Used keys: self.groupKey.
@@ -381,7 +381,7 @@ class AnalysysService:
         return ratingData
 
     def calculateRatingforCommonSubkey(self, subKey: str,
-                                       ratingData: typing.Dict[str, dict]):
+                                       ratingData: typ.Dict[str, dict]):
         '''
         Calculating chance of common subkey.
         '''
@@ -428,7 +428,7 @@ class AnalysysService:
         return True
 
     def makeLocalAnalyticData(self,
-                              localFunc: typing.Callable,
+                              localFunc: typ.Callable,
                               subKey: str = None) -> bool:
         '''
         Creates, calculates and save maked analytic data for current the analytic key (#localAnalyticKey).
@@ -481,7 +481,7 @@ class AnalyticLetters(AnalysysService):
         self.lettersKey = "Letters"
         self.nameEndingsKey = "Name_Endings"
 
-    def getFirstLetters(self) -> typing.List[str]:
+    def getFirstLetters(self) -> typ.List[str]:
         '''
         Returns all first letters.
         '''
@@ -698,9 +698,9 @@ class AnalyticChains(AnalysysService):
         self.chainsAnalytic_ChanceSubkey = self.ratingAnalytic_ChanceKey
 
     def nullifyCount(
-            self, chainNames: typing.Dict[str, dict],
-            lenChainNamesData: typing.Dict[str,
-                                           dict]) -> typing.Dict[str, dict]:
+            self, chainNames: typ.Dict[str, dict],
+            lenChainNamesData: typ.Dict[str,
+                                           dict]) -> typ.Dict[str, dict]:
         '''
         Makes certain count data equal to zero.
         '''
@@ -717,8 +717,8 @@ class AnalyticChains(AnalysysService):
         return dict(lenChainNamesData)
 
     def sortChainsByLength(
-            self, chainNames: typing.Dict[str,
-                                          dict]) -> typing.Dict[str, dict]:
+            self, chainNames: typ.Dict[str,
+                                          dict]) -> typ.Dict[str, dict]:
         '''
         Sorts chains by the length.
         '''
@@ -729,7 +729,7 @@ class AnalyticChains(AnalysysService):
 
         return sortedChainNames
 
-    def makeChainList(self, name: str) -> typing.List[str]:
+    def makeChainList(self, name: str) -> typ.List[str]:
         '''
         Creates list of chains from the name by current alphabet. Vowel or 
         consonant chain determines by key #self.localAnalyticKey.
@@ -755,7 +755,7 @@ class AnalyticChains(AnalysysService):
 
         return list(сhains)
 
-    def getChainsDataByLocalAnalytic(self) -> typing.Dict[str, dict]:
+    def getChainsDataByLocalAnalytic(self) -> typ.Dict[str, dict]:
         '''
         Returns chains data from temporary Names AnalyticDB by 
         current Local Analytic Key.
@@ -766,7 +766,7 @@ class AnalyticChains(AnalysysService):
 
         return dict(chainNames)
 
-    def getChain(self, name: str) -> typing.Iterable[str]:
+    def getChain(self, name: str) -> typ.Iterable[str]:
         '''
         Returns iterate keys for dict. returned key is vowel or 
         consonant chain.
@@ -776,7 +776,7 @@ class AnalyticChains(AnalysysService):
         for chain in сhains:
             yield chain
 
-    def getChainCount(self, name: str) -> typing.Iterable[int]:
+    def getChainCount(self, name: str) -> typ.Iterable[int]:
         '''
         Returns iterate keys for dict. Key is count of vowel or consonant in
         chains. Vowel or consonant determines key #self.localAnalyticKey
@@ -795,7 +795,7 @@ class AnalyticChains(AnalysysService):
                 lenChainName = len(str(chainName))
                 yield lenChainName
 
-    def getChainMaxCountKey(self, name: str) -> typing.Iterable[str]:
+    def getChainMaxCountKey(self, name: str) -> typ.Iterable[str]:
         '''
         Returns a key consisting of the length of chain and repets count 
         in the name.
@@ -809,7 +809,7 @@ class AnalyticChains(AnalysysService):
             yield ChainMaxCountKey
 
     def getChainCountDataByLocalAnalytic(
-            self, localKey: str) -> typing.Dict[str, dict]:
+            self, localKey: str) -> typ.Dict[str, dict]:
         '''
         Returns chains count data from temporary Names AnalyticDB by 
         local key.
@@ -825,7 +825,7 @@ class AnalyticChains(AnalysysService):
         return dict(lenChainNamesData)
 
     def getNullifyedChainCountDataByLocalAnalytic(
-            self, localKey: str) -> typing.Dict[str, dict]:
+            self, localKey: str) -> typ.Dict[str, dict]:
         '''
         Returns chains count data from temporary Names AnalyticDB by 
         local key with nullifyed count.
@@ -838,7 +838,7 @@ class AnalyticChains(AnalysysService):
 
     def setLocalChainsAnalyticData(
             self, localKey: str,
-            localChainsAnalyticData: typing.Dict[str, dict]) -> bool:
+            localChainsAnalyticData: typ.Dict[str, dict]) -> bool:
         '''
         Sets the chains rating data to temporary Names AnalyticDB by local key.
         '''
@@ -874,7 +874,7 @@ class AnalyticChains(AnalysysService):
 
         return preparedData
 
-    def prepareChainsAnalytic(self, newKey: str) -> typing.Dict[str, dict]:
+    def prepareChainsAnalytic(self, newKey: str) -> typ.Dict[str, dict]:
         '''
         Returns prepared template of chains analytic (#TEMPLATE_CHAINS_ANALYTIC) 
         for the certain key (#newKey).
@@ -913,7 +913,7 @@ class AnalyticChains(AnalysysService):
 
         return True
 
-    def calcChainMaxCountInName(self, name: str) -> typing.Dict[str, dict]:
+    def calcChainMaxCountInName(self, name: str) -> typ.Dict[str, dict]:
         '''
         Calculates the max counts of times the chain a certain length 
         (n.p. of 2 letters; chains may not be the same, but the number of 
@@ -1004,7 +1004,7 @@ class AnalyticChains(AnalysysService):
         return True
 
     def calcRatingForAllChainsSubkeysByLocalAnalytic(
-            self) -> typing.Tuple[bool, str]:
+            self) -> typ.Tuple[bool, str]:
         '''
         Calculates chances for the chains (vowels or consonant) by local analytic.
         '''
@@ -1020,7 +1020,7 @@ class AnalyticChains(AnalysysService):
         return True, None
 
     def calcChainsDataForAllSubkeysByLocalAnalytic(
-            self) -> typing.Tuple[bool, str]:
+            self) -> typ.Tuple[bool, str]:
         '''
         Calculates all chains data for all subkeys by Local AnalyticKey in 
         temporary Names AnalyticDB.
@@ -1047,7 +1047,7 @@ class AnalyticChains(AnalysysService):
         return True, None
 
     def createChainsDataForAllSubkeysByLocalAnalytic(
-            self) -> typing.Tuple[bool, str]:
+            self) -> typ.Tuple[bool, str]:
         '''
         Creates and format chains data by Local AnalyticKey in 
         temporary Names AnalyticDB.
@@ -1116,7 +1116,7 @@ class AnalyticCombinations(AnalyticChains):
         self.chainsCombinationKey = "Chains_Combinations"
         self.ChainsCombinationCounts = list([3, 2])
 
-    def getListChainsData(self, name: str) -> typing.Dict[str, list]:
+    def getListChainsData(self, name: str) -> typ.Dict[str, list]:
         '''
         Returns chains data list, which first list includes the first 
         letter of the name.
@@ -1147,7 +1147,7 @@ class AnalyticCombinations(AnalyticChains):
 
         return dict(listsData)
 
-    def makeAllChainList(self, name: str) -> typing.List[str]:
+    def makeAllChainList(self, name: str) -> typ.List[str]:
         ''' 
         Returns a list with all finded chains in the name by order.
         '''
@@ -1211,7 +1211,7 @@ class Analysis(AnalysysService):
     def __init__(self, testFile: Union[str, PathType] = None):
         super().__init__(testFile)
 
-    def makeFunctionsList(self) -> typing.List[typing.Callable]:
+    def makeFunctionsList(self) -> typ.List[typ.Callable]:
         '''
         Makes runable functions list for the filling the temporary variable analytical data.
         '''
@@ -1248,7 +1248,7 @@ class Analysis(AnalysysService):
 
         return respond
 
-    def makeLocalAnalyticDataByGroupKey(self) -> typing.List[str]:
+    def makeLocalAnalyticDataByGroupKey(self) -> typ.List[str]:
         '''
         Runs the list of functions that fill the temporary variable analytical data by the group key.
         '''
@@ -1262,7 +1262,7 @@ class Analysis(AnalysysService):
 
         return responds
 
-    def initLocalAnalyticDB(self, groupKeys: list) -> typing.List[str]:
+    def initLocalAnalyticDB(self, groupKeys: list) -> typ.List[str]:
         '''
         Initializes the analytic data by the current race for the each group key.
         '''
@@ -1274,7 +1274,7 @@ class Analysis(AnalysysService):
 
         return responds
 
-    def makeLocalAnalyticDB(self, groupKeys: list) -> typing.List[str]:
+    def makeLocalAnalyticDB(self, groupKeys: list) -> typ.List[str]:
         '''
         Creates the analytic data by the current race for the each group key.
         '''
@@ -1286,7 +1286,7 @@ class Analysis(AnalysysService):
 
         return responds
 
-    def formatLocalAnalyticDB(self, groupKeys: list) -> typing.List[str]:
+    def formatLocalAnalyticDB(self, groupKeys: list) -> typ.List[str]:
         '''
         Creates the analytic database by the current race (#self.raceNameKey).
         '''
@@ -1298,7 +1298,7 @@ class Analysis(AnalysysService):
         return responds
 
     def extractingNamesByGroupKey(
-            self, race: typing.Dict[str, dict]) -> typing.Dict[str, dict]:
+            self, race: typ.Dict[str, dict]) -> typ.Dict[str, dict]:
         '''
         Extracts a lists of names and saves in temporary database by the gender/surname, 
         and remembers the group key for the all lists.\n
@@ -1333,7 +1333,7 @@ class Analysis(AnalysysService):
 
         return True
 
-    def makeAnalyticData(self) -> typing.Dict[str, list]:
+    def makeAnalyticData(self) -> typ.Dict[str, list]:
         '''
         Starts to making names analytic data. Returns list of responds of local making functions.
         '''
@@ -1358,7 +1358,7 @@ class Analysis(AnalysysService):
         return responds
 
     @redirectOutput
-    def printResponds(self, responds: typing.Dict[str, list]) -> bool:
+    def printResponds(self, responds: typ.Dict[str, list]) -> bool:
         '''
         Prints the responds list for the each race.
         '''
@@ -1388,7 +1388,7 @@ class Analysis(AnalysysService):
         if not self.printResponds(responds):
             return "\nAnalyticDB: Fault; Answer: 'Error in the process of making local analytic data'"
 
-        flag = FileWork.overwriteDataFile(self.globNamesAnalytic, DBFile)
+        flag = FileTools.overwriteDataFile(self.globNamesAnalytic, DBFile)
         if not flag:
             return "\nAnalyticDB: Fault; Answer: 'Data not writed in database'"
 
@@ -1400,7 +1400,7 @@ class Analysis(AnalysysService):
 
 ###START MainBlock
 def main() -> str:
-    analysis: typing.instance = Analysis()
+    analysis: typ.instance = Analysis()
     res: str = analysis.makeAnalyticDB()
 
     #print(res)
