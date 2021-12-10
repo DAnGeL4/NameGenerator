@@ -2,7 +2,7 @@
 ##systemImport
 import ast
 import types
-import typing
+import typing as typ
 
 ##customImport
 from configs.CFGNames import VOWELS_LETTERS, CONSONANTS_LETTERS
@@ -97,7 +97,7 @@ class AnalysysService_Test(FunctionalClass):
 
     ##BEGIN PrepareBlock
     @classmethod
-    def setUpClass(cls) -> typing.NoReturn:
+    def setUpClass(cls) -> typ.NoReturn:
         '''Set up for class.'''
 
         cls.printSetUpClassMsg()
@@ -105,14 +105,14 @@ class AnalysysService_Test(FunctionalClass):
 
 
     @classmethod
-    def tearDownClass(cls) -> typing.NoReturn:
+    def tearDownClass(cls) -> typ.NoReturn:
         '''Tear down for class.'''
 
         cls.removeTestFiles()
         cls.printTearDownClassMsg()
 
 
-    def setUp(self) -> typing.NoReturn:
+    def setUp(self) -> typ.NoReturn:
         '''Set up for test.'''
 
         self.printSetUpMethodMsg()
@@ -123,7 +123,7 @@ class AnalysysService_Test(FunctionalClass):
         self.TestConstruction.groupKey = 'Test_Group_Key'
 
 
-    def tearDown(self) -> typing.NoReturn:
+    def tearDown(self) -> typ.NoReturn:
         '''Tear down for test.'''
 
         self.printTearDownMethodMsg()
@@ -133,7 +133,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_getBaseOfNames_checkingReadedData_expectedDict(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing read dictionary data from file.
         '''
@@ -158,7 +158,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_initNamesAnalytics_checkingCleringNamesDB_expectedEmptyDict(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing class variable cleanup.
         '''
@@ -171,7 +171,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_initNamesAnalytics_checkingStoredAnalyticData_expectedTemplate(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing getting Analytic template.
         '''
@@ -209,7 +209,7 @@ class AnalysysService_Test(FunctionalClass):
     
     @FunctionalClass.descript
     def test_initGlobNamesAnalytics_checkingStoredAnalyticData_expectedTemplate(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing getting global Analytic template.
         '''
@@ -221,7 +221,7 @@ class AnalysysService_Test(FunctionalClass):
     
     @FunctionalClass.descript
     def test_copyObjectData_checkingCopiedAnalyticValues_expectedRightValues(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing copied Analytic values. The rest of the variables are tested above.
         '''
@@ -242,7 +242,7 @@ class AnalysysService_Test(FunctionalClass):
     
     @FunctionalClass.descript
     def test_isiterable_checkingIfIterate_expectedTrue(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the iteration checking method.
         '''
@@ -253,7 +253,7 @@ class AnalysysService_Test(FunctionalClass):
     
     @FunctionalClass.descript
     def test_renameDictKey_checkingRenamedKey_expectedRightKeyName(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of rename key in dictionary.
         '''
@@ -265,7 +265,7 @@ class AnalysysService_Test(FunctionalClass):
     
     @FunctionalClass.descript
     def test_getFirstUnknownDictKeyName_checkingKeyName_expectedRightKeyName(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of getting key from dictionary with only one key.
         '''
@@ -277,7 +277,7 @@ class AnalysysService_Test(FunctionalClass):
     
     @FunctionalClass.descript
     def test_getLocalAnalyticData_checkingKeyName_expectedRightKeyName(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of getting local analytic data for current local analytic key.
         '''
@@ -297,7 +297,7 @@ class AnalysysService_Test(FunctionalClass):
     
     @FunctionalClass.descript
     def test_getCountByAnalyticKey_checkingCountDataByKey_expectedRightCount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of getting count data from dictionary by analytic and local key.
         Used curent keys: self.raceNameKey, self.localAnalyticKey, self.groupKey.
@@ -315,7 +315,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_getMaxCountByKey_checkingMaxCountDataByKey_expectedRightCount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of getting max count data from dictionary by analytic key.
         Used curent keys: self.raceNameKey.
@@ -332,7 +332,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_getMaleNamesCount_checkingMaleNamesCountData_expectedRightCount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of getting male names count data from dictionary by analytic key.
         Used curent keys: self.raceNameKey.
@@ -349,7 +349,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_getFemaleNamesCount_checkingFemaleNamesCountData_expectedRightCount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of getting female names count data from dictionary by analytic key.
         Used curent keys: self.raceNameKey.
@@ -366,7 +366,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_getSurnamesCount_checkingSurnamesCountData_expectedRightCount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of getting surnames count data from dictionary by analytic key.
         Used curent keys: self.raceNameKey.
@@ -383,7 +383,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_getAllNamesCount_checkingAllNamesCountData_expectedRightCount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of getting all names count data from dictionary by analytic key.
         Used curent keys: self.raceNameKey.
@@ -400,7 +400,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_setRatingDataByLocalAnalytic_checkingRatingDataStorage_expectedRatingData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of the correct saving of rating data in tmp_NamesAnalytic.
         Used curent keys: self.raceNameKey, self.localAnalyticKey, self.groupKey.
@@ -424,7 +424,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_setRatingDataByLocalAnalytic_checkingRatingDataStorageBySubkey_expectedRatingData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of the correct saving of rating data in tmp_NamesAnalytic by subkey.
         Used curent keys: self.raceNameKey, self.localAnalyticKey, self.groupKey.
@@ -448,7 +448,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_setCommonRattingData_checkingRatingDataStorage_expectedRatingData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of the correct saving of rating data for only common group key 
         in tmp_NamesAnalytic.
@@ -470,7 +470,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calcChanceByKey_checkingCalculating_expectedRatingChance(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of calculating chance by the count and common count.
         '''
@@ -480,7 +480,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calculateNamesCountByLocalAnalytic_checkingCalculating_expectedRatingCount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of calculating new common count by the getting count and old common count.
         Used curent keys: self.raceNameKey.
@@ -498,7 +498,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calcMaxNamesCount_checkingCalculatingMaleNamesCount_expectedRightCount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of calculating male names count.
         Used curent keys: self.raceNameKey, self.groupKey, self.tmp_NamesDB.
@@ -517,7 +517,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calcMaxNamesCount_checkingCalculatingFemaleNamesCount_expectedRightCount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of calculating female names count.
         Used curent keys: self.raceNameKey, self.groupKey, self.tmp_NamesDB.
@@ -536,7 +536,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calcMaxNamesCount_checkingCalculatingSurnamesCount_expectedRightCount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of calculating surnames count.
         Used curent keys: self.raceNameKey, self.groupKey, self.tmp_NamesDB.
@@ -556,7 +556,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calcMaxNamesCount_checkingCalculatingMaxNamesCount_expectedRightCount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of calculating max names count for all genders.
         Used curent keys: self.raceNameKey, self.groupKey, self.tmp_NamesDB.
@@ -578,7 +578,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calcAllChances_checkingCalculatingMaxNMaleChances_expectedRightChance(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of calculating male and common chances.
         Used curent keys: self.raceNameKey, self.groupKey.
@@ -597,7 +597,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calcAllChances_checkingCalculatingMaxNFemaleChances_expectedRightChance(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of calculating female and common chances.
         Used curent keys: self.raceNameKey, self.groupKey.
@@ -616,7 +616,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calcAllChances_checkingCalculatingMaxNSurnamesChances_expectedRightChance(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of calculating surnames and common chances.
         Used curent keys: self.raceNameKey, self.groupKey.
@@ -635,7 +635,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_prepareRatingAnalytic_checkingCreatingAnalyticData_expectedPreaperedTemplate(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of creating right analytic data from analytic template.
         '''
@@ -645,7 +645,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calculateCountByKey_checkingCalculatingRating_expectedCorrectCount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of creating rating data by calculating the key count.
         Used curent keys: self.raceNameKey, self.localAnalyticKey, self.groupKey.
@@ -669,7 +669,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calculateRatingByKey_checkingCalculatingRating_expectedRatingData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of calculating rating data for the passed key.
         Used curent keys: self.raceNameKey, self.localAnalyticKey, self.groupKey.
@@ -693,7 +693,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calculateRatingforCommonSubkey_checkingCalculatingRating_expectedRatingData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of calculating rating data for the common key.
         Used curent keys: self.raceNameKey, self.localAnalyticKey, self.groupKey.
@@ -716,7 +716,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_increaceCountforAllSubkeys_checkingIncreacingRating_expectedRatingData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of increacing count by all subkeys inside current local analytic key.
         Used curent keys: self.raceNameKey, self.localAnalyticKey, self.groupKey.
@@ -732,7 +732,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeCommonRatingData_checkingCreatingDataByAnalyticKey_expectedAnalyticData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the creation and calculating analytic data for common group 
         key by current the analytic key (#localAnalyticKey).
@@ -772,7 +772,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeLocalAnalyticData_checkingCreatingDataByAnalyticKey_expectedAnalyticData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the creation of analytic data by the passed temporary key 
         generation function for the analytic key.
@@ -811,7 +811,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeLocalAnalyticData_checkingCreatingDataByAnalyticSubkey_expectedAnalyticData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the creation of analytic data by the passed temporary key 
         generation function for the analytic subkey.
@@ -850,7 +850,7 @@ class AnalysysService_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeLocalAnalyticData_checkingCreatingIterationDataByAnalyticKey_expectedAnalyticData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the creation of analytic data by the passed temporary 
         iteraion keys generation function for the analytic key.
@@ -937,7 +937,7 @@ class AnalyticLetters_Test(FunctionalClass):
 
     ##BEGIN PrepareBlock
     @classmethod
-    def setUpClass(cls) -> typing.NoReturn:
+    def setUpClass(cls) -> typ.NoReturn:
         '''Set up for class.'''
 
         cls.printSetUpClassMsg()
@@ -945,14 +945,14 @@ class AnalyticLetters_Test(FunctionalClass):
 
 
     @classmethod
-    def tearDownClass(cls) -> typing.NoReturn:
+    def tearDownClass(cls) -> typ.NoReturn:
         '''Tear down for class.'''
 
         cls.removeTestFiles()
         cls.printTearDownClassMsg()
 
 
-    def setUp(self) -> typing.NoReturn:
+    def setUp(self) -> typ.NoReturn:
         '''Set up for test.'''
 
         self.printSetUpMethodMsg()
@@ -964,7 +964,7 @@ class AnalyticLetters_Test(FunctionalClass):
         self.TestConstruction = AnalyticLetters(tmp_Construction)
 
 
-    def tearDown(self) -> typing.NoReturn:
+    def tearDown(self) -> typ.NoReturn:
         '''Tear down for test.'''
 
         self.printTearDownMethodMsg()
@@ -975,7 +975,7 @@ class AnalyticLetters_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_getFirstLetters_checkingGettingDataByFirstLettersKey_expectedFirstLettersList(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the get method of keys by First_Letters key from 
         names analytic.
@@ -997,7 +997,7 @@ class AnalyticLetters_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_getFirstLettersMaxCountByKey_checkingGettingCountByFirstLettersSubkey_expectedFirstLettersCount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the get method of vowels or consonants count by 
         First_Letters subkey from names analytic.
@@ -1019,7 +1019,7 @@ class AnalyticLetters_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_setFirstLettersMaxCountByKey_checkingSettingCountByFirstLettersSubkey_expectedRightCount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the set method of vowels or consonants count by 
         First_Letters subkey from names analytic.
@@ -1043,7 +1043,7 @@ class AnalyticLetters_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calcFirstLetters_checkingCalculatingCountOfFirstLetters_expectedRightCount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing calculating of vowels and consonants first letters 
         from names analytic.
@@ -1073,7 +1073,7 @@ class AnalyticLetters_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeNameLettersCountData_checkingMakingCountOfLenLetters_expectedRightData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the making method of names lenght and their repeats 
         amount from names DB.
@@ -1103,7 +1103,7 @@ class AnalyticLetters_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeVowelsCountData_checkingMakingCountOfLenLetters_expectedRightData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of making data with vowels amount in 
         names and their repeats amount from names DB.
@@ -1135,7 +1135,7 @@ class AnalyticLetters_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeConsonantsCountData_checkingMakingCountOfLenLetters_expectedRightData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of making data with consonants amount in 
         names and their repeats amount from names DB.
@@ -1167,7 +1167,7 @@ class AnalyticLetters_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeFirstLetterCountData_checkingMakingFirstLettersData_expectedRightDataNCount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of making data with first letters in names 
         and their repeats amount from names DB; counts of vowels 
@@ -1204,7 +1204,7 @@ class AnalyticLetters_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeAllLettersData_checkingMakingAllLettersData_expectedRightData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of making data with all letters, used in 
         names, and their repeats amount from names DB.
@@ -1242,7 +1242,7 @@ class AnalyticLetters_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeNameEndingsData_checkingMakingNameEndingsData_expectedRightData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of making data with combinations of two 
         adjacent letters chains from the ends of names, includings 
@@ -1331,7 +1331,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     ##BEGIN PrepareBlock
     @classmethod
-    def setUpClass(cls) -> typing.NoReturn:
+    def setUpClass(cls) -> typ.NoReturn:
         '''Set up for class.'''
 
         cls.printSetUpClassMsg()
@@ -1339,14 +1339,14 @@ class AnalyticChains_Test(FunctionalClass):
 
 
     @classmethod
-    def tearDownClass(cls) -> typing.NoReturn:
+    def tearDownClass(cls) -> typ.NoReturn:
         '''Tear down for class.'''
 
         cls.removeTestFiles()
         cls.printTearDownClassMsg()
 
 
-    def setUp(self) -> typing.NoReturn:
+    def setUp(self) -> typ.NoReturn:
         '''Set up for test.'''
 
         self.printSetUpMethodMsg()
@@ -1358,7 +1358,7 @@ class AnalyticChains_Test(FunctionalClass):
         self.TestConstruction = AnalyticChains(tmp_Construction)
 
 
-    def tearDown(self) -> typing.NoReturn:
+    def tearDown(self) -> typ.NoReturn:
         '''Tear down for test.'''
 
         self.printTearDownMethodMsg()
@@ -1368,7 +1368,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_nullifyCount_checkingNullifyingLenChainsData_expectedNullifyedData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of nullifying count data for key of chain length 
         orger by the list of chain keys.
@@ -1385,7 +1385,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_prepareChainsAnalytic_checkingPreparingTemplate_expectedRightTemplate(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of get and prepare chains template for new key.
         '''
@@ -1401,7 +1401,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_getChainsDataByLocalAnalytic_checkingGettingData_expectedRightData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of getting chains data by the chains 
         subkey from names DB.
@@ -1428,7 +1428,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeChainList_checkingVowelGettingChainList_expectedChainList(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of getting vowel chains list from name.
         Used curent keys: self.alphabet.
@@ -1441,7 +1441,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeChainList_checkingConsonantGettingChainList_expectedChainList(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of getting consonant chains list from name.
         Used curent keys: self.alphabet.
@@ -1454,7 +1454,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_getChain_checkingIterationing_expectedChainList(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of getting consonant chains list from name.
         Used curent keys: self.alphabet.
@@ -1467,7 +1467,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_getChainCount_checkingGettingIterationLenOfChain_expectedListOfLen(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing an iterative method for obtaining the count of vowels 
         or consonants in a chain.
@@ -1493,7 +1493,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_sortChainsByLength_checkingSorting_expectedSortedChainsData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing a sorting chains by the length.
         '''
@@ -1509,7 +1509,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calcChainMaxCountInName_checkingCalcLenChainsAmount_expectedLenAmount(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of getting chains data by the chains 
         subkey from names DB.
@@ -1536,7 +1536,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_getChainMaxCountKey_checkingMakingKey_expectedRightKey(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the making key consisting of the length of chain 
         and repets amount in the name.
@@ -1562,7 +1562,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_getChainCountDataByLocalAnalytic_checkingGettingData_expectedData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the getting chains count data from temporary by local key.
         Used curent keys: self.raceNameKey, self.localAnalyticKey, 
@@ -1588,7 +1588,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_getNullifyedChainCountDataByLocalAnalytic_checkingGettingData_expectedData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the getting chains count data by local key with nullifyed count.
         Used curent keys: self.raceNameKey, self.localAnalyticKey, 
@@ -1616,7 +1616,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_setLocalChainsAnalyticData_checkingChainsDataStorage_expectedRatingData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of sets the chains rating data by local key.
         Used curent keys: self.raceNameKey, self.localAnalyticKey, 
@@ -1645,7 +1645,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_sortChainsByLength_checkingSortingChainDict_expectedEqualDict(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of sorting chains by the length.
         '''
@@ -1663,7 +1663,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calcChainFrequency_checkingCalculatingCount_expectedAmountOfLen(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of calculating common chains count in all names.
         Used curent keys: self.raceNameKey, self.localAnalyticKey, 
@@ -1695,7 +1695,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_prepareDataByChainsAnalyticTemplate_checkingPreparingData_expectedStoredNewDataModel(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of preparing and saving data of the lenght of chain and their 
         repets count in names.
@@ -1733,7 +1733,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_prepareDataByChainsAnalyticTemplate_checkingPreparingDataOnTheLastGroupKey_expectedStoredNewDataModel(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of preparing and saving data of the lenght of chain and their 
         repets count in names.
@@ -1776,7 +1776,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_callcRatingOfChainsBySubkey_checkingCalculatingRating_expectedRightChances(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of calculating local and common chances for vowels or consonant 
         chains by the subkey.
@@ -1809,7 +1809,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calcRatingForAllChainsSubkeysByLocalAnalytic_checkingCalculatingRating_expectedRightChances(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of calculating chances for the chains (vowels or consonant) by all subkey.
         Used curent keys: self.raceNameKey, self.localAnalyticKey, 
@@ -1853,7 +1853,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_createChainsDataForAllSubkeysByLocalAnalytic_checkingFormatOfCreatedData_expectedRightDataFormat(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of creating and formating chains data.
         Used curent keys: self.raceNameKey, self.localAnalyticKey, 
@@ -1904,7 +1904,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_calcChainsDataForAllSubkeysByLocalAnalytic_checkingCalculatingChainsData_expectedRightData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of calculating all chains data for all subkeys.
         Used curent keys: self.raceNameKey, self.localAnalyticKey, 
@@ -1999,7 +1999,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeVowelsChainsAllData_checkingMakingVowelChainsData_expectedRightData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of making all vowel chains data for all subkeys.
         Used curent keys: self.raceNameKey, self.groupKey, self.tmp_NamesDB.
@@ -2068,7 +2068,7 @@ class AnalyticChains_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeConsonantsChainsAllData_checkingMakingConsonantChainsData_expectedRightData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing of making all consonant chains data for all subkeys.
         Used curent keys: self.raceNameKey, self.groupKey, self.tmp_NamesDB.
@@ -2174,7 +2174,7 @@ class AnalyticCombinations_Test(FunctionalClass):
 
     ##Begin PrepareBlock
     @classmethod
-    def setUpClass(cls) -> typing.NoReturn:
+    def setUpClass(cls) -> typ.NoReturn:
         '''Set up for class.'''
 
         cls.printSetUpClassMsg()
@@ -2182,14 +2182,14 @@ class AnalyticCombinations_Test(FunctionalClass):
 
 
     @classmethod
-    def tearDownClass(cls) -> typing.NoReturn:
+    def tearDownClass(cls) -> typ.NoReturn:
         '''Tear down for class.'''
 
         cls.removeTestFiles()
         cls.printTearDownClassMsg()
 
 
-    def setUp(self) -> typing.NoReturn:
+    def setUp(self) -> typ.NoReturn:
         '''Set up for test.'''
 
         self.printSetUpMethodMsg()
@@ -2201,7 +2201,7 @@ class AnalyticCombinations_Test(FunctionalClass):
         self.TestConstruction = AnalyticCombinations(tmp_Construction)
 
 
-    def tearDown(self) -> typing.NoReturn:
+    def tearDown(self) -> typ.NoReturn:
         '''Tear down for test.'''
 
         self.printTearDownMethodMsg()
@@ -2211,7 +2211,7 @@ class AnalyticCombinations_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_getListChainsData_checkingChainsDataFromName_expectedRightData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of obtaining chains and 
         information about them from the name.
@@ -2226,7 +2226,7 @@ class AnalyticCombinations_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeAllChainList_checkingChainsDataFromName_expectedChainsByOrder(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of obtaining chains from a name in order.
         '''
@@ -2238,7 +2238,7 @@ class AnalyticCombinations_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeChainsCombinationsInOrderData_checkingMakingChainsCombinationsData_expectedRightData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of making combinations of chains in order from a names.
         '''
@@ -2328,7 +2328,7 @@ class Analysis_Test(FunctionalClass):
 
     ##BEGIN PrepareBlock
     @classmethod
-    def setUpClass(cls) -> typing.NoReturn:
+    def setUpClass(cls) -> typ.NoReturn:
         '''Set up for class.'''
 
         cls.printSetUpClassMsg()
@@ -2336,14 +2336,14 @@ class Analysis_Test(FunctionalClass):
 
 
     @classmethod
-    def tearDownClass(cls) -> typing.NoReturn:
+    def tearDownClass(cls) -> typ.NoReturn:
         '''Tear down for class.'''
 
         cls.removeTestFiles()
         cls.printTearDownClassMsg()
 
 
-    def setUp(self) -> typing.NoReturn:
+    def setUp(self) -> typ.NoReturn:
         '''Set up for test.'''
 
         self.printSetUpMethodMsg()
@@ -2359,7 +2359,7 @@ class Analysis_Test(FunctionalClass):
         self.TestConstruction.logFilePath = tmpLogTestNames
 
 
-    def tearDown(self) -> typing.NoReturn:
+    def tearDown(self) -> typ.NoReturn:
         '''Tear down for test.'''
 
         self.printTearDownMethodMsg()
@@ -2369,7 +2369,7 @@ class Analysis_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_makeFunctionsList_checkingDataListType_expectedFunctionsList(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Checking the type of list of returned data.
         '''
@@ -2387,7 +2387,7 @@ class Analysis_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_formatRespond_checkingRespond_expectedCorrectRespond(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of formating initial message of respond.
         '''
@@ -2398,7 +2398,7 @@ class Analysis_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_initLocalAnalyticDataByGroupKey_checkingInitialValues_expectedCountedValues(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of initialize base values in analytic data by group key.
         '''
@@ -2423,7 +2423,7 @@ class Analysis_Test(FunctionalClass):
         
     @FunctionalClass.descript
     def test_makeLocalAnalyticDataByGroupKey_checkingCreatedValues_expectedCountedValues(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of making analytic data by group key.
         '''
@@ -2520,7 +2520,7 @@ class Analysis_Test(FunctionalClass):
         
     @FunctionalClass.descript
     def test_initLocalAnalyticDB_checkingInitialValues_expectedCountedValues(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of initialize base values in analytic data 
         for all group keys.
@@ -2550,7 +2550,7 @@ class Analysis_Test(FunctionalClass):
         
     @FunctionalClass.descript
     def test_makeLocalAnalyticDB_checkingCreatedValues_expectedCountedValues(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of making analytic data for all group keys.
         '''
@@ -2746,7 +2746,7 @@ class Analysis_Test(FunctionalClass):
         
     @FunctionalClass.descript
     def test_formatLocalAnalyticDB_checkingCreatedValues_expectedCountedValues(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of making analytic data base. 
         Only sample data is used to verify.
@@ -2792,7 +2792,7 @@ class Analysis_Test(FunctionalClass):
 
     @FunctionalClass.descript
     def test_extractingNamesByGroupKey_checkingCreatedDB_expectedGenderLists(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of extracting a lists of names 
         and saving by the gender/surname.
@@ -2813,7 +2813,7 @@ class Analysis_Test(FunctionalClass):
         
     @FunctionalClass.descript
     def test_fillGlobNamesAnalyticVar_checkingCopyedData_expectedCopyedData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of filling a global naming 
         analytic database variable.
@@ -2867,7 +2867,7 @@ class Analysis_Test(FunctionalClass):
         
     @FunctionalClass.descript
     def test_makeAnalyticData_checkingCreatedValues_expectedCountedValues(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of making all analytic data base. 
         Only sample data is used to verify.
@@ -2917,7 +2917,7 @@ class Analysis_Test(FunctionalClass):
         
     @FunctionalClass.descript
     def test_printResponds_checkingCreatedValues_expectedCountedValues(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of making all analytic data base. 
         Only sample data is used to verify.
@@ -2940,7 +2940,7 @@ class Analysis_Test(FunctionalClass):
         
     @FunctionalClass.descript
     def test_makeAnalyticDB_checkingCreatedDB_expectedWritedData(
-            self) -> typing.NoReturn:
+            self) -> typ.NoReturn:
         '''
         Testing the method of making analytic database and write 
         in analytic database file.
@@ -2994,6 +2994,6 @@ class Analysis_Test(FunctionalClass):
 ###FINISH FunctionalBlock
 
 ###START MainBlock
-def main() -> typing.NoReturn:
+def main() -> typ.NoReturn:
     pass
 ###FINISH Mainblock

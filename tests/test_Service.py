@@ -3,7 +3,7 @@
 import unittest
 import os
 import functools
-import typing
+import typing as typ
 import pickle
 
 ##customImport
@@ -26,7 +26,7 @@ class FunctionalClass(unittest.TestCase):
     TestFileDirectory = "tests/tmp/"
     TestFiles = dict()
 
-    def descript(descriptedFunc: typing.Callable) -> typing.Callable:
+    def descript(descriptedFunc: typ.Callable) -> typ.Callable:
         '''
         Descriptes a function in output.
         '''
@@ -41,7 +41,7 @@ class FunctionalClass(unittest.TestCase):
 
 
     @classmethod
-    def printSetUpClassMsg(cls) -> typing.NoReturn:
+    def printSetUpClassMsg(cls) -> typ.NoReturn:
         '''Prints message for set up class.'''
         print("==============================")
         print("** SetUpClass: %s" % cls.__name__)
@@ -49,20 +49,20 @@ class FunctionalClass(unittest.TestCase):
 
 
     @classmethod
-    def printTearDownClassMsg(cls) -> typing.NoReturn:
+    def printTearDownClassMsg(cls) -> typ.NoReturn:
         '''Prints message for tear down class.'''
         print("==============================")
         print("*** TearDownClass: %s" % cls.__name__)
         print("==============================\n")
 
 
-    def printSetUpMethodMsg(self) -> typing.NoReturn:
+    def printSetUpMethodMsg(self) -> typ.NoReturn:
         '''Prints message for set up method.'''
         print("-------------------------------")
         print("* Set up for:\n|\t" + str(self._testMethodName))
 
 
-    def printTearDownMethodMsg(self) -> typing.NoReturn:
+    def printTearDownMethodMsg(self) -> typ.NoReturn:
         '''Prints message for tear down method.'''
         print("* Tear down for:\n|\t" + str(self._testMethodName))
         print("-------------------------------\n")
@@ -97,7 +97,7 @@ class FunctionalClass(unittest.TestCase):
                     print("* Error: \n | File %s doesn't exist." %
                           str(fullPathTestFile))
                           
-    def deepCopy(self, data: typing.Dict[str, dict]) -> typing.Dict[str, dict]:
+    def deepCopy(self, data: typ.Dict[str, dict]) -> typ.Dict[str, dict]:
         '''
         Deep copy uses pickle module.
         '''
@@ -106,7 +106,7 @@ class FunctionalClass(unittest.TestCase):
         return data
 
     def leaveKeys(self, allowedKeys: list, 
-                    data: typing.Dict[str, dict]) -> typing.Dict[str, dict]:
+                    data: typ.Dict[str, dict]) -> typ.Dict[str, dict]:
         '''
         Leaves only allowed keys and delete other from #NamesAnalyticData.
         '''
@@ -117,7 +117,7 @@ class FunctionalClass(unittest.TestCase):
         return data
 
     def deleteKeys(self, keys: list, 
-                    data: typing.Dict[str, dict]) -> typing.Dict[str, dict]:
+                    data: typ.Dict[str, dict]) -> typ.Dict[str, dict]:
         '''
         Deletes keys from NamesAnalyticData by the #keys list.
         '''
@@ -129,6 +129,6 @@ class FunctionalClass(unittest.TestCase):
 ###FINISH FunctionalBlock
 
 ###START MainBlock
-def main() -> typing.NoReturn:
+def main() -> typ.NoReturn:
     pass
 ###FINISH Mainblock

@@ -5,7 +5,7 @@ import os
 import hashlib
 import copy
 import functools
-import typing
+import typing as typ
 from typing import Union
 from pathlib import Path as PathType
 from contextlib import redirect_stdout
@@ -18,7 +18,7 @@ from configs.CFGNames import LOCAL_NAMES_LOG_FILE
 from configs.CFGNames import USING_FILE_STORING_FLAG
 from templates.templateAnalysis import TEMPLATE_LOCAL_RACE, TEMPLATE_GLOBAL_RACE
 
-from database.dbtest import ME_DBService
+from modules.dbTools import MongoDBTools, ME_DBService
 
 ###FINISH ImportBlock
 
@@ -26,7 +26,7 @@ from database.dbtest import ME_DBService
 ###FINISH GlobalConstantBlock
 
 ###START DecoratorBlock
-def redirectOutput(redirectedFunction: typing.Callable) -> typing.Callable:
+def redirectOutput(redirectedFunction: typ.Callable) -> typ.Callable:
     '''
     Redirects output to log file for #redirectedFunction. After returns stdout back.
     '''
@@ -46,9 +46,9 @@ def redirectOutput(redirectedFunction: typing.Callable) -> typing.Callable:
 
 
 ###START FunctionalBlock
-class FileWork:
+class FileTools:
     '''
-    Class #FileWork groups methods to works with files (find, sort, read, write, owerwrite etc.). 
+    Class #FileTools groups methods to works with files (find, sort, read, write, owerwrite etc.). 
     
     For work with class don't need class instance.
     '''
@@ -125,7 +125,7 @@ class FileWork:
         return fileName
 
     @staticmethod
-    def findDBNamesFiles(**kwargs) -> typing.List[PathType]:
+    def findDBNamesFiles(**kwargs) -> typ.List[PathType]:
         '''
         Finds all files, excluding folders, in directory (default directory is #DB_NAMES_DIRECTORY).
 
@@ -150,7 +150,7 @@ class FileWork:
         return dbDirFiles
 
     @classmethod
-    def findValidDBNamesFiles(cls, **kwargs) -> typing.List[PathType]:
+    def findValidDBNamesFiles(cls, **kwargs) -> typ.List[PathType]:
         '''
         Checks for a flag in the file names from list. Return list of files path's with a flag.
         
@@ -171,15 +171,15 @@ class FileWork:
         return validFiles
 
 
-class CheckSumWork:
+class ChecksumTools:
     '''
-    Class CheckSumWork contains methods to works wits checksum (calculate, check, createDB, write). Checksum based on md5 hash.
+    Class ChecksumTools contains methods to works wits checksum (calculate, check, createDB, write). Checksum based on md5 hash.
     '''
 
     @staticmethod
     def calculateCheckSum(
             fullPath: Union[str, PathType] = None,
-            data: Union[str, typing.ByteString] = None) -> typing.Hashable:
+            data: Union[str, typ.ByteString] = None) -> typ.Hashable:
         '''
         Calculates md5 hash of file or data.
         '''
@@ -200,7 +200,7 @@ class CheckSumWork:
 
     @staticmethod
     def getOldCheckSumDB(checkSumDBFile: Union[str, PathType], **kwargs
-                         ) -> typing.Dict[str, Union[typing.Hashable, bool]]:
+                         ) -> typ.Dict[str, Union[typ.Hashable, bool]]:
         '''
         Gets checksum database from file if #USING_FILE_STORING_FLAG true,
         else gets from mongoDB.
@@ -214,7 +214,7 @@ class CheckSumWork:
 
         oldCheckSumDB = None
         if usingFileStoringFlag:
-            oldCheckSumDB = FileWork.readDataFile(checkSumDBFile)
+            oldCheckSumDB = FileTools.readDataFile(checkSumDBFile)
         else:
             tool = ME_DBService()
             oldCheckSumDB = tool.readChecksumDB_ME()
@@ -226,25 +226,25 @@ class CheckSumWork:
 
     @classmethod
     def createFileCheckSum(cls, fullPath: Union[str, PathType]
-                           ) -> typing.Tuple[PathType, typing.Hashable]:
+                           ) -> typ.Tuple[PathType, typ.Hashable]:
         '''
         Creates check sum for the file from path.
         '''
 
         checkSum = cls.calculateCheckSum(fullPath)
-        fileName = FileWork.getFileNameFromPath(fullPath)
+        fileName = FileTools.getFileNameFromPath(fullPath)
 
         return fileName, checkSum
 
     @classmethod
     def createCheckSumDB(cls, checkSumDBFile: Union[str, PathType] = CHECK_SUM_FILE,
                          **kwargs
-                         ) -> typing.Dict[str, Union[typing.Hashable, bool]]:
+                         ) -> typ.Dict[str, Union[typ.Hashable, bool]]:
         '''
         Creates a checksum DB from #DBNames files.
         '''
         checkSumDB = cls.getOldCheckSumDB(checkSumDBFile, **kwargs)
-        dbNamesFiles = FileWork.findValidDBNamesFiles(**kwargs)
+        dbNamesFiles = FileTools.findValidDBNamesFiles(**kwargs)
 
         for fullPath in dbNamesFiles:
             fileName, checkSum = cls.createFileCheckSum(fullPath)
@@ -256,7 +256,7 @@ class CheckSumWork:
 
     @classmethod
     def writeCheckSumDB(cls,
-            checkSumDB: typing.Dict[str, typing.Hashable] = None,
+            checkSumDB: typ.Dict[str, typ.Hashable] = None,
             checkSumDBFile: Union[str, PathType] = CHECK_SUM_FILE,
             **kwargs) -> bool:
         '''
@@ -276,7 +276,7 @@ class CheckSumWork:
             checkSumDB = cls.createCheckSumDB(checkSumDBFile, **kwargs)
 
         if usingFileStoringFlag:
-            answer: bool = FileWork.overwriteDataFile(checkSumDB, checkSumDBFile)
+            answer: bool = FileTools.overwriteDataFile(checkSumDB, checkSumDBFile)
         else:
             tool = ME_DBService()
             answer: bool = tool.writeChecksumDB_ME(checkSumDB)
@@ -306,13 +306,32 @@ class CheckSumWork:
         return oldCheckSumDB == curCheckSumDB
 
 
-class WithNamesWork:
+class NamesTools:
     '''
-    Class #WithNamesWork contains methods to prepare #DBNames files (files with lists of names) to paste in DB. 
+    Class #NamesTools contains methods to prepare #DBNames files 
+    (files with lists of names) to paste in DB. 
     '''
 
     @staticmethod
-    def prepareLocalRaceTemplate(raceName: str) -> typing.Dict:
+    def eraseNamesBase(mdb='mdbName') -> typ.Text:
+        '''
+        Erases database of names and checksum. After this initializes default values.
+        '''
+        if USING_FILE_STORING_FLAG:
+            res = FileTools.overwriteDataFile({})
+            answer = "Main: DB file erased" if res else "Main: Erase fail"
+            
+        else:
+            answer = MongoDBTools.eraseME_DB(mdb)
+
+        checkSumDB = ChecksumTools.createCheckSumDB()
+        checkSumDB[CHECKSUM_DB_GLOBAL_FLAG] = False
+        ChecksumTools.writeCheckSumDB(checkSumDB)
+            
+        return answer
+
+    @staticmethod
+    def prepareLocalRaceTemplate(raceName: str) -> typ.Dict:
         '''
         Prepares a local race template replacing #tmp_race to #raceName.
         '''
@@ -323,7 +342,7 @@ class WithNamesWork:
         return dict(tmp_Race)
 
     @staticmethod
-    def makeRaceList(races: typing.List[dict]) -> typing.List:
+    def makeRaceList(races: typ.List[dict]) -> typ.List:
         '''
         Makes a list of race names.
         '''
@@ -338,12 +357,12 @@ class WithNamesWork:
 
     @staticmethod
     def getRaceAndKeyFormFileNamePath(
-            fullPath: Union[str, PathType]) -> typing.Tuple[str, str]:
+            fullPath: Union[str, PathType]) -> typ.Tuple[str, str]:
         '''
         Gets the name of the race and the name of the key from the file name in the full path and returns it.
         '''
 
-        fileName = FileWork.getFileNameFromPath(fullPath)
+        fileName = FileTools.getFileNameFromPath(fullPath)
 
         tmp_NameWords = fileName.split("_")
         raceName = tmp_NameWords[1]  #e.g. Elf, Ork, e.t.c
@@ -352,14 +371,14 @@ class WithNamesWork:
         return raceName, keyName
 
     @classmethod
-    def prepareGlobalRaceTemplate(cls, dataBaseOfNames: typing.Dict[str, dict],
-                                  raceName: str) -> typing.Dict[str, dict]:
+    def prepareGlobalRaceTemplate(cls, dataBaseOfNames: typ.Dict[str, dict],
+                                  raceName: str) -> typ.Dict[str, dict]:
         '''
         Prepares a global race template. Inserts #TEMPLATE_GLOBAL_RACE if database of names is empty.
         '''
 
         if dataBaseOfNames is None:
-            dataBaseOfNames = FileWork.readDataFile()
+            dataBaseOfNames = FileTools.readDataFile()
 
         if len(dataBaseOfNames.keys()) == 0:
             dataBaseOfNames = copy.deepcopy(TEMPLATE_GLOBAL_RACE)
@@ -372,7 +391,7 @@ class WithNamesWork:
         return dict(dataBaseOfNames)
 
     @classmethod
-    def insertNames(cls, keyName: str, raceNameDict: typing.Dict[str, dict],
+    def insertNames(cls, keyName: str, raceNameDict: typ.Dict[str, dict],
                     listOfNames: list) -> str:
         '''
         Selected insert of key in dictionary.
@@ -401,12 +420,12 @@ class WithNamesWork:
     @classmethod
     def formatNames(cls,
             fullPath: Union[str, PathType],
-            dataBaseOfNames: typing.Dict[str, dict]) -> typing.Dict[str, dict]:
+            dataBaseOfNames: typ.Dict[str, dict]) -> typ.Dict[str, dict]:
         '''
         Creates and formats the database of data to be inserted into the DB file.
         '''
 
-        listOfNames = FileWork.readFile(fullPath)
+        listOfNames = FileTools.readFile(fullPath)
         raceName, keyName = cls.getRaceAndKeyFormFileNamePath(
             fullPath)
         dataBaseOfNames = cls.prepareGlobalRaceTemplate(
@@ -419,14 +438,14 @@ class WithNamesWork:
         return dict(dataBaseOfNames)
 
     @classmethod
-    def createNamesDB(cls, **kwargs) -> typing.Tuple[str, Union[str, list]]:
+    def createNamesDB(cls, **kwargs) -> typ.Tuple[str, Union[str, list]]:
         '''
         Formates DB of names, writes to file and updates a checksum DB.
         '''
         dataBaseOfNames = None
         initializeFile = NAMES_BASE_INITIALIZE_FILE
 
-        if CheckSumWork.checkValidHash(**kwargs):
+        if ChecksumTools.checkValidHash(**kwargs):
             return "\nNamesDB: Canceled", "INF: Checksum exists"
 
         #begin_test_case_block
@@ -441,7 +460,7 @@ class WithNamesWork:
             dataBaseOfNames = kwargs.pop('dataBaseOfNames')
         #end_test_case_block
 
-        dbNamesFiles = FileWork.findValidDBNamesFiles(**kwargs)
+        dbNamesFiles = FileTools.findValidDBNamesFiles(**kwargs)
 
         for fullPath in dbNamesFiles:
             dataBaseOfNames = cls.formatNames(
@@ -449,7 +468,7 @@ class WithNamesWork:
 
         answers = 'Empty answer.'
         if usingFileStoringFlag:
-            answ = FileWork.overwriteDataFile(dataBaseOfNames, initializeFile)
+            answ = FileTools.overwriteDataFile(dataBaseOfNames, initializeFile)
             if not answ:
                 answers = "ERR: Can't write data to file."
                 return "\nNamesDB: Failed", answers
@@ -458,10 +477,6 @@ class WithNamesWork:
         else:
             tool = ME_DBService()
             answers = tool.insertNames(dataBaseOfNames)
-            
-        
-        #FileWork.overwriteDataFile(dataBaseOfNames, initializeFile)
-        #CheckSumWork.writeCheckSumDB(**kwargs)
 
         return "\nNamesDB: Created", answers
 
@@ -470,7 +485,7 @@ class WithNamesWork:
 
 ###START MainBlock
 @redirectOutput
-def printResponds(responds: Union[str, list]) -> typing.NoReturn:
+def printResponds(responds: Union[str, list]) -> typ.NoReturn:
     '''
     Function for printing responds in log file.
     '''
@@ -481,7 +496,7 @@ def printResponds(responds: Union[str, list]) -> typing.NoReturn:
         print(responds)
 
 def main() -> str:
-    globRresp, locResp = WithNamesWork.createNamesDB()
+    globRresp, locResp = NamesTools.createNamesDB()
     printResponds(locResp)
     
     return globRresp
