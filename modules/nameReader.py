@@ -476,7 +476,7 @@ class NamesTools:
             
         else:
             tool = ME_DBService()
-            answers = tool.insertNames(dataBaseOfNames)
+            answers = tool.writeBaseOfNamesDB_ME(dataBaseOfNames)
 
         return "\nNamesDB: Created", answers
 
