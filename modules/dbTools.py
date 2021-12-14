@@ -3,6 +3,7 @@
 import json
 import typing as typ
 import mongoengine as medb
+import pickle
 
 from bson.objectid import ObjectId
 from pymongo.mongo_client import MongoClient
@@ -11,8 +12,10 @@ from pymongo.database import Database
 ##customImport
 from configs.CFGNames import ME_SETTINGS
 from configs.CFGNames import CHECKSUM_DB_GLOBAL_FLAG
+from templates.templateAnalysis import TEMPLATE_GLOBAL_RACE
+from templates.templateAnalysis import TEMPLATE_LOCAL_RACE
 
-from database.medbNameSchemas import Race, Female, Male, Surname
+from database.medbNameSchemas import Race, Female, Male, Surnames
 
 from database.medbAnalyticSchemas import GlobalCounts, NameLettersCount
 from database.medbAnalyticSchemas import VowelsCount, ConsonantsCount
@@ -75,6 +78,7 @@ class MongoDBTools:
         referenceCollection = collectionField.document_type_obj
         referenceDocument = referenceCollection.objects.get(
             __raw__={field: data[field]})
+
         if referenceDocument:
             return referenceDocument.id
         return None
@@ -355,7 +359,48 @@ class ME_DBService():
     '''
     mdbNAliases = ME_SETTINGS.MDB_n_Aliases
 
-    def prepareNamesData(self, race: str, data: list) -> typ.Dict[str, dict]:
+    def getTemplate(self, template: typ.Any) -> typ.Any:
+        '''
+        Gets fast deepcopy of template.
+        '''
+        _tmpDump = pickle.dumps(template, -1)
+        return pickle.loads(_tmpDump)
+    
+    def getFirstUnknownDictKeyName(self,
+                                   tmp_dict: dict) -> typ.Union[str, None]:
+        '''
+        Returns key name from dictionary if have only one key.
+        '''
+
+        if len(tmp_dict.keys()) == 1:
+            return list(tmp_dict.keys())[0]
+        return None
+
+    def getNamesByRace(self, raceObject: MEDocument, 
+                        collection: MECollection) -> typ.List[str]:
+        '''
+        Returns names list by target race.
+        '''
+        objs = collection.objects(race=raceObject).only('name').all()
+        names = list([str(obj.name) for obj in objs])
+
+        return names
+
+    def getPreparedRaceData(self, raceObject: MEDocument) -> typ.Dict[str, dict]:
+        '''
+        Prepairs data by current race.
+        '''
+        raceField = getattr(raceObject, 'race', None)
+        raceData = self.getTemplate(TEMPLATE_LOCAL_RACE)
+        tmpKey = self.getFirstUnknownDictKeyName(raceData)
+
+        if not raceField or not tmpKey: 
+            return None
+
+        raceData[raceField] = raceData.pop(tmpKey)
+        return raceData
+
+    def prepareToWriteNamesData(self, race: str, data: list) -> typ.Dict[str, dict]:
         '''
         Adapts the names database to the mongoengine schema.
         '''
@@ -364,6 +409,113 @@ class ME_DBService():
             collectionData.append({'name': str(name), 'race': str(race)})
 
         return collectionData
+
+    def readNamesDBByRace(self, raceObject: MEDocument) -> typ.Dict[str, list]:
+        '''
+        Returns a base of names grouped by collection names.
+        '''
+        genderCollections = list([Male, Female, Surnames])
+
+        namesByCollections = dict()
+        for collection in genderCollections:
+            names = self.getNamesByRace(raceObject, collection)
+            namesByCollections.update({collection._class_name: names})
+
+        return namesByCollections
+
+    def fillRaceData(self, raceObject: MEDocument, 
+                    raceData: typ.Dict[str, dict]) -> typ.Dict[str, dict]:
+        '''
+        Populates a prepared race template with names data.
+        '''
+        raceField = getattr(raceObject, 'race', None)
+        if not raceField: 
+            return None
+
+        namesByCollections = self.readNamesDBByRace(raceObject)
+
+        for collection in namesByCollections.keys():
+            if collection in raceData[raceField]["Genders"].keys():
+                genderData = raceData[raceField]["Genders"][collection]
+                genderData["Names"]= namesByCollections[collection]
+
+            elif collection in raceData[raceField].keys():
+                raceData[raceField][collection] = namesByCollections[collection]
+            
+        return raceData
+
+    def readBaseOfNamesDB_ME(self) -> typ.Dict[str, dict]:
+        '''
+        Returns a base of names grouped by races.
+        '''
+        baseOfNames = self.getTemplate(TEMPLATE_GLOBAL_RACE)
+
+        objsRace = Race.objects.all()
+        for raceObject in objsRace:
+
+            raceData = self.getPreparedRaceData(raceObject)
+            if not raceData: continue
+
+            raceData = self.fillRaceData(raceObject, raceData)
+            if not raceData: continue
+            
+            baseOfNames["Races"].append(raceData)
+            
+        return baseOfNames
+
+    def writeBaseOfNamesDB_ME(self, namesDict: typ.Dict[str, dict]
+                                                ) -> typ.List[str]:
+        '''
+        Adapts the names database to the database format 
+        and writes it out.
+        '''
+        answers = list([])
+        racesData = list({})
+        malesData = list({})
+        femalesData = list({})
+        surnamesData = list({})
+
+        for race in namesDict['Races']:
+            raceName = str(next(iter(race)))
+            maleNames = race[raceName]['Genders']['Male']['Names']
+            femaleNames = race[raceName]['Genders']['Female']['Names']
+            surnames = race[raceName]['Surnames']
+
+            racesData.append({'race': raceName})
+            malesData = self.prepareToWriteNamesData(raceName, maleNames)
+            femalesData = self.prepareToWriteNamesData(raceName, femaleNames)
+            surnamesData = self.prepareToWriteNamesData(raceName, surnames)
+
+            collectionsData = dict({
+                'Race': {
+                    'collection': Race,
+                    'data': racesData,
+                    'operation': 'insert_only'
+                },
+                'Male': {
+                    'collection': Male,
+                    'data': malesData,
+                    'operation': 'insert_only'
+                },
+                'Female': {
+                    'collection': Female,
+                    'data': femalesData,
+                    'operation': 'insert_only'
+                },
+                'Surname': {
+                    'collection': Surnames,
+                    'data': surnamesData,
+                    'operation': 'insert_only'
+                },
+            })
+
+            answer = MongoDBTools.writeDatabase(collectionsData)
+            if answer:
+                answers.extend(answer)
+
+        if not answers:
+            answers = list(["Names inserted in mongoDB."])
+        return answers
 
     def readChecksumDB_ME(self) -> typ.Dict[str, dict]:
         '''
@@ -422,58 +574,11 @@ class ME_DBService():
             answers = list(["Checksun db writed in mongoDB."])
         return answers
 
-    def insertNames(self, namesDict: typ.Dict[str, dict]) -> typ.List[str]:
+    def writeAnalyticsDB_ME(self, analyticDB):
         '''
-        Adapts the names database to the database format 
-        and writes it out.
+        
         '''
-        answers = list([])
-        racesData = list({})
-        malesData = list({})
-        femalesData = list({})
-        surnamesData = list({})
-
-        for race in namesDict['Races']:
-            raceName = str(next(iter(race)))
-            maleNames = race[raceName]['Genders']['Male']['Names']
-            femaleNames = race[raceName]['Genders']['Female']['Names']
-            surnames = race[raceName]['Surnames']
-
-            racesData.append({'race': raceName})
-            malesData = self.prepareNamesData(raceName, maleNames)
-            femalesData = self.prepareNamesData(raceName, femaleNames)
-            surnamesData = self.prepareNamesData(raceName, surnames)
-
-            collectionsData = dict({
-                'Race': {
-                    'collection': Race,
-                    'data': racesData,
-                    'operation': 'insert_only'
-                },
-                'Male': {
-                    'collection': Male,
-                    'data': malesData,
-                    'operation': 'insert_only'
-                },
-                'Female': {
-                    'collection': Female,
-                    'data': femalesData,
-                    'operation': 'insert_only'
-                },
-                'Surname': {
-                    'collection': Surname,
-                    'data': surnamesData,
-                    'operation': 'insert_only'
-                },
-            })
-
-            answer = MongoDBTools.writeDatabase(collectionsData)
-            if answer:
-                answers.extend(answer)
-
-        if not answers:
-            answers = list(["Names inserted in mongoDB."])
-        return answers
+        pass
 
     def printDatabases(self, modelsByAliases: typ.Dict[str, list]
                                                     ) -> typ.NoReturn:
@@ -494,7 +599,7 @@ class ME_DBService():
         glob_db = self.mdbNAliases
         modelsByAliases = dict({
             glob_db['mdbName']['alias']:
-            list([Race, Male, Female, Surname]),
+            list([Race, Male, Female, Surnames]),
             glob_db['mdbAnalytic']['alias']:
             list([
                 GlobalCounts, NameLettersCount, VowelsCount, ConsonantsCount,
@@ -517,8 +622,6 @@ def main() -> typ.NoReturn:
     Entry point for working with databases.
     '''
     tools = ME_DBService()
-
     #tools.showDBData()
-
 
 ###FINISH Mainblock

@@ -13,6 +13,7 @@ from configs.CFGNames import ANALYTIC_DB_FILE
 from configs.CFGNames import LOCAL_ANALYSIS_LOG_FILE
 from configs.CFGNames import VOWELS_LETTERS, CONSONANTS_LETTERS
 from configs.CFGNames import GROUP_KEYS
+from configs.CFGNames import USING_FILE_STORING_FLAG
 
 from templates.templateAnalysis import TEMPLATE_GLOBAL_ANALYTIC
 from templates.templateAnalysis import TEMPLATE_NAMES_ANALYTIC
@@ -20,6 +21,7 @@ from templates.templateAnalysis import TEMPLATE_RATING_ANALYTIC
 from templates.templateAnalysis import TEMPLATE_CHAINS_ANALYTIC
 
 from modules.nameReader import FileTools
+from modules.dbTools import ME_DBService
 
 ###FINISH ImportBlock
 
@@ -35,7 +37,7 @@ def redirectOutput(redirectedFunction: typ.Callable) -> typ.Callable:
     @functools.wraps(redirectedFunction)
     def wrapper(*args, **kwargs):
         self = args[0]
-        
+
         with open(self.logFilePath, 'w') as f, redirect_stdout(f):
             print("---ANALYSIS-STARTED---\n")
             res = redirectedFunction(*args, **kwargs)
@@ -45,15 +47,15 @@ def redirectOutput(redirectedFunction: typ.Callable) -> typ.Callable:
 
     return wrapper
 
+
 ###FINISH DecoratorBlock
 
 
 ###START FunctionalBlock
 class AnalysysService:
-    def __init__(self,
-                 testFile: Union[str, PathType] = None) -> typ.NoReturn:
+    def __init__(self, testFile: Union[str, PathType] = None) -> typ.NoReturn:
         self.logFilePath = LOCAL_ANALYSIS_LOG_FILE
-        
+
         self.baseOfNames = dict(
         )  #variable for storing names from #DBNames/NamesBaseInitializing.cfg
         self.globNamesAnalytic = dict(
@@ -137,26 +139,36 @@ class AnalysysService:
         '''Renames first key name on second in dictionary.'''
         tmp_dict[key1] = tmp_dict.pop(key2)
 
-    def increaceCountforAllSubkeys(self,
-                                         destinationData: typ.Dict[str,
-                                                                      dict],
-                                         sourceData: typ.Dict[str, dict]):
+    def increaceCountforAllSubkeys(self, destinationData: typ.Dict[str, dict],
+                                   sourceData: typ.Dict[str, dict]):
         '''
         Increaces count by all subkeys inside current local analytic key.
         '''
         for localSubkey in sourceData:
             destinationData[localSubkey] += sourceData[localSubkey]
 
-    def getBaseOfNames(self,
-                       testFile: Union[str,
-                                       PathType] = None) -> typ.NoReturn:
+    def getNamesFromFile(self, testFile: Union[str, PathType] = None):
         '''
-        Gets base of names from file and saves data to #self.baseOfNames.
+        Gets base of names from file.
         '''
+        baseOfNames = ''
         if not testFile:
-            self.baseOfNames = FileTools.readDataFile()
+            baseOfNames = FileTools.readDataFile()
         else:
-            self.baseOfNames = FileTools.readDataFile(fileName=testFile)
+            baseOfNames = FileTools.readDataFile(fileName=testFile)
+
+        return baseOfNames
+
+    def getBaseOfNames(self,
+                       testFile: Union[str, PathType] = None) -> typ.NoReturn:
+        '''
+        Gets base of names and saves data to #self.baseOfNames.
+        '''
+        if USING_FILE_STORING_FLAG or testFile:
+            self.baseOfNames = self.getNamesFromFile(fileName=testFile)
+        else:
+            service = ME_DBService()
+            self.baseOfNames = service.readBaseOfNamesDB_ME()
 
     def getFirstUnknownDictKeyName(self,
                                    tmp_dict: dict) -> typ.Union[str, None]:
@@ -346,9 +358,9 @@ class AnalysysService:
 
         return chance
 
-    def calculateCountByKey(
-            self, key: str,
-            ratingData: typ.Dict[str, dict]) -> typ.Dict[str, dict]:
+    def calculateCountByKey(self, key: str, 
+                            ratingData: typ.Dict[str, dict]
+                            ) -> typ.Dict[str, dict]:
         '''
         Creates rating data by calculating the key count.
         Used keys: self.groupKey.
@@ -363,9 +375,9 @@ class AnalysysService:
 
         return ratingData
 
-    def calculateRatingByKey(
-            self, key: str,
-            ratingData: typ.Dict[str, dict]) -> typ.Dict[str, dict]:
+    def calculateRatingByKey(self, key: str, 
+                            ratingData: typ.Dict[str, dict]
+                            ) -> typ.Dict[str, dict]:
         '''
         Calculating chance of occurrence key.
         Used keys: self.groupKey.
@@ -381,7 +393,8 @@ class AnalysysService:
         return ratingData
 
     def calculateRatingforCommonSubkey(self, subKey: str,
-                                       ratingData: typ.Dict[str, dict]):
+                                       ratingData: typ.Dict[str, dict]
+                                       ) -> typ.Dict[str, dict]:
         '''
         Calculating chance of common subkey.
         '''
@@ -626,7 +639,7 @@ class AnalyticLetters(AnalysysService):
 
         return "makeAllLettersData: Done"
 
-    def makeNameEndingsData(self):
+    def makeNameEndingsData(self) -> str:
         '''
         Makes data with combinations of two adjacent letters chains from 
         the ends of names, includings one letter chains, and their repeats 
@@ -697,10 +710,9 @@ class AnalyticChains(AnalysysService):
         self.chainsAnalytic_NamesCountSubkey = "Names_Count"
         self.chainsAnalytic_ChanceSubkey = self.ratingAnalytic_ChanceKey
 
-    def nullifyCount(
-            self, chainNames: typ.Dict[str, dict],
-            lenChainNamesData: typ.Dict[str,
-                                           dict]) -> typ.Dict[str, dict]:
+    def nullifyCount(self, chainNames: typ.Dict[str, dict],
+                    lenChainNamesData: typ.Dict[str, dict]
+                    ) -> typ.Dict[str, dict]:
         '''
         Makes certain count data equal to zero.
         '''
@@ -716,9 +728,9 @@ class AnalyticChains(AnalysysService):
 
         return dict(lenChainNamesData)
 
-    def sortChainsByLength(
-            self, chainNames: typ.Dict[str,
-                                          dict]) -> typ.Dict[str, dict]:
+    def sortChainsByLength(self, 
+                           chainNames: typ.Dict[str, dict]
+                           ) -> typ.Dict[str, dict]:
         '''
         Sorts chains by the length.
         '''
@@ -808,8 +820,8 @@ class AnalyticChains(AnalysysService):
             ChainMaxCountKey = ("%s_%s" % (lenChainName, maxCountInNames))
             yield ChainMaxCountKey
 
-    def getChainCountDataByLocalAnalytic(
-            self, localKey: str) -> typ.Dict[str, dict]:
+    def getChainCountDataByLocalAnalytic(self,
+                                         localKey: str) -> typ.Dict[str, dict]:
         '''
         Returns chains count data from temporary Names AnalyticDB by 
         local key.
@@ -824,8 +836,8 @@ class AnalyticChains(AnalysysService):
 
         return dict(lenChainNamesData)
 
-    def getNullifyedChainCountDataByLocalAnalytic(
-            self, localKey: str) -> typ.Dict[str, dict]:
+    def getNullifyedChainCountDataByLocalAnalytic(self, 
+            localKey: str) -> typ.Dict[str, dict]:
         '''
         Returns chains count data from temporary Names AnalyticDB by 
         local key with nullifyed count.
@@ -836,8 +848,7 @@ class AnalyticChains(AnalysysService):
 
         return dict(lenChainNamesData)
 
-    def setLocalChainsAnalyticData(
-            self, localKey: str,
+    def setLocalChainsAnalyticData(self, localKey: str,
             localChainsAnalyticData: typ.Dict[str, dict]) -> bool:
         '''
         Sets the chains rating data to temporary Names AnalyticDB by local key.
@@ -905,9 +916,9 @@ class AnalyticChains(AnalysysService):
                 lenChainNamesData)
 
             doneFlag = self.setLocalChainsAnalyticData(analyticSubkey,
-                                                   preparedData)
+                                                       preparedData)
             self.unsetCommonGroupKey()
-                                                   
+
             if not doneFlag:
                 return False
 
@@ -1169,7 +1180,7 @@ class AnalyticCombinations(AnalyticChains):
 
         return chainList
 
-    def makeChainsCombinationsInOrderData(self):
+    def makeChainsCombinationsInOrderData(self) -> Union[typ.Iterable[str], str]:
         '''
         Makes data with combinations of two adjacent letters chains, 
         includings one letter chains, and their repeats amount.
@@ -1387,10 +1398,16 @@ class Analysis(AnalysysService):
         responds = self.makeAnalyticData()
         if not self.printResponds(responds):
             return "\nAnalyticDB: Fault; Answer: 'Error in the process of making local analytic data'"
-
-        flag = FileTools.overwriteDataFile(self.globNamesAnalytic, DBFile)
-        if not flag:
-            return "\nAnalyticDB: Fault; Answer: 'Data not writed in database'"
+        
+        if USING_FILE_STORING_FLAG or testDBFile:
+            flag = FileTools.overwriteDataFile(self.globNamesAnalytic, DBFile)
+            if not flag:
+                return "\nAnalyticDB: Fault; Answer: Data not writed in database file"
+        else:
+            service = ME_DBService()
+            flag = service.writeAnalyticsDB_ME(self.globNamesAnalytic)
+            if not flag:
+                return "\nAnalyticDB: ERR; Answer: Have not mongo data writer"
 
         return "\nAnalyticDB: Created"
 

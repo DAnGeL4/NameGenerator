@@ -52,8 +52,8 @@ ERASE_NAME_BASE_INIT_FLAG = False
 USING_FILE_STORING_FLAG = False
 #Type True to make unittests
 MAKE_UNITTESTS_FLAG = bool(
-                            True
-                            #False
+                            #True
+                            False
 )
 #Type True to get grofiling
 MAKE_PROFILING_FLAG = bool(
