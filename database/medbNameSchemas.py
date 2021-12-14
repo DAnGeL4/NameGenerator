@@ -46,9 +46,9 @@ class Female(Gender):
             'db_alias': 'mdbName'}
 
 
-class Surname(Gender):
+class Surnames(Gender):
     
-    meta = {'collection': 'Surname',
+    meta = {'collection': 'Surnames',
             'db_alias': 'mdbName'}
 
 ###FINISH FunctionalBlock
