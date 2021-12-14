@@ -156,3 +156,5 @@ logs/stats/profile/*.prof
 !logs/stats/profile/.gitkeep
 DBNames/*
 !DBNames/.gitkeep
+tests/tmp/*
+!tests/tmp/.gitkeep
