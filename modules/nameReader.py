@@ -446,7 +446,8 @@ class NamesTools:
         initializeFile = NAMES_BASE_INITIALIZE_FILE
 
         if ChecksumTools.checkValidHash(**kwargs):
-            return "\nNamesDB: Canceled", "INF: Checksum exists"
+            answer = "\nNamesDB: Canceled"
+            return answer, answer + "; INF: Checksum exists"
 
         #begin_test_case_block
         usingFileStoringFlag = USING_FILE_STORING_FLAG
@@ -477,6 +478,8 @@ class NamesTools:
         else:
             tool = ME_DBService()
             answers = tool.writeBaseOfNamesDB_ME(dataBaseOfNames)
+        
+        ChecksumTools.writeCheckSumDB(**kwargs)
 
         return "\nNamesDB: Created", answers
 
