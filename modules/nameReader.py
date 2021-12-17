@@ -313,7 +313,7 @@ class NamesTools:
     '''
 
     @staticmethod
-    def eraseNamesBase(mdb='mdbName') -> typ.Text:
+    def eraseNamesBase(mdb: str) -> typ.Text:
         '''
         Erases database of names and checksum. After this initializes default values.
         '''

@@ -16,6 +16,7 @@ from configs.CFGNames import ERASE_NAME_BASE_INIT_FLAG
 from configs.CFGNames import MAKE_PROFILING_FLAG
 from configs.CFGNames import MAKE_UNITTESTS_FLAG 
 from configs.CFGNames import USING_FILE_STORING_FLAG
+from configs.CFGNames import ME_SETTINGS
 
 from modules import nameGen
 from modules import nameReader
@@ -90,8 +91,16 @@ def globalRun() -> typ.NoReturn:
     This is the base function.
     '''    
     if ERASE_NAME_BASE_INIT_FLAG:
-        res = nameReader.NamesTools.eraseNamesBase()
-        print(res)
+        mdbNAliases = ME_SETTINGS.MDB_n_Aliases
+        
+        mdbAliases = list([
+            mdbNAliases['mdbName']['alias'],
+            mdbNAliases['mdbAnalytic']['alias']
+        ])
+
+        for mdbAlias in mdbAliases:
+            res = nameReader.NamesTools.eraseNamesBase(mdb=mdbAlias)
+            print(res)
 
     responds = runMainFunctionsList()
     for respond in responds:
