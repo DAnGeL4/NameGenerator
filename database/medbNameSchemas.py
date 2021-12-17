@@ -20,6 +20,15 @@ class Race(medb.Document):
 
     meta = {'collection': 'Race',
             'db_alias': 'mdbName'}
+            
+
+class GenderGroups(medb.Document):
+    gender_group = medb.StringField(max_length=200, 
+                                required=True,
+                                unique=True)
+
+    meta = {'collection': 'GenderGroups',
+            'db_alias': 'mdbName'}
 
 
 class Gender(medb.Document):
