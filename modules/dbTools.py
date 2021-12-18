@@ -5,6 +5,7 @@ import typing as typ
 import mongoengine as medb
 import pickle
 
+from pprint import pprint
 from bson.objectid import ObjectId
 from pymongo.mongo_client import MongoClient
 from pymongo.database import Database
@@ -15,7 +16,7 @@ from configs.CFGNames import CHECKSUM_DB_GLOBAL_FLAG
 from templates.templateAnalysis import TEMPLATE_GLOBAL_RACE
 from templates.templateAnalysis import TEMPLATE_LOCAL_RACE
 
-from database.medbNameSchemas import Race, Female, Male, Surnames
+from database.medbNameSchemas import Race, Female, Male, Surnames, GenderGroups
 
 from database.medbAnalyticSchemas import GlobalCounts, NameLettersCount
 from database.medbAnalyticSchemas import VowelsCount, ConsonantsCount
@@ -99,7 +100,8 @@ class MongoDBTools:
         '''
         fieldsContainersCollections = tuple(
             (medb.DynamicField, medb.EmbeddedDocumentField,
-             medb.GenericEmbeddedDocumentField))
+            medb.GenericEmbeddedDocumentField, medb.EmbeddedDocumentListField))
+                
         return fieldsContainersCollections
 
     @staticmethod
@@ -178,6 +180,34 @@ class MongoDBTools:
         return "INF: Target Mongo db erased. Recreated empty."
 
     @classmethod
+    def insertEmbeddedField(cls, document: MEDocument, 
+                    collection: MECollection, field: str, 
+                    data: typ.Dict[str, dict]) -> MEDocument:
+        '''
+        Checks the embedded field and data, and inserts into the document.
+        '''
+        embeddedType = collection._fields.get(field)
+
+        if type(data[field]) is dict:
+            embeddedCollection = embeddedType.document_type
+            subDocument = cls.setDocument(embeddedCollection, data[field])
+            setattr(document, field, subDocument)
+
+        elif type(data[field]) is list:     
+            if not hasattr(collection, '_get_embedded_list_field_type'):
+                return document
+
+            embeddedCollection = collection._get_embedded_list_field_type(embeddedType.name)
+
+            for keyData in data[field]:
+                subDocument = cls.setDocument(embeddedCollection, keyData)
+                
+                if hasattr(document, 'add_unique'):
+                    document.add_unique(field, subDocument)
+        
+        return document
+
+    @classmethod
     def insertField(cls, document: MEDocument, collection: MECollection,
                     field: str, data: typ.Dict[str, dict]) -> MEDocument:
         '''
@@ -191,8 +221,7 @@ class MongoDBTools:
             setattr(document, field, cls.getReferenceID(collectionField, data))
 
         elif isinstance(collectionField, fieldsContainersCollections):
-            if type(data[field]) is dict:
-                document = cls.setDocument(document[field], data[field])
+            document = cls.insertEmbeddedField(document, collection, field, data)
 
         else:
             setattr(document, field, data[field])
@@ -223,7 +252,7 @@ class MongoDBTools:
                        data: typ.Dict[str, dict]) -> typ.Union[str, None]:
         '''
         Prepraires and saves document.
-        '''
+        '''        
         documents = cls.checkDocExist(collection, data)
         if documents:
             return "INF: Document already exist. Insert canceled"
@@ -358,6 +387,10 @@ class ME_DBService():
     Contains tools for working with mongoengine and mongodb.
     '''
     mdbNAliases = ME_SETTINGS.MDB_n_Aliases
+    genderGroups = dict({'Male': Male._class_name, 
+                        'Female': Female._class_name, 
+                        'Surnames': Surnames._class_name,
+                        'Common': 'Common'})
 
     def getTemplate(self, template: typ.Any) -> typ.Any:
         '''
@@ -365,16 +398,6 @@ class ME_DBService():
         '''
         _tmpDump = pickle.dumps(template, -1)
         return pickle.loads(_tmpDump)
-    
-    def getFirstUnknownDictKeyName(self,
-                                   tmp_dict: dict) -> typ.Union[str, None]:
-        '''
-        Returns key name from dictionary if have only one key.
-        '''
-
-        if len(tmp_dict.keys()) == 1:
-            return list(tmp_dict.keys())[0]
-        return None
 
     def getNamesByRace(self, raceObject: MEDocument, 
                         collection: MECollection) -> typ.List[str]:
@@ -392,7 +415,7 @@ class ME_DBService():
         '''
         raceField = getattr(raceObject, 'race', None)
         raceData = self.getTemplate(TEMPLATE_LOCAL_RACE)
-        tmpKey = self.getFirstUnknownDictKeyName(raceData)
+        tmpKey = str(next(iter(raceData)))
 
         if not raceField or not tmpKey: 
             return None
@@ -444,6 +467,229 @@ class ME_DBService():
             
         return raceData
 
+    def fillGlobalCountsData(self, raceKey: str, 
+                            raceData: typ.Dict[str, dict]
+                            ) -> typ.List[typ.Dict[str, dict]]:
+        '''
+        Adapts the global counts data to the mongoengine schema.
+        '''
+        globalCountsData = list([{
+            'race': raceKey, 
+            'maxNamesCount': raceData.pop('Max_Names_Count'),
+            'femaleNamesCount': raceData.pop('Female_Names_Count'),
+            'maleNamesCount': raceData.pop('Male_Names_Count'),
+            'surnamesCount': raceData.pop('Surnames_Count'),
+            'firstLettersCounts': {
+                'vowelsCount': raceData['First_Letters'].pop('Vowels_Count'),
+                'consonantsCount': raceData['First_Letters'].pop('Consonants_Count')
+            }
+        }])
+        
+        return globalCountsData
+
+    def prepareGlobalCountsData(self, raceKey: str, 
+                                raceData: typ.Dict[str, dict]
+                                ) -> typ.Dict[str, dict]:
+        '''
+        Prepares and arranges the global counts data for writing.
+        '''
+        globalCountsData = self.fillGlobalCountsData(raceKey, raceData)
+
+        collectionsData = {
+            'GlobalCounts': {
+                'collection': GlobalCounts,
+                'data': globalCountsData,
+                'operation': 'update_or_insert'
+        }}
+        return collectionsData
+
+    def fillAnalyticCountCollection(self, raceKey: str, 
+                        raceData: typ.Dict[str, dict], 
+                        localAnalyticKey: str) -> typ.Dict[str, dict]:
+        '''
+        Adapts the analytic counts data to the mongoengine schema.
+        '''
+        localAnalyticData = raceData.pop(localAnalyticKey)
+
+        collectionData = list([])
+        
+        for genderGroupKey in localAnalyticData:
+            genderGroupData = localAnalyticData[genderGroupKey]
+
+            for key in genderGroupData:
+                keyData = genderGroupData[key]
+
+                collectionData.append(
+                    {'race': raceKey, 
+                    'gender_group': genderGroupKey,
+                    'key': key,
+                    'count': keyData['Count'],
+                    'chance': keyData['Chance']
+                    }
+                )
+
+        return collectionData
+
+    def prepareAnalyticCountCollections(self, raceKey: str, 
+                                        raceData: typ.Dict[str, dict]
+                                        ) -> typ.Dict[str, dict]:
+        '''
+        Prepares and arranges the analytic counts data for writing.        
+        '''
+        collectionsData = dict({})
+
+        analyticCountCollections = dict({
+            'Name_Letters_Count': NameLettersCount, 
+            'Vowels_Count': VowelsCount, 
+            'Consonants_Count': ConsonantsCount,
+            'First_Letters': FirstLetters, 
+            'Letters': Letters, 
+            'Chains_Combinations': ChainsCombinations, 
+            'Name_Endings': NameEndings
+            })
+
+        for localAnalyticKey in analyticCountCollections.keys():
+            collectionName = analyticCountCollections[localAnalyticKey]._class_name
+            collectionData = self.fillAnalyticCountCollection(raceKey, raceData, localAnalyticKey)
+
+            collectionsData.update({
+                collectionName: {
+                    'collection': analyticCountCollections[localAnalyticKey],
+                    'data': collectionData,
+                    'operation': 'update_or_insert'
+                }
+            })
+        
+        return collectionsData
+
+    def fillLocalChainData(self, genderGroupData: typ.Dict[str, dict]
+                                                ) -> typ.Dict[str, dict]:
+        '''
+        Adapts the loacal analytic chain data to the mongoengine 
+        embedded document schema.
+        '''
+        localKeysData = list([])
+        for key in genderGroupData:
+            keyData = genderGroupData[key]
+
+            if 'Max_Count_In_Name' in keyData.keys():
+                editedKey = key.split('_')[0]
+                localKeyData = {
+                    'length': editedKey, 
+                    'maxCountInName': keyData['Max_Count_In_Name'], 
+                    'namesCount': keyData['Names_Count'], 
+                    'chance': keyData['Chance']}
+                
+            else:
+                localKeyData = {
+                    'key': key, 
+                    'count': keyData['Count'], 
+                    'chance': keyData['Chance']}
+
+            localKeysData.append(localKeyData)
+        
+        return localKeysData
+    
+    def unpackAnalyticChainData(self, localAnalyticData: typ.Dict[str, dict]
+                                                    ) -> typ.Dict[str, dict]:
+        '''
+        Unpacks the gender groups data from analytic subkeys.
+        '''
+        unpackedData = dict({})
+        for localSubkey in localAnalyticData:
+            localSubdata = localAnalyticData[localSubkey]
+
+            for genderGroupKey in localSubdata:
+                genderGroupData = localSubdata[genderGroupKey]
+                localKeysData = self.fillLocalChainData(genderGroupData)
+
+                if genderGroupKey not in unpackedData.keys():
+                    unpackedData[genderGroupKey] = dict()
+
+                unpackedData[genderGroupKey].update(
+                    {localSubkey: localKeysData})
+                    
+        return unpackedData
+
+    def fillAnalyticChainCollection(self, raceKey: str, 
+                                    unpackedData: typ.Dict[str, dict]
+                                    ) -> typ.Dict[str, dict]:
+        '''
+        Adapts the analytic chain data to the mongoengine schema.
+        '''
+        embeddedChainsKeys = {'Chains': 'chains', 
+            'Chain_Frequency': 'chainFrequency', 
+            'Length_Count_Names': 'lengthCountNames'}
+
+        collectionData = list([])
+        for genderGroupKey in unpackedData:
+            genderGroupData = unpackedData[genderGroupKey]
+
+            consonantsChainsData = dict({
+                'race': raceKey,
+                'gender_group': genderGroupKey})
+
+            for chainKey in genderGroupData:
+                chainData = genderGroupData[chainKey]
+
+                consonantsChainsData.update({
+                    embeddedChainsKeys[chainKey]: chainData})
+                        
+            collectionData.append(consonantsChainsData)
+
+        return collectionData
+
+    def prepareAnalyticChainCollection(self, raceKey: str, 
+                                       raceData: typ.Dict[str, dict]
+                                       ) -> typ.Dict[str, dict]:
+        '''
+        Prepares and arranges the analytic chain data for writing.       
+        '''
+        collectionsData = dict({})
+
+        analyticCountCollections = dict({
+            'Vowels_Chains': VowelsChains, 
+            'Consonants_Chains': ConsonantsChains, 
+            })
+        
+        for localAnalyticKey in analyticCountCollections.keys():
+            localAnalyticData = raceData.pop(localAnalyticKey)
+            unpackedData = self.unpackAnalyticChainData(localAnalyticData)
+
+            collectionName = analyticCountCollections[localAnalyticKey]._class_name
+            collectionData = self.fillAnalyticChainCollection(raceKey, unpackedData)
+
+            collectionsData.update({
+                collectionName: {
+                    'collection': analyticCountCollections[localAnalyticKey],
+                    'data': collectionData,
+                    'operation': 'update_or_insert'
+                }
+            })
+        
+        return collectionsData
+
+    def writeGendersDB_ME(self) -> typ.List[str]:
+        '''
+        Writes gender groups in own collection.
+        '''
+        genderGroupsData = list([])
+        for gGr in self.genderGroups.keys():
+            genderGroupsData.append({'gender_group': self.genderGroups[gGr]})
+
+        collectionsData = dict({
+                'GenderGroups': {
+                    'collection': GenderGroups,
+                    'data': genderGroupsData,
+                    'operation': 'insert_only'
+                }
+            })
+        answer = MongoDBTools.writeDatabase(collectionsData)
+
+        if not answer:
+            return list([])
+        return answer
+
     def readBaseOfNamesDB_ME(self) -> typ.Dict[str, dict]:
         '''
         Returns a base of names grouped by races.
@@ -470,18 +716,21 @@ class ME_DBService():
         and writes it out.
         '''
         answers = list([])
-        racesData = list({})
-        malesData = list({})
-        femalesData = list({})
-        surnamesData = list({})
+        gGr = self.genderGroups
+
+        answer = self.writeGendersDB_ME()
+        answers.extend(answer)
 
         for race in namesDict['Races']:
             raceName = str(next(iter(race)))
-            maleNames = race[raceName]['Genders']['Male']['Names']
-            femaleNames = race[raceName]['Genders']['Female']['Names']
-            surnames = race[raceName]['Surnames']
+            maleNames = race[raceName]['Genders'][
+                            gGr['Male']]['Names']
+            femaleNames = race[raceName]['Genders'][
+                            gGr['Female']]['Names']
+            surnames = race[raceName][
+                            gGr['Surnames']]
 
-            racesData.append({'race': raceName})
+            racesData= list([{'race': raceName}])
             malesData = self.prepareToWriteNamesData(raceName, maleNames)
             femalesData = self.prepareToWriteNamesData(raceName, femaleNames)
             surnamesData = self.prepareToWriteNamesData(raceName, surnames)
@@ -574,11 +823,35 @@ class ME_DBService():
             answers = list(["Checksun db writed in mongoDB."])
         return answers
 
-    def writeAnalyticsDB_ME(self, analyticDB):
+    def writeAnalyticsDB_ME(self, analyticDB: typ.Dict[str, dict]
+                                                ) -> typ.List[str]:
         '''
-        
+        Adapts the analytic database to the database format 
+        and writes it out.
         '''
-        pass
+        answers = list([])
+
+        for raceKey in analyticDB['Analytics']:
+            collectionsData = dict({})
+            raceData = analyticDB['Analytics'][raceKey]
+
+            collectionsData.update(
+                self.prepareGlobalCountsData(raceKey, raceData)
+            )
+            collectionsData.update(
+                self.prepareAnalyticCountCollections(raceKey, raceData)
+            )
+            collectionsData.update(
+                self.prepareAnalyticChainCollection(raceKey, raceData)
+            )
+
+            answer = MongoDBTools.writeDatabase(collectionsData)
+            if answer: 
+                answers.append(answer)
+
+        if not answers:
+            answers = list(["Analytic db writed in mongoDB."])
+        return answers
 
     def printDatabases(self, modelsByAliases: typ.Dict[str, list]
                                                     ) -> typ.NoReturn:

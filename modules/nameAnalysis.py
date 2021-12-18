@@ -553,7 +553,7 @@ class AnalyticLetters(AnalysysService):
         def tmp_getNameLenghtFunc(name: str) -> str:
             '''Gets name lenght.'''
             res = len(str(name))
-            return str(res)
+            return int(res)
 
         if not self.makeLocalAnalyticData(tmp_getNameLenghtFunc):
             return "makeNameLettersCountData: Error: Can't make data"
@@ -1407,7 +1407,7 @@ class Analysis(AnalysysService):
             service = ME_DBService()
             flag = service.writeAnalyticsDB_ME(self.globNamesAnalytic)
             if not flag:
-                return "\nAnalyticDB: ERR; Answer: Have not mongo data writer"
+                return "\nAnalyticDB: ERR; Answer: Data not writed in mongo database"
 
         return "\nAnalyticDB: Created"
 
