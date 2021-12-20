@@ -16,7 +16,8 @@ from configs.CFGNames import CHECKSUM_DB_GLOBAL_FLAG
 from templates.templateAnalysis import TEMPLATE_GLOBAL_RACE
 from templates.templateAnalysis import TEMPLATE_LOCAL_RACE
 
-from database.medbNameSchemas import Race, Female, Male, Surnames, GenderGroups
+from database.medbNameSchemas import Race, Female, Male
+from database.medbNameSchemas import Surnames, GenderGroups
 
 from database.medbAnalyticSchemas import GlobalCounts, NameLettersCount
 from database.medbAnalyticSchemas import VowelsCount, ConsonantsCount
@@ -251,10 +252,10 @@ class MongoDBTools:
     def insertDocument(cls, collection: MECollection,
                        data: typ.Dict[str, dict]) -> typ.Union[str, None]:
         '''
-        Prepraires and saves document.
+        Prepaires and saves document.
         '''        
-        documents = cls.checkDocExist(collection, data)
-        if documents:
+        document = cls.checkDocExist(collection, data)
+        if document:
             return "INF: Document already exist. Insert canceled"
 
         document = cls.setDocument(collection, data)
@@ -268,24 +269,20 @@ class MongoDBTools:
         return answer
 
     @classmethod
-    def updateDocument(cls, documents: typ.List[MEDocument],
+    def updateDocument(cls, document: typ.List[MEDocument],
                        data: typ.Dict[str, dict]) -> typ.List[str]:
         '''
-        Prepraires and updates document.
+        Prepaires and updates document.
         '''
-        answers = list()
-        for document in documents:
-            document = cls.setDocument(document, data)
+        document = cls.setDocument(document, data)
+        answer = None
+        try:
+            document.save()
 
-            answer = None
-            try:
-                document.save()
+        except medb.NotUniqueError as err:
+            answer = getattr(err, 'message', str(err))
 
-            except medb.NotUniqueError as err:
-                answer = getattr(err, 'message', str(err))
-            answers.append(answer)
-
-        return answers
+        return answer
 
     @classmethod
     def checkDocExist(
@@ -298,10 +295,10 @@ class MongoDBTools:
         uniqueRawData = cls.getUniqueRAWData(collection, data)
 
         rawQuery = uniqueRawData if uniqueRawData else data
-        objs = collection.objects(__raw__=rawQuery).all()
+        obj = collection.objects(__raw__=rawQuery).first()
 
-        if objs:
-            return objs
+        if obj:
+            return obj
         return None
 
     @classmethod
@@ -313,11 +310,11 @@ class MongoDBTools:
         '''
         answer = ''
 
-        documents = cls.checkDocExist(collection, data)
-        if not documents:
+        document = cls.checkDocExist(collection, data)
+        if not document:
             answer = cls.insertDocument(collection, data)
         else:
-            answer = cls.updateDocument(documents, data)
+            answer = cls.updateDocument(document, data)
 
         return str(answer)
 
@@ -445,6 +442,18 @@ class ME_DBService():
             namesByCollections.update({collection._class_name: names})
 
         return namesByCollections
+
+    def setChecksumGlobalDB_ME(self, value):
+        '''
+        Sets only the global exist flag in checksum db from mongodb.
+        '''
+        globFlag = GlobalFlags.objects().first()
+        if globFlag.count() == 0:
+            globFlag = GlobalFlags()
+            
+        globFlag.globalExist = value
+        answer = globFlag.save()
+        return answer
 
     def fillRaceData(self, raceObject: MEDocument, 
                     raceData: typ.Dict[str, dict]) -> typ.Dict[str, dict]:
@@ -896,5 +905,7 @@ def main() -> typ.NoReturn:
     '''
     tools = ME_DBService()
     #tools.showDBData()
+
+    print()
 
 ###FINISH Mainblock

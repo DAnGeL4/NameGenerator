@@ -199,7 +199,7 @@ class ChecksumTools:
         return checkSum
 
     @staticmethod
-    def getOldCheckSumDB(checkSumDBFile: Union[str, PathType], **kwargs
+    def getOldCheckSumDB(checkSumDBFile: Union[str, PathType] = None, **kwargs
                          ) -> typ.Dict[str, Union[typ.Hashable, bool]]:
         '''
         Gets checksum database from file if #USING_FILE_STORING_FLAG true,
@@ -214,7 +214,8 @@ class ChecksumTools:
 
         oldCheckSumDB = None
         if usingFileStoringFlag:
-            oldCheckSumDB = FileTools.readDataFile(checkSumDBFile)
+            if checkSumDBFile:
+                oldCheckSumDB = FileTools.readDataFile(checkSumDBFile)
         else:
             tool = ME_DBService()
             oldCheckSumDB = tool.readChecksumDB_ME()
@@ -223,6 +224,32 @@ class ChecksumTools:
             oldCheckSumDB = {}
         
         return oldCheckSumDB
+
+    @classmethod
+    def getGlobalChecksumFlag(cls) -> bool:
+        '''
+        Gets global exist flag from existing checksum db.
+        '''
+        checkSumDB = ChecksumTools.getOldCheckSumDB()
+        return checkSumDB[CHECKSUM_DB_GLOBAL_FLAG]
+
+    @classmethod
+    def setGlobalChecksumFlag(cls, value: bool) -> str:
+        '''
+        Sets only the global exist flag in 
+        the currently used checksum db.
+        '''
+        answer = None
+        if USING_FILE_STORING_FLAG:
+            checkSumDB = cls.getOldCheckSumDB()
+            checkSumDB[CHECKSUM_DB_GLOBAL_FLAG] = value
+            answer = cls.writeCheckSumDB(checkSumDB)
+
+        else:
+            tool = ME_DBService()
+            answer = tool.setChecksumGlobalDB_ME(value)
+
+        return answer
 
     @classmethod
     def createFileCheckSum(cls, fullPath: Union[str, PathType]
@@ -250,7 +277,7 @@ class ChecksumTools:
             fileName, checkSum = cls.createFileCheckSum(fullPath)
             checkSumDB[fileName] = checkSum
 
-        checkSumDB[CHECKSUM_DB_GLOBAL_FLAG] = True
+        #_ = cls.setGlobalChecksumFlag(True)
 
         return checkSumDB
 

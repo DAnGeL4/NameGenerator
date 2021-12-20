@@ -14,13 +14,14 @@ from configs.CFGNames import LOCAL_ANALYSIS_LOG_FILE
 from configs.CFGNames import VOWELS_LETTERS, CONSONANTS_LETTERS
 from configs.CFGNames import GROUP_KEYS
 from configs.CFGNames import USING_FILE_STORING_FLAG
+#from configs.CFGNames import CHECKSUM_DB_GLOBAL_FLAG
 
 from templates.templateAnalysis import TEMPLATE_GLOBAL_ANALYTIC
 from templates.templateAnalysis import TEMPLATE_NAMES_ANALYTIC
 from templates.templateAnalysis import TEMPLATE_RATING_ANALYTIC
 from templates.templateAnalysis import TEMPLATE_CHAINS_ANALYTIC
 
-from modules.nameReader import FileTools
+from modules.nameReader import FileTools, ChecksumTools
 from modules.dbTools import ME_DBService
 
 ###FINISH ImportBlock
@@ -1393,6 +1394,9 @@ class Analysis(AnalysysService):
 
         if not self.baseOfNames or len(self.baseOfNames.keys()) == 0:
             return "\nAnalyticDB: Canceled; Answer: 'Empty initialize database'"
+        
+        if ChecksumTools.getGlobalChecksumFlag():
+            return "\nAnalyticDB: Canceled; Answer: 'Analytics allready exists'"
 
         responds = dict()
         responds = self.makeAnalyticData()
@@ -1408,6 +1412,8 @@ class Analysis(AnalysysService):
             flag = service.writeAnalyticsDB_ME(self.globNamesAnalytic)
             if not flag:
                 return "\nAnalyticDB: ERR; Answer: Data not writed in mongo database"
+
+        _ = ChecksumTools.setGlobalChecksumFlag(True)
 
         return "\nAnalyticDB: Created"
 
