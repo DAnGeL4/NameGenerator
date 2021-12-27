@@ -164,6 +164,15 @@ class MongoDBTools:
         return clients
 
     @classmethod
+    def unregisterDataBases(cls) -> typ.NoReturn:
+        '''
+        Disconnects of all databases by dictionary.
+        '''
+        for database in cls.mdbNAliases:
+            alias = cls.mdbNAliases[database]['alias']
+            _ = medb.disconnect(alias)
+
+    @classmethod
     def eraseME_DB(cls, mdb: str = None) -> str:
         '''
         Drops and recreates empty all collections from the target database.

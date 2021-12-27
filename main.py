@@ -59,9 +59,9 @@ def makeMainFunctionsList() -> typ.List[typ.Callable]:
     Makes runable functions list from main functions of all modules.
     '''
     functionsList = list([
-        nameGen.main,
         nameReader.main,
         nameAnalysis.main,
+        nameGen.main,
     ])
 
     if MAKE_UNITTESTS_FLAG:
@@ -117,6 +117,7 @@ def main() -> typ.NoReturn:
     if checkDependencies() in errors:
         return
 
+    tools = None
     if not USING_FILE_STORING_FLAG:
         tools = dbTools.MongoDBTools()
         _ = tools.registerDataBases()
@@ -138,6 +139,8 @@ def main() -> typ.NoReturn:
     print("\n#...END TEST CODE")
     ##TESTED_AREA_END
     
+    if tools:
+        tools.unregisterDataBases()
     return
 
 
