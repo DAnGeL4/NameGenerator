@@ -117,7 +117,8 @@ class AnalysysService_Test(FunctionalClass):
 
         self.printSetUpMethodMsg()
         nameBaseFile = str(self.TestFileDirectory + 'NameBaseInitialize.cfg')
-        self.TestConstruction = AnalysysService(nameBaseFile)
+        self.TestConstruction = AnalysysService(nameBaseFile, 
+                                                usingFileStoringFlag=True)
         self.TestConstruction.raceNameKey = 'TestRace'
         self.TestConstruction.localAnalyticKey = 'Test_Analytic_key'
         self.TestConstruction.groupKey = 'Test_Group_Key'
@@ -231,7 +232,7 @@ class AnalysysService_Test(FunctionalClass):
         self.TestConstruction.FirstOnly = True
 
         nameBaseFile = str(self.TestFileDirectory + 'NameBaseInitialize.cfg')
-        obj = AnalysysService(nameBaseFile)
+        obj = AnalysysService(nameBaseFile, usingFileStoringFlag=True)
         obj.copyObjectData(self.TestConstruction)
 
         res = {'raceNameKey': obj.raceNameKey, 'groupKey': obj.groupKey,
@@ -956,12 +957,13 @@ class AnalyticLetters_Test(FunctionalClass):
         '''Set up for test.'''
 
         self.printSetUpMethodMsg()
-        tmp_Construction = AnalysysService()
+        tmp_Construction = AnalysysService(usingFileStoringFlag=True)
         tmp_Construction.raceNameKey = 'TestRace'
         tmp_Construction.localAnalyticKey = 'Test_Analytic_key'
         tmp_Construction.groupKey = 'Test_Group_Key'
 
-        self.TestConstruction = AnalyticLetters(tmp_Construction)
+        self.TestConstruction = AnalyticLetters(tmp_Construction, 
+                                                usingFileStoringFlag=True)
 
 
     def tearDown(self) -> typ.NoReturn:
@@ -1094,10 +1096,10 @@ class AnalyticLetters_Test(FunctionalClass):
         
         res = self.TestConstruction.tmp_NamesAnalytic['TestRace']['Name_Letters_Count']
         self.assertDictEqual(res, {'Male':{
-                                        '2': {'Count': 3, 'Chance': 100.0,}
+                                        2: {'Count': 3, 'Chance': 100.0,}
                                         },
                                     'Common':{
-                                        '2': {'Count': 3, 'Chance': 30.0, }
+                                        2: {'Count': 3, 'Chance': 30.0, }
                                     }})
 
 
@@ -1350,12 +1352,13 @@ class AnalyticChains_Test(FunctionalClass):
         '''Set up for test.'''
 
         self.printSetUpMethodMsg()
-        tmp_Construction = AnalysysService()
+        tmp_Construction = AnalysysService(usingFileStoringFlag=True)
         tmp_Construction.raceNameKey = 'TestRace'
         tmp_Construction.localAnalyticKey = 'Test_Analytic_key'
         tmp_Construction.groupKey = 'Test_Group_Key'
 
-        self.TestConstruction = AnalyticChains(tmp_Construction)
+        self.TestConstruction = AnalyticChains(tmp_Construction, 
+                                               usingFileStoringFlag=True)
 
 
     def tearDown(self) -> typ.NoReturn:
@@ -2193,12 +2196,13 @@ class AnalyticCombinations_Test(FunctionalClass):
         '''Set up for test.'''
 
         self.printSetUpMethodMsg()
-        tmp_Construction = AnalysysService()
+        tmp_Construction = AnalysysService(usingFileStoringFlag=True)
         tmp_Construction.raceNameKey = 'TestRace'
         tmp_Construction.localAnalyticKey = 'Test_Analytic_key'
         tmp_Construction.groupKey = 'Test_Group_Key'
 
-        self.TestConstruction = AnalyticCombinations(tmp_Construction)
+        self.TestConstruction = AnalyticCombinations(tmp_Construction, 
+                                                     usingFileStoringFlag=True)
 
 
     def tearDown(self) -> typ.NoReturn:
@@ -2348,8 +2352,9 @@ class Analysis_Test(FunctionalClass):
 
         self.printSetUpMethodMsg()
 
-        tmp_Construction = AnalysysService()
-        self.TestConstruction = Analysis(tmp_Construction)
+        tmp_Construction = AnalysysService(usingFileStoringFlag=True)
+        self.TestConstruction = Analysis(tmp_Construction, 
+                                         usingFileStoringFlag=True)
 
         self.TestConstruction.raceNameKey = 'TestRace'
         self.TestConstruction.localAnalyticKey = 'Test_Analytic_key'
@@ -2374,7 +2379,7 @@ class Analysis_Test(FunctionalClass):
         Checking the type of list of returned data.
         '''
 
-        res = self.TestConstruction.makeFunctionsList()
+        res = self.TestConstruction.makeFunctionsList(usingFileStoringFlag=True)
 
         resTypes = list()
         compareTypesList = list()
@@ -2436,7 +2441,8 @@ class Analysis_Test(FunctionalClass):
         self.TestConstruction.tmp_NamesDB['Male'] = ['Ve']
         self.TestConstruction.groupKey = 'Male'
 
-        self.TestConstruction.makeLocalAnalyticDataByGroupKey()
+        self.TestConstruction.makeLocalAnalyticDataByGroupKey(
+                                             usingFileStoringFlag=True)
         
         res = self.TestConstruction.tmp_NamesAnalytic['TestRace']
         self.assertDictEqual(res, {
@@ -2446,9 +2452,9 @@ class Analysis_Test(FunctionalClass):
                                     'Surnames_Count': 0, 
                                     'Name_Letters_Count': {
                                         'Male': {
-                                            '2': {'Count': 1, 'Chance': 100.0}}, 
+                                            2: {'Count': 1, 'Chance': 100.0}}, 
                                         'Common': {
-                                            '2': {'Count': 1, 'Chance': 100.0}}}, 
+                                            2: {'Count': 1, 'Chance': 100.0}}}, 
                                     'Vowels_Count': {
                                         'Male': {
                                             1: {'Count': 1, 'Chance': 100.0}}, 
@@ -2568,7 +2574,8 @@ class Analysis_Test(FunctionalClass):
 
         groupKeys = ['Male', 'Female', 'Surnames']
 
-        self.TestConstruction.makeLocalAnalyticDB(groupKeys)
+        self.TestConstruction.makeLocalAnalyticDB(groupKeys, 
+                                                  usingFileStoringFlag=True)
         
         res = self.TestConstruction.tmp_NamesAnalytic['TestRace']
         self.assertDictEqual(res, {
@@ -2578,13 +2585,13 @@ class Analysis_Test(FunctionalClass):
                                     'Surnames_Count': 1, 
                                     'Name_Letters_Count': {
                                         'Male': {
-                                            '2': {'Count': 1, 'Chance': 100.0}}, 
+                                            2: {'Count': 1, 'Chance': 100.0}}, 
                                         'Common': {
-                                            '2': {'Count': 3, 'Chance': 100.0}}, 
+                                            2: {'Count': 3, 'Chance': 100.0}}, 
                                         'Female': {
-                                            '2': {'Count': 1, 'Chance': 100.0}}, 
+                                            2: {'Count': 1, 'Chance': 100.0}}, 
                                         'Surnames': {
-                                            '2': {'Count': 1, 'Chance': 100.0}}
+                                            2: {'Count': 1, 'Chance': 100.0}}
                                         }, 
                                     'Vowels_Count': {
                                         'Male': {
@@ -2760,7 +2767,8 @@ class Analysis_Test(FunctionalClass):
 
         groupKeys = ['Male', 'Female', 'Surnames']
 
-        self.TestConstruction.formatLocalAnalyticDB(groupKeys)
+        self.TestConstruction.formatLocalAnalyticDB(groupKeys, 
+                                                    usingFileStoringFlag=True)
         
         data = self.TestConstruction.tmp_NamesAnalytic['TestRace']
         res = { 'Max_Names_Count': data['Max_Names_Count'], 
@@ -2884,7 +2892,7 @@ class Analysis_Test(FunctionalClass):
                     'Surnames': ['Su']}}
                 ]}
 
-        self.TestConstruction.makeAnalyticData()
+        self.TestConstruction.makeAnalyticData(usingFileStoringFlag=True)
         
         data = self.TestConstruction.globNamesAnalytic[
                                         'Analytics']['TestRace']
@@ -2958,7 +2966,8 @@ class Analysis_Test(FunctionalClass):
                 ]}
 
         testDBFile = self.TestFileDirectory + 'tmpDBAnalytic.cfg'
-        self.TestConstruction.makeAnalyticDB(testDBFile)
+        self.TestConstruction.makeAnalyticDB(testDBFile,
+                                             usingFileStoringFlag=True)
 
         with open(testDBFile, 'r') as f:
             readedData = f.read()

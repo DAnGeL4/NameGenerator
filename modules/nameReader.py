@@ -226,24 +226,34 @@ class ChecksumTools:
         return oldCheckSumDB
 
     @classmethod
-    def getGlobalChecksumFlag(cls) -> bool:
+    def getGlobalChecksumFlag(cls, 
+                              checkSumDBFile: Union[str, PathType] = CHECK_SUM_FILE, 
+                              **kwargs) -> bool:
         '''
         Gets global exist flag from existing checksum db.
         '''
-        checkSumDB = ChecksumTools.getOldCheckSumDB()
+        checkSumDB = ChecksumTools.getOldCheckSumDB(checkSumDBFile, **kwargs)
         return checkSumDB[CHECKSUM_DB_GLOBAL_FLAG]
 
     @classmethod
-    def setGlobalChecksumFlag(cls, value: bool) -> str:
+    def setGlobalChecksumFlag(cls, value: bool, 
+                              checkSumDBFile: Union[str, PathType] = CHECK_SUM_FILE, 
+                              **kwargs) -> str:
         '''
         Sets only the global exist flag in 
         the currently used checksum db.
         '''
+        #begin_test_case_block
+        usingFileStoringFlag = USING_FILE_STORING_FLAG
+        if 'usingFileStoringFlag' in kwargs:
+            usingFileStoringFlag = kwargs['usingFileStoringFlag']
+        #end_test_case_block
+
         answer = None
-        if USING_FILE_STORING_FLAG:
-            checkSumDB = cls.getOldCheckSumDB()
+        if usingFileStoringFlag:
+            checkSumDB = cls.getOldCheckSumDB(checkSumDBFile, **kwargs)
             checkSumDB[CHECKSUM_DB_GLOBAL_FLAG] = value
-            answer = cls.writeCheckSumDB(checkSumDB)
+            answer = cls.writeCheckSumDB(checkSumDB, **kwargs)
 
         else:
             tool = ME_DBService()
@@ -277,7 +287,7 @@ class ChecksumTools:
             fileName, checkSum = cls.createFileCheckSum(fullPath)
             checkSumDB[fileName] = checkSum
 
-        #_ = cls.setGlobalChecksumFlag(True)
+        #_ = cls.setGlobalChecksumFlag(True, **kwargs)
 
         return checkSumDB
 
@@ -340,11 +350,17 @@ class NamesTools:
     '''
 
     @staticmethod
-    def eraseNamesBase(mdb: str) -> typ.Text:
+    def eraseNamesBase(mdb: str, **kwargs) -> typ.Text:
         '''
         Erases database of names and checksum. After this initializes default values.
         '''
-        if USING_FILE_STORING_FLAG:
+        #begin_test_case_block
+        usingFileStoringFlag = USING_FILE_STORING_FLAG
+        if 'usingFileStoringFlag' in kwargs:
+            usingFileStoringFlag = kwargs['usingFileStoringFlag']
+        #end_test_case_block
+
+        if usingFileStoringFlag:
             res = FileTools.overwriteDataFile({})
             answer = "Main: DB file erased" if res else "Main: Erase fail"
             
@@ -383,7 +399,7 @@ class NamesTools:
         return list(raceList)
 
     @staticmethod
-    def getRaceAndKeyFormFileNamePath(
+    def getRaceAndKeyFromFileNamePath(
             fullPath: Union[str, PathType]) -> typ.Tuple[str, str]:
         '''
         Gets the name of the race and the name of the key from the file name in the full path and returns it.
@@ -453,7 +469,7 @@ class NamesTools:
         '''
 
         listOfNames = FileTools.readFile(fullPath)
-        raceName, keyName = cls.getRaceAndKeyFormFileNamePath(
+        raceName, keyName = cls.getRaceAndKeyFromFileNamePath(
             fullPath)
         dataBaseOfNames = cls.prepareGlobalRaceTemplate(
             dataBaseOfNames, raceName)

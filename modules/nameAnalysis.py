@@ -54,7 +54,8 @@ def redirectOutput(redirectedFunction: typ.Callable) -> typ.Callable:
 
 ###START FunctionalBlock
 class AnalysysService:
-    def __init__(self, testFile: Union[str, PathType] = None) -> typ.NoReturn:
+    
+    def __init__(self, testFile: Union[str, PathType] = None, **kwargs) -> typ.NoReturn:
         self.logFilePath = LOCAL_ANALYSIS_LOG_FILE
 
         self.baseOfNames = dict(
@@ -71,7 +72,7 @@ class AnalysysService:
         self.FirstOnly = None  #using for the only first iteration
         self._tmp_groupKey = None
 
-        self.getBaseOfNames(testFile)
+        self.getBaseOfNames(testFile, **kwargs)
         self.initGlobNamesAnalytics()
 
         #Group keys
@@ -161,12 +162,19 @@ class AnalysysService:
         return baseOfNames
 
     def getBaseOfNames(self,
-                       testFile: Union[str, PathType] = None) -> typ.NoReturn:
+                       testFile: Union[str, PathType] = None, 
+                       **kwargs) -> typ.NoReturn:
         '''
         Gets base of names and saves data to #self.baseOfNames.
         '''
-        if USING_FILE_STORING_FLAG or testFile:
-            self.baseOfNames = self.getNamesFromFile(fileName=testFile)
+        #begin_test_case_block
+        usingFileStoringFlag = USING_FILE_STORING_FLAG
+        if 'usingFileStoringFlag' in kwargs:
+            usingFileStoringFlag = kwargs['usingFileStoringFlag']
+        #end_test_case_block
+
+        if usingFileStoringFlag or testFile:
+            self.baseOfNames = self.getNamesFromFile(testFile)
         else:
             service = ME_DBService()
             self.baseOfNames = service.readBaseOfNamesDB_ME()
@@ -476,10 +484,12 @@ class AnalysysService:
 
 
 class AnalyticLetters(AnalysysService):
+
     def __init__(self,
                  analysisObj: object,
-                 testFile: Union[str, PathType] = None):
-        super().__init__(testFile)
+                 testFile: Union[str, PathType] = None,
+                 **kwargs):
+        super().__init__(testFile, **kwargs)
 
         self.copyObjectData(analysisObj)
 
@@ -688,10 +698,12 @@ class AnalyticLetters(AnalysysService):
 
 
 class AnalyticChains(AnalysysService):
+
     def __init__(self,
                  analysisObj: object,
-                 testFile: Union[str, PathType] = None):
-        super().__init__(testFile)
+                 testFile: Union[str, PathType] = None,
+                 **kwargs):
+        super().__init__(testFile, **kwargs)
 
         self.copyObjectData(analysisObj)
 
@@ -1117,10 +1129,12 @@ class AnalyticChains(AnalysysService):
 
 
 class AnalyticCombinations(AnalyticChains):
+
     def __init__(self,
                  analysisObj: object,
-                 testFile: Union[str, PathType] = None):
-        super().__init__(analysisObj, testFile)
+                 testFile: Union[str, PathType] = None,
+                 **kwargs):
+        super().__init__(analysisObj, testFile, **kwargs)
 
         self.copyObjectData(analysisObj)
 
@@ -1220,23 +1234,28 @@ class AnalyticCombinations(AnalyticChains):
 
 
 class Analysis(AnalysysService):
-    def __init__(self, testFile: Union[str, PathType] = None):
-        super().__init__(testFile)
 
-    def makeFunctionsList(self) -> typ.List[typ.Callable]:
+    def __init__(self, testFile: Union[str, PathType] = None, **kwargs):
+        super().__init__(testFile, **kwargs)
+
+    def makeFunctionsList(self, **kwargs) -> typ.List[typ.Callable]:
         '''
         Makes runable functions list for the filling the temporary variable analytical data.
         '''
+        lettersObj = AnalyticLetters(self, **kwargs)
+        chainsObj = AnalyticChains(self, **kwargs)
+        combinationsObj = AnalyticCombinations(self, **kwargs)
+
         functionsList = list([
-            AnalyticLetters(self).makeNameLettersCountData,
-            AnalyticLetters(self).makeVowelsCountData,
-            AnalyticLetters(self).makeConsonantsCountData,
-            AnalyticLetters(self).makeFirstLetterCountData,
-            AnalyticLetters(self).makeAllLettersData,
-            AnalyticLetters(self).makeNameEndingsData,
-            AnalyticChains(self).makeVowelsChainsAllData,
-            AnalyticChains(self).makeConsonantsChainsAllData,
-            AnalyticCombinations(self).makeChainsCombinationsInOrderData,
+            lettersObj.makeNameLettersCountData,
+            lettersObj.makeVowelsCountData,
+            lettersObj.makeConsonantsCountData,
+            lettersObj.makeFirstLetterCountData,
+            lettersObj.makeAllLettersData,
+            lettersObj.makeNameEndingsData,
+            chainsObj.makeVowelsChainsAllData,
+            chainsObj.makeConsonantsChainsAllData,
+            combinationsObj.makeChainsCombinationsInOrderData,
         ])
 
         return functionsList
@@ -1260,12 +1279,12 @@ class Analysis(AnalysysService):
 
         return respond
 
-    def makeLocalAnalyticDataByGroupKey(self) -> typ.List[str]:
+    def makeLocalAnalyticDataByGroupKey(self, **kwargs) -> typ.List[str]:
         '''
         Runs the list of functions that fill the temporary variable analytical data by the group key.
         '''
         responds = list()
-        functionsList = self.makeFunctionsList()
+        functionsList = self.makeFunctionsList(**kwargs)
 
         for function in functionsList:
             respond = self.formatRespond()
@@ -1286,7 +1305,7 @@ class Analysis(AnalysysService):
 
         return responds
 
-    def makeLocalAnalyticDB(self, groupKeys: list) -> typ.List[str]:
+    def makeLocalAnalyticDB(self, groupKeys: list, **kwargs) -> typ.List[str]:
         '''
         Creates the analytic data by the current race for the each group key.
         '''
@@ -1294,18 +1313,18 @@ class Analysis(AnalysysService):
 
         for groupKey in groupKeys:
             self.groupKey = groupKey
-            responds.extend(self.makeLocalAnalyticDataByGroupKey())
+            responds.extend(self.makeLocalAnalyticDataByGroupKey(**kwargs))
 
         return responds
 
-    def formatLocalAnalyticDB(self, groupKeys: list) -> typ.List[str]:
+    def formatLocalAnalyticDB(self, groupKeys: list, **kwargs) -> typ.List[str]:
         '''
         Creates the analytic database by the current race (#self.raceNameKey).
         '''
         responds = list()
 
         responds.extend(self.initLocalAnalyticDB(groupKeys))
-        responds.extend(self.makeLocalAnalyticDB(groupKeys))
+        responds.extend(self.makeLocalAnalyticDB(groupKeys, **kwargs))
 
         return responds
 
@@ -1345,7 +1364,7 @@ class Analysis(AnalysysService):
 
         return True
 
-    def makeAnalyticData(self) -> typ.Dict[str, list]:
+    def makeAnalyticData(self, **kwargs) -> typ.Dict[str, list]:
         '''
         Starts to making names analytic data. Returns list of responds of local making functions.
         '''
@@ -1362,7 +1381,7 @@ class Analysis(AnalysysService):
             if not self.extractingNamesByGroupKey(race):
                 return None
 
-            responds[self.raceNameKey] = self.formatLocalAnalyticDB(groupKeys)
+            responds[self.raceNameKey] = self.formatLocalAnalyticDB(groupKeys, **kwargs)
 
             if not self.fillGlobNamesAnalyticVar():
                 return None
@@ -1386,7 +1405,7 @@ class Analysis(AnalysysService):
 
         return True
 
-    def makeAnalyticDB(self, testDBFile: Union[str, PathType] = None) -> str:
+    def makeAnalyticDB(self, testDBFile: Union[str, PathType] = None, **kwargs) -> str:
         '''
         Makes analytic database and write in analytic database file. Returns status.
         '''
@@ -1395,11 +1414,11 @@ class Analysis(AnalysysService):
         if not self.baseOfNames or len(self.baseOfNames.keys()) == 0:
             return "\nAnalyticDB: Canceled; Answer: 'Empty initialize database'"
         
-        if ChecksumTools.getGlobalChecksumFlag():
+        if ChecksumTools.getGlobalChecksumFlag(**kwargs) and not testDBFile:
             return "\nAnalyticDB: Canceled; Answer: 'Analytics allready exists'"
 
         responds = dict()
-        responds = self.makeAnalyticData()
+        responds = self.makeAnalyticData(**kwargs)
         if not self.printResponds(responds):
             return "\nAnalyticDB: Fault; Answer: 'Error in the process of making local analytic data'"
         
@@ -1413,7 +1432,7 @@ class Analysis(AnalysysService):
             if not flag:
                 return "\nAnalyticDB: ERR; Answer: Data not writed in mongo database"
 
-        _ = ChecksumTools.setGlobalChecksumFlag(True)
+        _ = ChecksumTools.setGlobalChecksumFlag(True, **kwargs)
 
         return "\nAnalyticDB: Created"
 

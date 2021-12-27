@@ -17,7 +17,7 @@ from modules.nameReader import FileTools, ChecksumTools, NamesTools
 
 
 ###START FunctionalBlock
-class FileWork_Test(FunctionalClass):
+class FileTools_Test(FunctionalClass):
     '''
     Testing next methods of class #FileTools:
     readFile;
@@ -155,10 +155,14 @@ class FileWork_Test(FunctionalClass):
         self.assertListEqual(res, ["tests/tmp/DBNames_Test_Data"])
 
 
-class CheckSumWork_Test(FunctionalClass):
+class ChecksumTools_Test(FunctionalClass):
     '''
     Testing next methods of class #ChecksumTools:
     calculateCheckSum;
+    
+    getOldCheckSumDB;
+    setGlobalChecksumFlag;
+
     createFileCheckSum;
     createCheckSumDB;
     writeCheckSumDB;
@@ -272,7 +276,8 @@ class CheckSumWork_Test(FunctionalClass):
 
         res: bool = ChecksumTools.writeCheckSumDB(
             checkSumData,
-            checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'))
+            checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'),
+            usingFileStoringFlag=True)
         self.assertTrue(res)
 
     @FunctionalClass.descript
@@ -331,11 +336,15 @@ class CheckSumWork_Test(FunctionalClass):
         self.assertTrue(res)
 
 
-class WithNamesWork_Test(FunctionalClass):
+class NamesTools_Test(FunctionalClass):
     '''
     Testing next methods of class #NamesTools:
+
+    eraseNamesBase;
+    
     prepareLocalRaceTemplate;
     makeRaceList;
+    getRaceAndKeyFromFileNamePath;
     prepareGlobalRaceTemplate;
     insertNames;
     getRaceAndKeyFormFileName;
@@ -525,14 +534,14 @@ class WithNamesWork_Test(FunctionalClass):
             })
 
     @FunctionalClass.descript
-    def test_getRaceAndKeyFormFileName_gettingsKeysFromFilename_expectedCorrectKeys(
+    def test_getRaceAndKeyFromFileName_gettingsKeysFromFilename_expectedCorrectKeys(
             self) -> typ.NoReturn:
         '''
         Testing the method of gettings race key and gender/surname key from full path of file.
         '''
 
         res: typ.Tuple[str,
-                          str] = NamesTools.getRaceAndKeyFormFileNamePath(
+                          str] = NamesTools.getRaceAndKeyFromFileNamePath(
                               "./DBTest/DBNames_TestRace_TestGender")
         self.assertTupleEqual(res, ('TestRace', 'TestGender'))
 
