@@ -54,6 +54,21 @@ def redirectOutput(redirectedFunction: typ.Callable) -> typ.Callable:
 ###FINISH DecoratorBlock
 
 ###START FunctionalBlock
+def eraseMongoDBs():
+    '''
+    Erases target mongo databases by aliases.
+    '''
+    mdbNAliases = ME_SETTINGS.MDB_n_Aliases
+    
+    mdbAliases = list([
+        mdbNAliases['mdbName']['alias'],
+        mdbNAliases['mdbAnalytic']['alias']
+    ])
+
+    for mdbAlias in mdbAliases:
+        res = nameReader.NamesTools.eraseNamesBase(mdb=mdbAlias)
+        print(res)
+
 def makeMainFunctionsList() -> typ.List[typ.Callable]:
     '''
     Makes runable functions list from main functions of all modules.
@@ -91,16 +106,11 @@ def globalRun() -> typ.NoReturn:
     This is the base function.
     '''    
     if ERASE_NAME_BASE_INIT_FLAG:
-        mdbNAliases = ME_SETTINGS.MDB_n_Aliases
-        
-        mdbAliases = list([
-            mdbNAliases['mdbName']['alias'],
-            mdbNAliases['mdbAnalytic']['alias']
-        ])
-
-        for mdbAlias in mdbAliases:
-            res = nameReader.NamesTools.eraseNamesBase(mdb=mdbAlias)
+        if USING_FILE_STORING_FLAG:
+            res = nameReader.NamesTools.eraseNamesBase()
             print(res)
+        else:
+            eraseMongoDBs()
 
     responds = runMainFunctionsList()
     for respond in responds:
