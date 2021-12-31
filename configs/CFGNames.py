@@ -46,7 +46,10 @@ DB_NAMES_FILENAME_FLAG = "DBNames"
 CHECKSUM_DB_GLOBAL_FLAG = "globalExist"
 
 #Type True to reinitialize database
-ERASE_NAME_BASE_INIT_FLAG = False
+ERASE_NAME_BASE_INIT_FLAG = bool(
+                            #True
+                            False
+)
 #Type True to use storing in files
 #or type False to use MongoDB
 USING_FILE_STORING_FLAG = bool(

@@ -92,8 +92,8 @@ class FileTools:
     @staticmethod
     def overwriteDataFile(
             data: dict,
-            fileName: Union[str, PathType] = NAMES_BASE_INITIALIZE_FILE
-    ) -> bool:
+            fileName: Union[str, PathType] = NAMES_BASE_INITIALIZE_FILE,
+            **kwargs) -> bool:
         '''
         Erase and owerwrite new data (dictionary type) in datafile(#fileName). 
         Default #fileName - NAMES_BASE_INITIALIZE_FILE
@@ -205,9 +205,9 @@ class ChecksumTools:
         Gets checksum database from file if #USING_FILE_STORING_FLAG true,
         else gets from mongoDB.
         '''
+        usingFileStoringFlag = USING_FILE_STORING_FLAG
 
         #begin_test_case_block
-        usingFileStoringFlag = USING_FILE_STORING_FLAG
         if 'usingFileStoringFlag' in kwargs:
             usingFileStoringFlag = kwargs['usingFileStoringFlag']
         #end_test_case_block
@@ -222,7 +222,7 @@ class ChecksumTools:
         
         if not oldCheckSumDB:
             oldCheckSumDB = {}
-        
+
         return oldCheckSumDB
 
     @classmethod
@@ -243,8 +243,9 @@ class ChecksumTools:
         Sets only the global exist flag in 
         the currently used checksum db.
         '''
-        #begin_test_case_block
         usingFileStoringFlag = USING_FILE_STORING_FLAG
+        
+        #begin_test_case_block
         if 'usingFileStoringFlag' in kwargs:
             usingFileStoringFlag = kwargs['usingFileStoringFlag']
         #end_test_case_block
@@ -253,7 +254,7 @@ class ChecksumTools:
         if usingFileStoringFlag:
             checkSumDB = cls.getOldCheckSumDB(checkSumDBFile, **kwargs)
             checkSumDB[CHECKSUM_DB_GLOBAL_FLAG] = value
-            answer = cls.writeCheckSumDB(checkSumDB, **kwargs)
+            answer = cls.writeCheckSumDB(checkSumDB, checkSumDBFile, **kwargs)
 
         else:
             tool = ME_DBService()
@@ -287,7 +288,8 @@ class ChecksumTools:
             fileName, checkSum = cls.createFileCheckSum(fullPath)
             checkSumDB[fileName] = checkSum
 
-        #_ = cls.setGlobalChecksumFlag(True, **kwargs)
+        if CHECKSUM_DB_GLOBAL_FLAG not in checkSumDB:
+            checkSumDB[CHECKSUM_DB_GLOBAL_FLAG] = False
 
         return checkSumDB
 
@@ -299,9 +301,9 @@ class ChecksumTools:
         '''
         Writes a checksum DB in specified file.
         '''
+        usingFileStoringFlag = USING_FILE_STORING_FLAG
 
         #begin_test_case_block
-        usingFileStoringFlag = USING_FILE_STORING_FLAG
         if 'usingFileStoringFlag' in kwargs:
             usingFileStoringFlag = kwargs['usingFileStoringFlag']
 
@@ -340,7 +342,11 @@ class ChecksumTools:
             fileName, checkSum = cls.createFileCheckSum(fileNamePath)
             curCheckSumDB[fileName] = checkSum
 
-        return oldCheckSumDB == curCheckSumDB
+        answ = True
+        if not oldCheckSumDB[CHECKSUM_DB_GLOBAL_FLAG] or \
+                oldCheckSumDB != curCheckSumDB:
+            answ = False
+        return answ
 
 
 class NamesTools:
@@ -350,26 +356,30 @@ class NamesTools:
     '''
 
     @staticmethod
-    def eraseNamesBase(mdb: str, **kwargs) -> typ.Text:
+    def eraseNamesBase(mdb: str = None, **kwargs) -> typ.Text:
         '''
         Erases database of names and checksum. After this initializes default values.
         '''
-        #begin_test_case_block
         usingFileStoringFlag = USING_FILE_STORING_FLAG
+        
+        #begin_test_case_block
         if 'usingFileStoringFlag' in kwargs:
             usingFileStoringFlag = kwargs['usingFileStoringFlag']
         #end_test_case_block
 
         if usingFileStoringFlag:
-            res = FileTools.overwriteDataFile({})
+            res = FileTools.overwriteDataFile({}, **kwargs)
             answer = "Main: DB file erased" if res else "Main: Erase fail"
+
+            checkSumDB = ChecksumTools.createCheckSumDB(**kwargs)
+            checkSumDB[CHECKSUM_DB_GLOBAL_FLAG] = False
+            _ = ChecksumTools.writeCheckSumDB(checkSumDB, **kwargs)
             
         else:
+            if not mdb:
+                return "Main: Database name not defined"
             answer = MongoDBTools.eraseME_DB(mdb)
-
-        checkSumDB = ChecksumTools.createCheckSumDB()
-        checkSumDB[CHECKSUM_DB_GLOBAL_FLAG] = False
-        ChecksumTools.writeCheckSumDB(checkSumDB)
+            _ = ChecksumTools.setGlobalChecksumFlag(False)
             
         return answer
 
@@ -487,13 +497,13 @@ class NamesTools:
         '''
         dataBaseOfNames = None
         initializeFile = NAMES_BASE_INITIALIZE_FILE
+        usingFileStoringFlag = USING_FILE_STORING_FLAG
 
         if ChecksumTools.checkValidHash(**kwargs):
             answer = "\nNamesDB: Canceled"
             return answer, answer + "; INF: Checksum exists"
 
         #begin_test_case_block
-        usingFileStoringFlag = USING_FILE_STORING_FLAG
         if 'usingFileStoringFlag' in kwargs:
             usingFileStoringFlag = kwargs['usingFileStoringFlag']
 
@@ -509,7 +519,7 @@ class NamesTools:
         for fullPath in dbNamesFiles:
             dataBaseOfNames = cls.formatNames(
                 fullPath, dataBaseOfNames)
-
+                
         answers = 'Empty answer.'
         if usingFileStoringFlag:
             answ = FileTools.overwriteDataFile(dataBaseOfNames, initializeFile)

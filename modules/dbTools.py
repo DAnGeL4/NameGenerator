@@ -325,7 +325,7 @@ class MongoDBTools:
         else:
             answer = cls.updateDocument(document, data)
 
-        return str(answer)
+        return answer
 
     @classmethod
     def writeDocuments(cls, collection: MECollection,
@@ -456,8 +456,8 @@ class ME_DBService():
         '''
         Sets only the global exist flag in checksum db from mongodb.
         '''
-        globFlag = GlobalFlags.objects().first()
-        if globFlag.count() == 0:
+        globFlag = GlobalFlags.objects.first()
+        if len(globFlag) == 0:
             globFlag = GlobalFlags()
             
         globFlag.globalExist = value
