@@ -1,6 +1,7 @@
 ###START ImportBlock
 ##systemImport
 import os
+import ast
 import typing as typ
 
 ##customImport
@@ -159,10 +160,9 @@ class ChecksumTools_Test(FunctionalClass):
     '''
     Testing next methods of class #ChecksumTools:
     calculateCheckSum;
-    
     getOldCheckSumDB;
+    getGlobalChecksumFlag;
     setGlobalChecksumFlag;
-
     createFileCheckSum;
     createCheckSumDB;
     writeCheckSumDB;
@@ -171,7 +171,11 @@ class ChecksumTools_Test(FunctionalClass):
 
     ##BEGIN ConstantBlock
     TestFiles = {
-        'CheckSumDB.cfg': dict({}),
+        'CheckSumDB.cfg': dict({
+            'DBNames_Test_Data':
+                'f8ecbed43362ae6ecf00726de6ae17ea',
+            'globalExist': True
+        }),
         'DBNames_Test_Data': dict({
             'test_key': 'test_data'
         }),
@@ -225,10 +229,76 @@ class ChecksumTools_Test(FunctionalClass):
         '''
         Testing the method for calculating md5 hash for data from file.
         '''
-
         res: typ.Hashable = ChecksumTools.calculateCheckSum(
             str(self.TestFileDirectory + 'TMP_Test_Data'))
         self.assertEqual(res, 'f8ecbed43362ae6ecf00726de6ae17ea')
+
+    @FunctionalClass.descript
+    def test_getOldCheckSumDB_readDataFile_expectedRightData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets checksum database from db file.
+        '''
+        #CheckSumDB.cfg writed in setUpClass method
+        checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg')
+        res: typ.Dict = ChecksumTools.getOldCheckSumDB(
+            checkSumDBFile=checkSumDBFile, 
+            usingFileStoringFlag=True)
+
+        self.assertDictEqual(res, {'DBNames_Test_Data': 
+                                        'f8ecbed43362ae6ecf00726de6ae17ea',
+                                   'globalExist': True})
+
+    @FunctionalClass.descript
+    def test_getGlobalChecksumFlag_readDataFile_expectedTrue(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets global exist flag from db file.
+        '''
+        #CheckSumDB.cfg writed in setUpClass method
+        checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg')
+        res: typ.Dict = ChecksumTools.getOldCheckSumDB(
+            checkSumDBFile=checkSumDBFile, 
+            usingFileStoringFlag=True)
+
+        self.assertTrue(res)
+
+    @FunctionalClass.descript
+    def test_setGlobalChecksumFlag_writeDataFile_expectedTrueAnsw(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets checksum database from db file.
+        '''
+        #CheckSumDB.cfg writed in setUpClass method
+        checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg')
+        res: typ.Dict = ChecksumTools.setGlobalChecksumFlag(
+            value=False,
+            checkSumDBFile=checkSumDBFile, 
+            usingFileStoringFlag=True)
+
+        self.assertTrue(res)
+        
+    @FunctionalClass.descript
+    def test_setGlobalChecksumFlag_readDataFile_expectedFalseFlag(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets checksum database from db file.
+        '''
+        #CheckSumDB.cfg writed in setUpClass method
+        checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg')
+        _ = ChecksumTools.setGlobalChecksumFlag(
+            value=False,
+            checkSumDBFile=checkSumDBFile, 
+            usingFileStoringFlag=True)
+
+        data = None
+        with open(checkSumDBFile) as f:
+            data = f.read()
+        res: typ.Dict = ast.literal_eval(data)
+
+        self.assertDictEqual(res, {'DBNames_Test_Data': 
+                                        'f8ecbed43362ae6ecf00726de6ae17ea',
+                                   'globalExist': False})                   #
 
     @FunctionalClass.descript
     def test_createFileCheckSum_makeMD5ForFile_expectedFilenameAndMD5(
@@ -286,21 +356,25 @@ class ChecksumTools_Test(FunctionalClass):
         '''
         Testing the data written to a checksum database file.
         '''
-
         #Write expected data to database file
+        checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg')
         checkSumData: dict = dict({
             'DBNames_Test_Data':
             'f8ecbed43362ae6ecf00726de6ae17ea',
             'globalExist':
             True
         })
+
         ChecksumTools.writeCheckSumDB(
             checkSumData,
-            checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'),
+            checkSumDBFile=checkSumDBFile,
             usingFileStoringFlag=True)
 
-        res: dict = FileTools.readDataFile(
-            str(self.TestFileDirectory + 'CheckSumDB.cfg'))
+        data = None
+        with open(checkSumDBFile) as f:
+            data = f.read()
+        res: typ.Dict = ast.literal_eval(data)
+
         self.assertDictEqual(
             res,
             dict({
@@ -314,23 +388,21 @@ class ChecksumTools_Test(FunctionalClass):
         '''
         Testing the method comparing checksum from file and recently calculated.
         '''
-
         #Write expected data to database file
+        checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg')
         checkSumData: dict = dict({
             'DBNames_Test_Data':
             'f8ecbed43362ae6ecf00726de6ae17ea',
             'globalExist':
             True
         })
-        ChecksumTools.writeCheckSumDB(
-            checkSumData,
-            checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'),
-            usingFileStoringFlag=True)
+        with open(checkSumDBFile, 'w') as f:
+            f.write(str(checkSumData))
 
         #Comparing checksum value of #DBNames_Test_Data file with value from database
         res: bool = ChecksumTools.checkValidHash(
             fileNamePath=str(self.TestFileDirectory + 'DBNames_Test_Data'),
-            checkSumDBFile=str(self.TestFileDirectory + 'CheckSumDB.cfg'),
+            checkSumDBFile=checkSumDBFile,
             directory="tests/tmp/",
             usingFileStoringFlag=True)
         self.assertTrue(res)
@@ -339,9 +411,7 @@ class ChecksumTools_Test(FunctionalClass):
 class NamesTools_Test(FunctionalClass):
     '''
     Testing next methods of class #NamesTools:
-
     eraseNamesBase;
-    
     prepareLocalRaceTemplate;
     makeRaceList;
     getRaceAndKeyFromFileNamePath;
@@ -354,10 +424,12 @@ class NamesTools_Test(FunctionalClass):
 
     ##BEGIN ConstantBlock
     TestFiles = {
-        'CheckSumDB.cfg':
-        dict({
+        'CheckSumDB.cfg': dict({
             'DBNames_testRace_Surnames': 'f979b7abfe5c503d10c2945d1212842e',
-            'GLOB_EXIST': True
+            'globalExist': True
+        }),
+        'NamesBaseInitialize.cfg': dict({
+            'test_key': 'test_data'
         }),
         'DBNames_testRace_Surnames':
         'testName1\ntestName2\ntestName3\n',
@@ -392,6 +464,68 @@ class NamesTools_Test(FunctionalClass):
         self.printTearDownMethodMsg()
 
     ##END PrepareBlock
+    @FunctionalClass.descript
+    def test_eraseNamesBase_erasingDBFile_expectedRightAnswer(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of erases database file.
+        '''
+        initFile = str(self.TestFileDirectory + 'NamesBaseInitialize.cfg')
+        checkSumDBFile = str(self.TestFileDirectory + 'CheckSumDB.cfg')
+
+        res: typ.Dict = NamesTools.eraseNamesBase(
+            usingFileStoringFlag=True,
+            fileName=initFile,
+            checkSumDBFile=checkSumDBFile, 
+            directory="tests/tmp/")
+
+        self.assertEqual(res, "Main: DB file erased")
+    
+    @FunctionalClass.descript
+    def test_eraseNamesBase_erasingDBFile_expectedErasedFile(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of erases database file.
+        '''
+        initFile = str(self.TestFileDirectory + 'NamesBaseInitialize.cfg')
+        checkSumDBFile = str(self.TestFileDirectory + 'CheckSumDB.cfg')
+
+        _ = NamesTools.eraseNamesBase(
+                usingFileStoringFlag=True,
+                fileName=initFile,
+                checkSumDBFile=checkSumDBFile, 
+                directory="tests/tmp/")
+
+        data = None
+        with open(initFile) as f:
+            data = f.read()
+        res: typ.Dict = ast.literal_eval(data)
+
+        self.assertDictEqual(res, {})
+    
+    @FunctionalClass.descript
+    def test_eraseNamesBase_changingExistFlag_expectedExistFalse(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of erases database file.
+        '''
+        initFile = str(self.TestFileDirectory + 'NamesBaseInitialize.cfg')
+        checkSumDBFile = str(self.TestFileDirectory + 'CheckSumDB.cfg')
+
+        _ = NamesTools.eraseNamesBase(
+                usingFileStoringFlag=True,
+                fileName=initFile,
+                checkSumDBFile=checkSumDBFile, 
+                directory="tests/tmp/")
+
+        data = None
+        with open(checkSumDBFile) as f:
+            data = f.read()
+        res: typ.Dict = ast.literal_eval(data)
+
+        self.assertDictEqual(res, {'DBNames_testRace_Surnames': 
+                                        'd94f4e322384ae967806cb0ef649ad57',
+                                    'globalExist': False})
 
     @FunctionalClass.descript
     def test_prepareLocalRaceTemplate_insertRaceInTemplate_expectedPreparingTemplate(

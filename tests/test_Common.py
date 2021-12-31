@@ -7,6 +7,7 @@ from contextlib import redirect_stdout
 from configs.CFGNames import GLOBAL_TEST_LOG_FILE
 
 from tests import test_nameReader
+from tests import test_nameReader_MongoDB
 from tests import test_nameAnalysis
 ###FINISH ImportBlock
 
@@ -47,6 +48,9 @@ def createTestSuites() -> unittest.suite.TestSuite:
     suites.addTests(tests)
     
     tests = testLoad.loadTestsFromModule(test_nameAnalysis)
+    suites.addTests(tests)
+    
+    tests = testLoad.loadTestsFromModule(test_nameReader_MongoDB)
     suites.addTests(tests)
     
     return suites
