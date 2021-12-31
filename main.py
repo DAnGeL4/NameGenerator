@@ -54,43 +54,15 @@ def redirectOutput(redirectedFunction: typ.Callable) -> typ.Callable:
 ###FINISH DecoratorBlock
 
 ###START FunctionalBlock
-def makeMainFunctionsList() -> typ.List[typ.Callable]:
+class MainService():
     '''
-    Makes runable functions list from main functions of all modules.
+    Contains a tools for main function.
     '''
-    functionsList = list([
-        nameReader.main,
-        nameAnalysis.main,
-        nameGen.main,
-    ])
 
-    if MAKE_UNITTESTS_FLAG:
-        functionsList.append(
-            test_Common.main,
-        )
-
-    return functionsList
-
-def runMainFunctionsList() -> typ.List[str]:
-    '''
-    Runs the list of main functions from other modules.
-    Returns list of responds.
-    '''
-    responds = list()
-    functionsList = makeMainFunctionsList()
-
-    for function in functionsList:
-        respond = function()
-        responds.append(respond)
-
-    return responds
-
-@redirectOutput
-def globalRun() -> typ.NoReturn:
-    '''
-    This is the base function.
-    '''    
-    if ERASE_NAME_BASE_INIT_FLAG:
+    def eraseMongoDBs(self) -> typ.NoReturn:
+        '''
+        Erases target mongo databases by aliases.
+        '''
         mdbNAliases = ME_SETTINGS.MDB_n_Aliases
         
         mdbAliases = list([
@@ -102,9 +74,56 @@ def globalRun() -> typ.NoReturn:
             res = nameReader.NamesTools.eraseNamesBase(mdb=mdbAlias)
             print(res)
 
-    responds = runMainFunctionsList()
-    for respond in responds:
-        print(respond)
+    def makeMainFunctionsList(self) -> typ.List[typ.Callable]:
+        '''
+        Makes runable functions list from main functions of all modules.
+        '''
+        functionsList = list([
+            nameReader.main,
+            nameAnalysis.main,
+            nameGen.main,
+        ])
+
+        return functionsList
+
+    def runMainFunctionsList(self) -> typ.List[str]:
+        '''
+        Runs the list of main functions from other modules.
+        Returns list of responds.
+        '''
+        responds = list()
+        functionsList = self.makeMainFunctionsList()
+
+        for function in functionsList:
+            respond = function()
+            responds.append(respond)
+
+        return responds
+
+    @redirectOutput
+    def runUnittests(self) -> typ.NoReturn:
+        '''
+        Runs the module with unittests.
+        '''
+        if MAKE_UNITTESTS_FLAG:
+            res = test_Common.main()
+            print(res)
+
+    @redirectOutput
+    def globalRun(self) -> typ.NoReturn:
+        '''
+        This is the base function.
+        '''    
+        if ERASE_NAME_BASE_INIT_FLAG:
+            if USING_FILE_STORING_FLAG:
+                res = nameReader.NamesTools.eraseNamesBase()
+                print(res)
+            else:
+                self.eraseMongoDBs()
+
+        responds = self.runMainFunctionsList()
+        for respond in responds:
+            print(respond)
 ###FINISH FunctionalBlock
 
 ###START MainBlock
@@ -113,34 +132,39 @@ def main() -> typ.NoReturn:
     Main function.
     Uses profiling if #MAKE_PROFILING_FLAG is true.
     '''
+    tools = None
+    service = MainService()
+
     errors = list(["WARNING", "WRONG"])
     if checkDependencies() in errors:
         return
 
-    tools = None
     if not USING_FILE_STORING_FLAG:
         tools = dbTools.MongoDBTools()
         _ = tools.registerDataBases()
 
     if not MAKE_PROFILING_FLAG:
-        globalRun()
+        service.globalRun()
 
     else:
         #!Not work yet. Too old version of graphviz(0.16) package
         #Hope updates soon :)
-        Profiling.makeProfileNGraph('globalRun')
+        Profiling.makeProfileNGraph('MainService().globalRun')
+
+    if tools:
+        tools.unregisterDataBases()
+
+    service.runUnittests()
 
 
     ##TESTED_AREA_BEGIN
     print("\n#BEGIN TEST CODE...\n")
-    
-    dbTools.main()
+
+    from modules import tst
+    tst.main()
 
     print("\n#...END TEST CODE")
     ##TESTED_AREA_END
-    
-    if tools:
-        tools.unregisterDataBases()
     return
 
 
