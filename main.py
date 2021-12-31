@@ -58,7 +58,6 @@ class MainService():
     '''
     Contains a tools for main function.
     '''
-
     def eraseMongoDBs(self) -> typ.NoReturn:
         '''
         Erases target mongo databases by aliases.
