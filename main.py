@@ -159,8 +159,8 @@ def main() -> typ.NoReturn:
     ##TESTED_AREA_BEGIN
     print("\n#BEGIN TEST CODE...\n")
 
-    from modules import tst
-    tst.main()
+    #from modules import tst
+    #tst.main()
 
     print("\n#...END TEST CODE")
     ##TESTED_AREA_END

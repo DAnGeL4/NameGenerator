@@ -1,7 +1,6 @@
 ###START ImportBlock
 ##systemImport
 import random
-import string
 
 ##customImport
 from configs.CFGNames import VOWELS_LETTERS, VOWELS_MAX_COUNT
@@ -15,66 +14,77 @@ from configs.CFGNames import CONSONANTS_MAX_COUNT, ALPHABET
 ###FINISH DecoratorBlock
 
 ###START FunctionalBlock
-def randomNameSize(startRange=5, endRange=7):
+class ManualNameGen():
     '''
-    Возвращает случайное целое число #nameSize в диапазоне от #startRange до #endRange.
-    '''
-
-    nameSize = random.randint(startRange, endRange)
-    return nameSize
-
-
-def randomLetter():
-    '''
-    Возвращает случайную букву нижнего регистра #letter из алфавита ALPHABET.
     '''
 
-    letter = random.choice(ALPHABET)
-    return letter
+    def randomNameSize(self, startRange=5, endRange=7):
+        '''
+        Returns a random integer #nameSize ranging 
+        from #startRange to #endRange.
+        '''
+
+        nameSize = random.randint(startRange, endRange)
+        return nameSize
 
 
-def createCharacterName():
-    '''
-    Функция "топорной" случайной генерации имени по правилам: не более 2 гласных и 2 согласных подряд.
-    '''
-    
-    nameSize = randomNameSize()
-    tmpName = ""
-    characterName = ""
+    def randomLetter(self):
+        '''
+        Returns a random lowercase letter #letter 
+        from the ALPHABET alphabet.
+        '''
 
-    vowelsCount = 0
-    consonantsCount = 0
-    for letNumber in range(nameSize):
-        flag = True         #flag устанавливается в false когда найдена
-                            ##буква соответствующая правилам
+        letter = random.choice(ALPHABET)
+        return letter
 
-        while flag:
-            tmp_randomLetter = randomLetter()
 
-            #Правило 2 гласных
-            if tmp_randomLetter in VOWELS_LETTERS:
-                vowelsCount += 1
-                consonantsCount = 0
-                if vowelsCount >= VOWELS_MAX_COUNT:
-                    continue
+    def createCharacterName(self):
+        '''
+        The function of 'clumsy' random generation of a name 
+        according to the rules: no more than 2 vowels 
+        and 2 consonants in a row.
+        '''
+        
+        nameSize = self.randomNameSize()
+        tmpName = ""
+        characterName = ""
 
-            #Правило 2 согласных
-            else:
-                vowelsCount = 0
-                consonantsCount += 1
-                if consonantsCount >= CONSONANTS_MAX_COUNT:
-                    continue
+        vowelsCount = 0
+        consonantsCount = 0
+        for letNumber in range(nameSize):
+            flag = True         #flag is set to false when a 
+                                ##letter matching the rules is found
 
-            tmpName += tmp_randomLetter
-            flag = False
+            while flag:
+                tmp_randomLetter = self.randomLetter()
 
-    characterName = tmpName.capitalize()
-    return characterName
+                #Rule of 2 vowels
+                if tmp_randomLetter in VOWELS_LETTERS:
+                    vowelsCount += 1
+                    consonantsCount = 0
+                    if vowelsCount >= VOWELS_MAX_COUNT:
+                        continue
+
+                #Rule of 2 consonants
+                else:
+                    vowelsCount = 0
+                    consonantsCount += 1
+                    if consonantsCount >= CONSONANTS_MAX_COUNT:
+                        continue
+
+                tmpName += tmp_randomLetter
+                flag = False
+
+        characterName = tmpName.capitalize()
+        return characterName
+
 ###FINISH FunctionalBlock
 
 ###START MainBlock
 def main():
+    nameGen = ManualNameGen()
     respond = '\nName Generator: '
-    respond += createCharacterName()
+    respond += nameGen.createCharacterName()
+    
     return respond
 ###FINISH Mainblock
