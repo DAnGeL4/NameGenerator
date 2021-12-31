@@ -10,6 +10,8 @@ gprof2dot = "^2021.2.21"
 pydot = "^1.4.2"
 graphviz = "^0.16"
 mongoengine = "^0.23.1"
+keras = "^2.7.0"
+mongomock = "^3.23.0"
 
 [tool.poetry.dev-dependencies]
 
