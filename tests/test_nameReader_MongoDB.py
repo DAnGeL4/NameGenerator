@@ -8,7 +8,7 @@ from configs.CFGNames import ME_SETTINGS
 from configs.CFGNames import CHECKSUM_DB_GLOBAL_FLAG
 from tests.test_Service import FunctionalClass
 
-from modules.nameReader import FileTools, ChecksumTools, NamesTools
+from modules.nameReader import ChecksumTools, NamesTools
 
 from database.medbCheckSumSchemas import GlobalFlags
 from database.medbCheckSumSchemas import ChecksumFiles
@@ -41,7 +41,6 @@ class ChecksumTools_Test(FunctionalClass):
     ##BEGIN ConstantBlock
     mdb_alias = ME_SETTINGS.MDB_n_Aliases['mdbCheckSum']['alias']
     TestFiles = {
-        #'CheckSumDB.cfg': dict({}),
         'DBNames_Test_Data': dict({
             'test_key': 'test_data'
         }),
@@ -194,11 +193,6 @@ class NamesTools_Test(FunctionalClass):
     mdb_alias = ME_SETTINGS.MDB_n_Aliases['mdbName']['alias']
     mdb_checksum_alias = ME_SETTINGS.MDB_n_Aliases['mdbCheckSum']['alias']
     TestFiles = {
-        #'CheckSumDB.cfg':
-        #dict({
-        #    'DBNames_testRace_Surnames': 'd94f4e322384ae967806cb0ef649ad57',
-        #    CHECKSUM_DB_GLOBAL_FLAG: True
-        #}),
         'DBNames_testRace_Surnames':
         'testName1\ntestName2\ntestName3\n',
         'InitializeFile.cfg':
@@ -235,36 +229,12 @@ class NamesTools_Test(FunctionalClass):
         self.printSetUpMethodMsg()
         
         existFlag = GlobalFlags()
-        #checksumFile = ChecksumFiles()
-
         existFlag.globalExist = True
-        #checksumFile.file = 'DBNames_Test_Data'
-        #checksumFile.checksum = 'f8ecbed43362ae6ecf00726de6ae17ea'
-
         existFlag.save()
-        #checksumFile.save()
 
         race = Race()
         race.race = 'TestRace'
         race.save()
-
-        #gender_groups = GenderGroups()
-        #gender_male = Male()
-        #gender_female = Female()
-        #gender_surname = Surnames()
-
-        #gender_groups.gender_group = 'TestGender'
-        #gender_male.name = 'TestMale'
-        #gender_male.race = race
-        #gender_female.name = 'TestFemale'
-        #gender_female.race = race
-        #gender_surname.name = 'TestSurname'
-        #gender_surname.race = race
-
-        #gender_groups.save()
-        #gender_male.save()
-        #gender_female.save()
-        #gender_surname.save()
 
     def tearDown(self) -> typ.NoReturn:
         '''Tear down for test.'''
