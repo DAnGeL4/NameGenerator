@@ -5,7 +5,6 @@ import typing as typ
 import mongoengine as medb
 import pickle
 
-from pprint import pprint
 from bson.objectid import ObjectId
 from pymongo.mongo_client import MongoClient
 from pymongo.database import Database

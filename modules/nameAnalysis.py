@@ -167,8 +167,9 @@ class AnalysysService:
         '''
         Gets base of names and saves data to #self.baseOfNames.
         '''
-        #begin_test_case_block
         usingFileStoringFlag = USING_FILE_STORING_FLAG
+
+        #begin_test_case_block
         if 'usingFileStoringFlag' in kwargs:
             usingFileStoringFlag = kwargs['usingFileStoringFlag']
         #end_test_case_block
@@ -1410,6 +1411,12 @@ class Analysis(AnalysysService):
         Makes analytic database and write in analytic database file. Returns status.
         '''
         DBFile = ANALYTIC_DB_FILE if not testDBFile else testDBFile
+        usingFileStoringFlag = USING_FILE_STORING_FLAG
+        
+        #begin_test_case_block
+        if 'usingFileStoringFlag' in kwargs:
+            usingFileStoringFlag = kwargs['usingFileStoringFlag']
+        #end_test_case_block
 
         if not self.baseOfNames or len(self.baseOfNames.keys()) == 0:
             return "\nAnalyticDB: Canceled; Answer: 'Empty initialize database'"
@@ -1422,7 +1429,7 @@ class Analysis(AnalysysService):
         if not self.printResponds(responds):
             return "\nAnalyticDB: Fault; Answer: 'Error in the process of making local analytic data'"
         
-        if USING_FILE_STORING_FLAG or testDBFile:
+        if usingFileStoringFlag or testDBFile:
             flag = FileTools.overwriteDataFile(self.globNamesAnalytic, DBFile)
             if not flag:
                 return "\nAnalyticDB: Fault; Answer: Data not writed in database file"
