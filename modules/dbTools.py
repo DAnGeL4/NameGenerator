@@ -428,6 +428,40 @@ class ME_DBService():
         raceData[raceField] = raceData.pop(tmpKey)
         return raceData
 
+    @classmethod
+    def getIdByField(cls, collection: MECollection, 
+                     field: str, value: str) -> ObjectId:
+        '''
+        Gets id by field from collection.
+        '''
+        collectionField = getattr(collection, field, None)
+        if not collectionField:
+            return None
+            
+        objId = MongoDBTools.getReferenceID(collectionField, 
+                                            {field: value})
+        return objId
+
+    @classmethod
+    def getLocalAnalyticDataByKeys(cls, collection: MECollection, race: str, 
+                                   genderGroup: str) -> typ.List[dict]:
+        '''
+        Reads analytic data from collection by target keys.
+        '''
+        raceId = cls.getIdByField(collection, 'race', race)
+        genderId = cls.getIdByField(collection, 'gender_group', genderGroup)
+
+        if not raceId or not genderId:
+            return list()
+
+        filterdObjects = collection.objects(medb.Q(race=raceId) & 
+                                            medb.Q(gender_group=genderId))
+
+        filterdData = filterdObjects.to_json()
+        filterdData = json.loads(filterdData)
+        
+        return filterdData
+
     def prepareToWriteNamesData(self, race: str, data: list) -> typ.Dict[str, dict]:
         '''
         Adapts the names database to the mongoengine schema.
@@ -520,7 +554,8 @@ class ME_DBService():
         }}
         return collectionsData
 
-    def fillAnalyticCountCollection(self, raceKey: str, 
+    @classmethod
+    def fillAnalyticCountCollection(cls, raceKey: str, 
                         raceData: typ.Dict[str, dict], 
                         localAnalyticKey: str) -> typ.Dict[str, dict]:
         '''
