@@ -25,10 +25,11 @@ GLOBAL_GRAPH_FILE = os.path.join(GLOBAL_GRAPH_DIR, 'prof-graph.png')
 #log files
 GLOBAL_TEST_DIRECTORY = os.path.join(GLOBAL_LOG_DIR,'tests/')
 
-GLOBAL_LOG_FILE = os.path.join(GLOBAL_LOG_DIR, 'LOGCommon.log')
-LOCAL_NAMES_LOG_FILE = os.path.join(GLOBAL_LOG_DIR, 'LOGNames.log')
+GLOBAL_LOG_FILE = os.path.join(GLOBAL_LOG_DIR, 'LOGNames.log')
+LOCAL_NAMES_LOG_FILE = os.path.join(GLOBAL_LOG_DIR, 'LOGReader.log')
 LOCAL_ANALYSIS_LOG_FILE = os.path.join(GLOBAL_LOG_DIR, 
                             'LOGAnalysis.log')
+LOCAL_GENERATOR_LOG_FILE = os.path.join(GLOBAL_LOG_DIR, 'LOGGen.log')
 GLOBAL_TEST_LOG_FILE = os.path.join(GLOBAL_TEST_DIRECTORY, 
                         'LOGTESTCommon.log')
 
