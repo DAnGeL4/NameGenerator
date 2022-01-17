@@ -149,7 +149,8 @@ class AnalysysService:
         for localSubkey in sourceData:
             destinationData[localSubkey] += sourceData[localSubkey]
 
-    def getNamesFromFile(self, testFile: Union[str, PathType] = None):
+    def getNamesFromFile(self, testFile: Union[str, PathType] = None, 
+                                                ) -> typ.Dict[str, dict]:
         '''
         Gets base of names from file.
         '''
@@ -173,6 +174,10 @@ class AnalysysService:
         if 'usingFileStoringFlag' in kwargs:
             usingFileStoringFlag = kwargs['usingFileStoringFlag']
         #end_test_case_block
+        
+        if 'baseOfNames' in kwargs:
+            self.baseOfNames = kwargs['baseOfNames']
+            return
 
         if usingFileStoringFlag or testFile:
             self.baseOfNames = self.getNamesFromFile(testFile)
