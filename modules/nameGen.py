@@ -500,7 +500,7 @@ class ManualNameGen():
             maxSize = croppedSize
 
         if minSize >= croppedSize:
-            chainSize = minSize
+            chainSize = croppedSize
         else:
             preparedData = self.prepareFrequencyData(minMaxRange,
                                                      frequencyData)
