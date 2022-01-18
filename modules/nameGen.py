@@ -7,10 +7,11 @@ import typing as typ
 from contextlib import redirect_stdout
 
 ##customImport
-from configs.CFGNames import VOWELS_LETTERS, VOWELS_MAX_COUNT
-from configs.CFGNames import CONSONANTS_MAX_COUNT, CONSONANTS_LETTERS
+from configs.CFGNames import VOWELS_LETTERS, CONSONANTS_LETTERS
+from configs.CFGNames import VOWELS_MAX_COUNT, CONSONANTS_MAX_COUNT
 from configs.CFGNames import ALPHABET
 from configs.CFGNames import LOCAL_GENERATOR_LOG_FILE
+from configs.CFGNames import USING_FILE_STORING_FLAG
 
 from database.medbAnalyticSchemas import NameLettersCount, NameEndings
 from database.medbAnalyticSchemas import FirstLetters, Letters
@@ -526,7 +527,7 @@ class ManualNameGen():
             croppedSize = croppedSize - chainSize
             if croppedSize == 0:
                 break
-            assert croppedSize >= 0, "ERR: Out of range cropped size."
+            assert croppedSize >= 0, "ERR: Out of range cropped size." #>0
 
             chainType = self.getNextLetterType(chainType)
 
@@ -983,6 +984,7 @@ class ManualNameGen():
         self.printLogLine('First letter', self.lastLetter, 2)
 
         croppedSize = nameSize - nameEndSize
+        self.printLogLine('Cropped size', croppedSize, 2)
         chainsOrder = self.makeChainsOrder(croppedSize)
 
         self.printLogLine('Chains order', chainsOrder, 2)
@@ -1021,25 +1023,22 @@ class ManualNameGen():
 ###START MainBlock
 @redirectOutput
 def main():
-    nameGen = ManualNameGen_Stub()
-    respond = '\nName Generator Legacy:'
-    respond += nameGen.createCharacterName()
+    respond = '\nName Generator: '
+    
+    if USING_FILE_STORING_FLAG:
+        nameGen = ManualNameGen_Stub()
+        respond += '\n* Stub name: '
+        respond += nameGen.createCharacterName()
+    else:
+        nameGen = ManualNameGen()
+        race = 'Elf'
+        respond += '\n* Race: %s' % race
 
-    nameGen = ManualNameGen()
-    race = 'Elf'
-    respond += '\n\nRace: %s' % race
-
-    gender = 'Male'
-    respond += '\nNew %s: ' % gender
-    respond += nameGen.createCharacterName(race, gender)
-
-    gender = 'Female'
-    respond += '\nNew %s: ' % gender
-    respond += nameGen.createCharacterName(race, gender)
-
-    gender = 'Surnames'
-    respond += '\nNew %s: ' % gender
-    respond += nameGen.createCharacterName(race, gender)
+        loc_resp = '\n* New %s: '
+        gender_groups = ['Male', 'Female', 'Surnames']
+        for gender in gender_groups:
+            respond += loc_resp % gender
+            respond += nameGen.createCharacterName(race, gender)
 
     print(respond)
     return respond

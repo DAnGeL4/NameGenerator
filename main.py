@@ -14,7 +14,7 @@ from contextlib import redirect_stdout
 from configs.CFGNames import GLOBAL_LOG_FILE
 from configs.CFGNames import ERASE_NAME_BASE_INIT_FLAG
 from configs.CFGNames import MAKE_PROFILING_FLAG
-from configs.CFGNames import MAKE_UNITTESTS_FLAG 
+from configs.CFGNames import MAKE_UNITTESTS_FLAG
 from configs.CFGNames import USING_FILE_STORING_FLAG
 from configs.CFGNames import ME_SETTINGS
 
@@ -26,32 +26,47 @@ from modules import dbTools
 from tests import test_Common
 
 from diagnostic.modules.diagnostics import Profiling, checkDependencies
+
 ###FINISH ImportBlock
 
 ###START GlobalConstantBlock
 ###FINISH GlobalConstantBlock
 
+
 ###START DecoratorBlock
-def redirectOutput(redirectedFunction: typ.Callable) -> typ.Callable:
+def redirectOutput(redirectedFunction: typ.Callable,
+                   eraseLog: bool = True,
+                   msg: str='') -> typ.Callable:
     '''
-    Redirects output to log file for #redirectedFunction. After returns stdout back.
+    Redirects output to log file for #redirectedFunction. 
+    After returns stdout back.
     '''
     @functools.wraps(redirectedFunction)
     def wrapper(*args, **kwargs):
         print("START...")
+        if msg: print(str(msg) + '...')
+
         logFilePath = GLOBAL_LOG_FILE
         
-        with open(logFilePath, 'w') as f, redirect_stdout(f):
-            print("---STARTED---\n")
+        fileMode = 'a'
+        if eraseLog:
+            fileMode = 'w'
+
+        with open(logFilePath, fileMode) as f, redirect_stdout(f):
+            print("---STARTED---")
+            if msg: print('---' + str(msg) + '---\n')
             res = redirectedFunction(*args, **kwargs)
-            print("\n---FINISHED---")
-        
-        print("...FINISH")
+            print("\n---FINISHED---\n")
+
+        print("...FINISH\n")
 
         return res
 
     return wrapper
+
+
 ###FINISH DecoratorBlock
+
 
 ###START FunctionalBlock
 class MainService():
@@ -63,7 +78,7 @@ class MainService():
         Erases target mongo databases by aliases.
         '''
         mdbNAliases = ME_SETTINGS.MDB_n_Aliases
-        
+
         mdbAliases = list([
             mdbNAliases['mdbName']['alias'],
             mdbNAliases['mdbAnalytic']['alias']
@@ -99,7 +114,7 @@ class MainService():
 
         return responds
 
-    @redirectOutput
+    @functools.partial(redirectOutput, eraseLog=False, msg='Unittests')
     def runUnittests(self) -> typ.NoReturn:
         '''
         Runs the module with unittests.
@@ -112,7 +127,7 @@ class MainService():
     def globalRun(self) -> typ.NoReturn:
         '''
         This is the base function.
-        '''    
+        '''
         if ERASE_NAME_BASE_INIT_FLAG:
             if USING_FILE_STORING_FLAG:
                 res = nameReader.NamesTools.eraseNamesBase()
@@ -123,7 +138,10 @@ class MainService():
         responds = self.runMainFunctionsList()
         for respond in responds:
             print(respond)
+
+
 ###FINISH FunctionalBlock
+
 
 ###START MainBlock
 def main() -> typ.NoReturn:
@@ -155,12 +173,8 @@ def main() -> typ.NoReturn:
 
     service.runUnittests()
 
-
     ##TESTED_AREA_BEGIN
     print("\n#BEGIN TEST CODE...\n")
-
-    #from modules import tst
-    #tst.main()
 
     print("\n#...END TEST CODE")
     ##TESTED_AREA_END
@@ -171,4 +185,4 @@ def main() -> typ.NoReturn:
 
 ###START RunBlock
 main()
-###FINISH RunBlock  
+###FINISH RunBlock

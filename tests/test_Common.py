@@ -66,5 +66,5 @@ def main() -> str:
     
     runner.run(testSuites)
 
-    return "\nTests Module: Done"
+    return "Tests Module: Done"
 ###FINISH Mainblock
