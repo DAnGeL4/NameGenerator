@@ -502,6 +502,7 @@ class ManualNameGen():
         if minSize >= croppedSize:
             chainSize = croppedSize
         else:
+            minMaxRange = tuple((minSize, maxSize))
             preparedData = self.prepareFrequencyData(minMaxRange,
                                                      frequencyData)
             frequencyRules = self.setRangeByChances(preparedData, False)
