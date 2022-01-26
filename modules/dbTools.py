@@ -368,24 +368,6 @@ class MongoDBTools:
 
         return answers
 
-    @classmethod
-    def printCollection(cls, collection: MECollection) -> typ.NoReturn:
-        '''
-        Custom print on demand for collection fields.
-        '''
-        print("\n #MEDATA_module.1 {0} len: {1}".format(
-            collection._class_name, len(collection.objects)))
-        for obj in collection.objects:
-            printString = ""  #\n  ##MEDATA_module.1.1 \n"
-
-            for field in obj._fields:
-                printString += "   *" + str(field) + ": " + str(
-                    obj[field]) + "\n"
-
-            print(printString)
-
-        return None
-
 
 class ME_DBService():
     '''
@@ -904,40 +886,6 @@ class ME_DBService():
         if not answers:
             answers = list(["Analytic db writed in mongoDB."])
         return answers
-
-    def printDatabases(self, modelsByAliases: typ.Dict[str, list]
-                                                    ) -> typ.NoReturn:
-        '''
-        Custom data printing for database.
-        '''
-        for alias in modelsByAliases.keys():
-            print("\nMEDATA.x DB %s" % alias)
-
-            models = modelsByAliases[alias]
-            for model in models:
-                MongoDBTools.printCollection(model)
-
-    def showDBData(self) -> typ.NoReturn:
-        '''
-        Shows data for all databases by aliases.
-        '''
-        glob_db = self.mdbNAliases
-        modelsByAliases = dict({
-            glob_db['mdbName']['alias']:
-            list([Race, Male, Female, Surnames]),
-            glob_db['mdbAnalytic']['alias']:
-            list([
-                GlobalCounts, NameLettersCount, VowelsCount, ConsonantsCount,
-                FirstLetters, Letters, ChainsCombinations, NameEndings,
-                VowelsChains, ConsonantsChains
-            ]),
-            glob_db['mdbCheckSum']['alias']:
-            list([GlobalFlags, ChecksumFiles]),
-        })
-
-        self.printDatabases(modelsByAliases)
-
-
 ###FINISH FunctionalBlock
 
 
@@ -947,8 +895,6 @@ def main() -> typ.NoReturn:
     Entry point for working with databases.
     '''
     tools = ME_DBService()
-    #tools.showDBData()
-
     print()
 
 ###FINISH Mainblock
