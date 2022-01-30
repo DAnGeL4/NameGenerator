@@ -298,6 +298,53 @@ class MongoDBTools_Test(FunctionalClass):
         
         self.assertEqual(res, 0)
 
+    @FunctionalClass.descript
+    def test_insertEmbeddedField_fillingEmbeddedField_expectedDictDataInField(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of inserts dict data into the embedded document.
+        '''
+        collection = GlobalCounts
+        field = 'firstLettersCounts'
+        data = dict({
+            field: dict({
+                'vowelsCount': 3,
+                'consonantsCount': 3
+            })
+        })
+
+        doc = collection()
+        doc = MongoDBTools.insertEmbeddedField(doc, collection, field, data)
+
+        tmp = doc.to_json()
+        tmp = json.loads(tmp)
+        res = tmp[field]
+
+        self.assertDictEqual(res, {'vowelsCount': 3, 'consonantsCount': 3})
+
+    @FunctionalClass.descript
+    def test_insertEmbeddedField_fillingEmbeddedField_expectedListDataInField(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of inserts list data into the embedded document.
+        '''
+        collection = VowelsChains
+        field = 'chains'
+        data = dict({
+            field: list([
+                {'key': 'c', 'count': 3, 'chance': 3.0}
+            ])
+        })
+
+        doc = collection()
+        doc = MongoDBTools.insertEmbeddedField(doc, collection, field, data)
+
+        tmp = doc.to_json()
+        tmp = json.loads(tmp)
+        res = tmp[field]
+
+        self.assertListEqual(res, [{'key': 'c', 'count': 3, 'chance': 3.0}])
+
 
 class ME_DBService_Test(FunctionalClass):
     pass
