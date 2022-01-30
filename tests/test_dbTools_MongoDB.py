@@ -408,6 +408,41 @@ class MongoDBTools_Test(FunctionalClass):
 
         self.assertDictEqual(res, {'vowelsCount': 3, 'consonantsCount': 3})
 
+    @FunctionalClass.descript
+    def test_setDocument_fillingAllFields_expectedFilledDocument(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepraires and inserts data into the document.
+        '''
+        race = Race.objects(race='TestRace').first()
+        collection = GlobalCounts
+        data = dict({
+            'race': 'TestRace',
+            'maxNamesCount': 9,
+            'femaleNamesCount': 3,
+            'maleNamesCount': 3,
+            'surnamesCount': 3,
+            'firstLettersCounts': dict({
+                'vowelsCount': 3,
+                'consonantsCount': 3
+            })
+        })
+
+        doc = MongoDBTools.setDocument(collection, data)
+
+        tmp = doc.to_json()
+        res = json.loads(tmp)
+
+        self.assertDictEqual(res, { 'race': {'$oid': str(race.id)},
+                                    'maxNamesCount': 9,
+                                    'femaleNamesCount': 3,
+                                    'maleNamesCount': 3,
+                                    'surnamesCount': 3,
+                                    'firstLettersCounts': {
+                                        'vowelsCount': 3,
+                                        'consonantsCount': 3}
+                                })
+
 
 class ME_DBService_Test(FunctionalClass):
     pass
