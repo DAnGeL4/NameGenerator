@@ -34,7 +34,7 @@ class FunctionalClass(unittest.TestCase):
         @functools.wraps(descriptedFunc)
         def wrapper(*args):
             self = args[0]
-            print("* Description: \n|\t%s" % self.shortDescription())
+            print("| * Description: \n|\t%s" % self.shortDescription())
             descriptedFunc(*args)
 
         return wrapper
@@ -44,7 +44,7 @@ class FunctionalClass(unittest.TestCase):
     def printSetUpClassMsg(cls) -> typ.NoReturn:
         '''Prints message for set up class.'''
         print("==============================")
-        print("** SetUpClass: %s" % cls.__name__)
+        print("| ** SetUpClass: %s" % cls.__name__)
         print("==============================\n")
 
 
@@ -52,19 +52,19 @@ class FunctionalClass(unittest.TestCase):
     def printTearDownClassMsg(cls) -> typ.NoReturn:
         '''Prints message for tear down class.'''
         print("==============================")
-        print("*** TearDownClass: %s" % cls.__name__)
+        print("| *** TearDownClass: %s" % cls.__name__)
         print("==============================\n")
 
 
     def printSetUpMethodMsg(self) -> typ.NoReturn:
         '''Prints message for set up method.'''
         print("-------------------------------")
-        print("* Set up for:\n|\t" + str(self._testMethodName))
+        print("| * Set up for:\n|\t" + str(self._testMethodName))
 
 
     def printTearDownMethodMsg(self) -> typ.NoReturn:
         '''Prints message for tear down method.'''
-        print("* Tear down for:\n|\t" + str(self._testMethodName))
+        print("| * Tear down for:\n|\t" + str(self._testMethodName))
         print("-------------------------------\n")
 
 
