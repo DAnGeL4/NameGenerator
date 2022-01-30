@@ -183,6 +183,16 @@ class MongoDBTools_Test(FunctionalClass):
         
         self.assertTupleEqual(res, containersFields)
 
+    @FunctionalClass.descript
+    def test_getUniqueRAWData_makingRawData_expectedDict(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets unique fields and makes raw data from them.
+        '''
+        res: dict = MongoDBTools.getUniqueRAWData(Race, {'race': 'TestData'})
+        
+        self.assertDictEqual(res, {'race': 'TestData'})
+
 
 class ME_DBService_Test(FunctionalClass):
     pass
