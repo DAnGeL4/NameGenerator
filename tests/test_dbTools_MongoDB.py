@@ -443,6 +443,53 @@ class MongoDBTools_Test(FunctionalClass):
                                         'consonantsCount': 3}
                                 })
 
+    @FunctionalClass.descript
+    def test_insertDocument_savingDocument_expectedSavedDocument(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepaires and saves document.
+        '''
+        collection = Race
+        data = dict({
+            'race': 'NewTestRace'
+        })
+
+        _ = MongoDBTools.insertDocument(collection, data)
+        res = Race.objects(race='NewTestRace').count()
+
+        self.assertEqual(res, 1)
+
+    @FunctionalClass.descript
+    def test_insertDocument_savingExistingDocument_expectedWarningAnswer(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepaires and saves document.
+        '''
+        collection = Race
+        data = dict({
+            'race': 'TestRace'
+        })
+
+        res = MongoDBTools.insertDocument(collection, data)
+
+        self.assertEqual(res, "INF: Document already exist. Insert canceled")
+
+    @FunctionalClass.descript
+    def test_insertDocument_savingExistingDocument_expectedNoDuplicate(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepaires and saves document.
+        '''
+        collection = Race
+        data = dict({
+            'race': 'TestRace'
+        })
+
+        _ = MongoDBTools.insertDocument(collection, data)
+        res = Race.objects(race='TestRace').count()
+
+        self.assertEqual(res, 1)
+
 
 class ME_DBService_Test(FunctionalClass):
     pass
