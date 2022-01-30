@@ -141,6 +141,48 @@ class MongoDBTools_Test(FunctionalClass):
         
         self.assertEqual(res, Database)
 
+    @FunctionalClass.descript
+    def test_getReferenceID_readingReferenceId_expectedId(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets id for reference field of document.
+        '''
+        race = Race.objects(race='TestRace').first()
+        collectionField = getattr(Male, 'race', None)
+
+        res: str = MongoDBTools.getReferenceID(collectionField, {'race': 'TestRace'})
+        
+        self.assertEqual(res, race.id)
+
+    @FunctionalClass.descript
+    def test_getReferenceFields_getingTupleOfFields_expectedTupleOfFields(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets tuple of mongoengine reference fields.
+        '''
+        referenceFields = tuple((medb.GenericReferenceField,
+                                  medb.LazyReferenceField, 
+                                  medb.ReferenceField))
+
+        res: tuple = MongoDBTools.getReferenceFields()
+        
+        self.assertTupleEqual(res, referenceFields)
+
+    @FunctionalClass.descript
+    def test_getFieldsContainersCollections_getingTupleOfFields_expectedTupleOfFields(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets tuple of mongoengine fields of collections containers.
+        '''
+        containersFields = tuple((medb.DynamicField, 
+                                  medb.EmbeddedDocumentField, 
+                                  medb.GenericEmbeddedDocumentField, 
+                                  medb.EmbeddedDocumentListField))
+
+        res: tuple = MongoDBTools.getFieldsContainersCollections()
+        
+        self.assertTupleEqual(res, containersFields)
+
 
 class ME_DBService_Test(FunctionalClass):
     pass
