@@ -286,6 +286,18 @@ class MongoDBTools_Test(FunctionalClass):
         
         self.assertEqual(res, None)
 
+    @FunctionalClass.descript
+    def test_eraseME_DB_recreatingEmptyCollections_expectedEmptyCollections(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of recreates empty all collections.
+        '''
+        mdb = 'mdbName'
+        _ = MongoDBTools.eraseME_DB(mdb)
+        res: int = Race.objects.count()
+        
+        self.assertEqual(res, 0)
+
 
 class ME_DBService_Test(FunctionalClass):
     pass
