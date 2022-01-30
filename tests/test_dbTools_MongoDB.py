@@ -345,6 +345,69 @@ class MongoDBTools_Test(FunctionalClass):
 
         self.assertListEqual(res, [{'key': 'c', 'count': 3, 'chance': 3.0}])
 
+    @FunctionalClass.descript
+    def test_insertField_fillingReferenceField_expectedReferenceId(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of inserts data into the document.
+        '''
+        race = Race.objects(race='TestRace').first()
+        collection = GlobalCounts
+        field = 'race'
+        data = dict({field: 'TestRace'})
+
+        doc = collection()
+        doc = MongoDBTools.insertField(doc, collection, field, data)
+
+        tmp = doc.to_json()
+        tmp = json.loads(tmp)
+        res = tmp[field]
+
+        self.assertDictEqual(res, {'$oid': str(race.id)})
+
+    @FunctionalClass.descript
+    def test_insertField_fillingField_expectedDataInField(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of inserts data into the document.
+        '''
+        collection = GlobalCounts
+        field = 'maxNamesCount'
+        data = dict({field: 3})
+
+        doc = collection()
+        doc = MongoDBTools.insertField(doc, collection, field, data)
+
+        tmp = doc.to_json()
+        tmp = json.loads(tmp)
+        res = tmp[field]
+
+        self.assertEqual(res, 3)
+
+    @FunctionalClass.descript
+    def test_insertField_fillingEmbeddedField_expectedDataInEmbeddedField(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of inserts data into the document.
+        '''
+        collection = GlobalCounts
+        field = 'firstLettersCounts'
+        data = dict({
+            field: dict({
+                'vowelsCount': 3,
+                'consonantsCount': 3
+            })
+        })
+
+        doc = collection()
+        doc = MongoDBTools.insertField(doc, collection, field, data)
+
+        tmp = doc.to_json()
+        tmp = json.loads(tmp)
+        res = tmp[field]
+
+        self.assertDictEqual(res, {'vowelsCount': 3, 'consonantsCount': 3})
+
 
 class ME_DBService_Test(FunctionalClass):
     pass
