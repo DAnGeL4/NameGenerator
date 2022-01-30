@@ -1,8 +1,10 @@
 ###START ImportBlock
 ##systemImport
 import typing as typ
+import json
 import mongoengine as medb
 
+from mongomock import MongoClient
 from mongomock import Database
 
 ##customImport
@@ -19,6 +21,7 @@ from database.medbNameSchemas import Race, GenderGroups
 from database.medbNameSchemas import Male, Female, Surnames
 
 from database.medbAnalyticSchemas import GlobalCounts, VowelsChains
+from database.medbAnalyticSchemas import FirstLettersCounts
 
 ###FINISH ImportBlock
 
@@ -192,6 +195,96 @@ class MongoDBTools_Test(FunctionalClass):
         res: dict = MongoDBTools.getUniqueRAWData(Race, {'race': 'TestData'})
         
         self.assertDictEqual(res, {'race': 'TestData'})
+
+    @FunctionalClass.descript
+    def tst_getConnectString_makingMongoConnectionString_expectedConnectionString(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of makes connection string for mongodb.
+        '''
+        mdbUser = ME_SETTINGS.mdbUser
+        mdbPass = ME_SETTINGS.mdbPass
+        mdbCluster = ME_SETTINGS.mdbCluster
+        mdb = 'TestDataBase'
+
+        connectString = "mongodb+srv://" + mdbUser + ":" + mdbPass + \
+                        "@" + mdbCluster + ".9wwxd.mongodb.net/" + \
+                        mdb + "?retryWrites=true&w=majority"
+
+        res: str = MongoDBTools.getConnectString(mdb)
+        
+        self.assertEqual(res, connectString)
+
+    @FunctionalClass.descript
+    def test_getConnect_establishingConnection_expectedClient(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of connects to database and sets the alias.
+        '''
+        @classmethod
+        def mockConnectionStr(cls, mdb: str):
+            '''
+            Replaces the original function with a 
+            new one to get a connection to mongomoсk
+            '''
+            return 'mongomock://localhost@' + mdb
+
+        mdb = self.mdb_test
+        alias = self.mdb_test_alias
+        MongoDBTools.getConnectString = mockConnectionStr
+
+
+        client = MongoDBTools.getConnect(mdb, alias)
+        res: object = type(client)
+        
+        self.assertEqual(res, MongoClient)
+
+    @FunctionalClass.descript
+    def test_registerDataBases_establishingConnections_expectedClientsList(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of connects to all databases by dictionary.
+        '''
+        @classmethod
+        def mockConnectionStr(cls, mdb: str):
+            '''
+            Replaces the original function with a 
+            new one to get a connection to mongomoсk
+            '''
+            return 'mongomock://localhost@' + mdb
+
+        mdb = self.mdb_test
+        alias = self.mdb_test_alias
+        MongoDBTools.getConnectString = mockConnectionStr
+        MongoDBTools.mdbNAliases = dict({'test': {
+                                        'db_name': mdb,
+                                        'alias': alias}})
+
+        answ = MongoDBTools.registerDataBases()
+        res: object = type(answ['test_alias'])
+        
+        self.assertEqual(res, MongoClient)
+
+    @FunctionalClass.descript
+    def test_unregisterDataBases_breakingConnections_expectedNoConnections(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of disconnects to all databases by dictionary.
+        '''
+        mdb = self.mdb_test
+        alias = self.mdb_test_alias
+        MongoDBTools.mdbNAliases = dict({'test': {
+                                        'db_name': mdb,
+                                        'alias': alias}})
+        
+        medb.connect(mdb, host='mongomock://localhost', 
+                                            alias=alias)
+        _ = MongoDBTools.unregisterDataBases()
+
+        currentConnections = medb.connection._connections
+        res: typ.Any = getattr(currentConnections, alias, None)
+        
+        self.assertEqual(res, None)
 
 
 class ME_DBService_Test(FunctionalClass):
