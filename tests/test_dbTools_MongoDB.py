@@ -489,6 +489,48 @@ class MongoDBTools_Test(FunctionalClass):
 
         self.assertEqual(res, 1)
 
+    @FunctionalClass.descript
+    def test_updateDocument_savingExistingDocument_expectedChangedDocument(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepaires and updates document.
+        '''
+        race = Race.objects(race='TestRace').first()
+        collection = GlobalCounts
+        data = dict({
+            'race': 'TestRace',
+            'maxNamesCount': 9,
+            'femaleNamesCount': 3,
+            'maleNamesCount': 3,
+            'surnamesCount': 3,
+            'firstLettersCounts': dict({
+                'vowelsCount': 3,
+                'consonantsCount': 3
+            })
+        })
+        
+        doc = collection()
+        doc.race = race.id
+        doc.firstLettersCounts = FirstLettersCounts()
+        doc.save()
+
+        _ = MongoDBTools.updateDocument(doc, data)
+
+        doc = GlobalCounts.objects.first()
+        tmp = doc.to_json()
+        res = json.loads(tmp)
+        _ = res.pop('_id')
+
+        self.assertDictEqual(res, { 'race': {'$oid': str(race.id)},
+                                    'maxNamesCount': 9,
+                                    'femaleNamesCount': 3,
+                                    'maleNamesCount': 3,
+                                    'surnamesCount': 3,
+                                    'firstLettersCounts': {
+                                        'vowelsCount': 3,
+                                        'consonantsCount': 3}
+                                })
+
 
 class ME_DBService_Test(FunctionalClass):
     pass
