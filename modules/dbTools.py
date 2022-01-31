@@ -190,11 +190,12 @@ class MongoDBTools:
 
     @classmethod
     def insertEmbeddedField(cls, document: MEDocument, 
-                    collection: MECollection, field: str, 
+                    field: str, 
                     data: typ.Dict[str, dict]) -> MEDocument:
         '''
         Checks the embedded field and data, and inserts into the document.
         '''
+        collection = document.__class__
         embeddedType = collection._fields.get(field)
 
         if type(data[field]) is dict:
@@ -217,11 +218,12 @@ class MongoDBTools:
         return document
 
     @classmethod
-    def insertField(cls, document: MEDocument, collection: MECollection,
-                    field: str, data: typ.Dict[str, dict]) -> MEDocument:
+    def insertField(cls, document: MEDocument, field: str, 
+                    data: typ.Dict[str, dict]) -> MEDocument:
         '''
         Checks the field and data, and inserts into the document.
         '''
+        collection = document.__class__
         referenceFields = cls.getReferenceFields()
         fieldsContainersCollections = cls.getFieldsContainersCollections()
         collectionField = getattr(collection, field, None)
@@ -230,7 +232,7 @@ class MongoDBTools:
             setattr(document, field, cls.getReferenceID(collectionField, data))
 
         elif isinstance(collectionField, fieldsContainersCollections):
-            document = cls.insertEmbeddedField(document, collection, field, data)
+            document = cls.insertEmbeddedField(document, field, data)
 
         else:
             setattr(document, field, data[field])
@@ -252,7 +254,7 @@ class MongoDBTools:
         for field in data.keys():
 
             if hasattr(collection, field):
-                document = cls.insertField(document, collection, field, data)
+                document = cls.insertField(document, field, data)
 
         return document
 

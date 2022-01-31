@@ -50,7 +50,6 @@ class MongoDBTools_Test(FunctionalClass):
     insertField;
     setDocument;
     insertDocument;
-
     updateDocument;
     
     checkDocExist;
@@ -314,7 +313,7 @@ class MongoDBTools_Test(FunctionalClass):
         })
 
         doc = collection()
-        doc = MongoDBTools.insertEmbeddedField(doc, collection, field, data)
+        doc = MongoDBTools.insertEmbeddedField(doc, field, data)
 
         tmp = doc.to_json()
         tmp = json.loads(tmp)
@@ -337,7 +336,7 @@ class MongoDBTools_Test(FunctionalClass):
         })
 
         doc = collection()
-        doc = MongoDBTools.insertEmbeddedField(doc, collection, field, data)
+        doc = MongoDBTools.insertEmbeddedField(doc, field, data)
 
         tmp = doc.to_json()
         tmp = json.loads(tmp)
@@ -357,7 +356,7 @@ class MongoDBTools_Test(FunctionalClass):
         data = dict({field: 'TestRace'})
 
         doc = collection()
-        doc = MongoDBTools.insertField(doc, collection, field, data)
+        doc = MongoDBTools.insertField(doc, field, data)
 
         tmp = doc.to_json()
         tmp = json.loads(tmp)
@@ -376,7 +375,7 @@ class MongoDBTools_Test(FunctionalClass):
         data = dict({field: 3})
 
         doc = collection()
-        doc = MongoDBTools.insertField(doc, collection, field, data)
+        doc = MongoDBTools.insertField(doc, field, data)
 
         tmp = doc.to_json()
         tmp = json.loads(tmp)
@@ -400,7 +399,7 @@ class MongoDBTools_Test(FunctionalClass):
         })
 
         doc = collection()
-        doc = MongoDBTools.insertField(doc, collection, field, data)
+        doc = MongoDBTools.insertField(doc, field, data)
 
         tmp = doc.to_json()
         tmp = json.loads(tmp)
