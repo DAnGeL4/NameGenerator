@@ -104,8 +104,8 @@ class MongoDBTools:
                 
         return fieldsContainersCollections
 
-    @staticmethod
-    def getUniqueRAWData(collection: MECollection,
+    @classmethod
+    def getUniqueRAWData(cls, collection: MECollection,
                          data: typ.Dict[str, dict]) -> typ.Dict[str, dict]:
         '''
         Gets unique fields and makes raw data from them.
@@ -124,7 +124,14 @@ class MongoDBTools:
                 field = fieldIndex[0]
 
                 if field in data:
-                    rawData.update({field: data[field]})
+                    value = data[field]
+                    
+                    referenceFields = cls.getReferenceFields()
+                    collectionField = getattr(collection, field, None)
+                    if isinstance(collectionField, referenceFields):
+                        value = cls.getReferenceID(collectionField, data)
+
+                    rawData.update({field: value})
 
         return rawData
 

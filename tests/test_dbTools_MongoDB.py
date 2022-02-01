@@ -559,6 +559,64 @@ class MongoDBTools_Test(FunctionalClass):
         res = MongoDBTools.checkDocExist(collection, data)
         self.assertIsNone(res)
 
+    @FunctionalClass.descript
+    def test_updateOrInsertDocument_savingExistingDocument_expectedChangedDocument(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepaires and updates document.
+        '''
+        race = Race.objects(race='TestRace').first()
+        collection = GlobalCounts
+        data = dict({
+            'race': 'TestRace',
+            'maxNamesCount': 9,
+            'femaleNamesCount': 3,
+            'maleNamesCount': 3,
+            'surnamesCount': 3,
+            'firstLettersCounts': dict({
+                'vowelsCount': 3,
+                'consonantsCount': 3
+            })
+        })
+        
+        doc = collection()
+        doc.race = race.id
+        doc.firstLettersCounts = FirstLettersCounts()
+        doc.save()
+
+        _ = MongoDBTools.updateOrInsertDocument(collection, data)
+
+        doc = GlobalCounts.objects.first()
+        tmp = doc.to_json()
+        res = json.loads(tmp)
+        _ = res.pop('_id')
+
+        self.assertDictEqual(res, { 'race': {'$oid': str(race.id)},
+                                    'maxNamesCount': 9,
+                                    'femaleNamesCount': 3,
+                                    'maleNamesCount': 3,
+                                    'surnamesCount': 3,
+                                    'firstLettersCounts': {
+                                        'vowelsCount': 3,
+                                        'consonantsCount': 3}
+                                })
+
+    @FunctionalClass.descript
+    def test_updateOrInsertDocument_savingNewDocument_expectedDocument(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepaires and updates document.
+        '''
+        collection = Race
+        data = dict({
+            'race': 'NewTestRace'
+        })
+
+        _ = MongoDBTools.updateOrInsertDocument(collection, data)
+
+        res = Race.objects(race='NewTestRace').count()
+        self.assertEqual(res, 1)
+
 
 class ME_DBService_Test(FunctionalClass):
     pass
