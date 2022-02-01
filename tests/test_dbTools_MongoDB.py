@@ -531,6 +531,34 @@ class MongoDBTools_Test(FunctionalClass):
                                         'consonantsCount': 3}
                                 })
 
+    @FunctionalClass.descript
+    def test_checkDocExist_checkingExistingDocument_expectedExist(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of checks if documents already exists in db.
+        '''
+        collection = Race
+        data = dict({
+            'race': 'TestRace'
+        })
+
+        res = MongoDBTools.checkDocExist(collection, data)
+        self.assertIsNotNone(res)
+
+    @FunctionalClass.descript
+    def test_checkDocExist_checkingExistingDocument_expectedNotExist(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of checks if documents already exists in db.
+        '''
+        collection = Race
+        data = dict({
+            'race': 'NotExistRace'
+        })
+
+        res = MongoDBTools.checkDocExist(collection, data)
+        self.assertIsNone(res)
+
 
 class ME_DBService_Test(FunctionalClass):
     pass
