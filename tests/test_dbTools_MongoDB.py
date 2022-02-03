@@ -55,7 +55,6 @@ class MongoDBTools_Test(FunctionalClass):
     updateOrInsertDocument;
     updateDocumentIfExist;
     writeDocuments;
-
     writeDatabase;
     '''
 
@@ -901,6 +900,89 @@ class MongoDBTools_Test(FunctionalClass):
 
         res = MongoDBTools.writeDocuments(collection, dataList, oprtn)
         self.assertListEqual(res, ["WRN: Document not exist. Update canceled."])
+
+    @FunctionalClass.descript
+    def test_writeDatabase_insertingDocumentsForFewCollections_expectedRightData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of writes prepared data for 
+        few collections in the database.
+        '''
+        collectionsData = dict({
+            'Race': {
+                'collection': Race,
+                'data': list([
+                    {'race': 'TestRace'},       #already exist
+                    {'race': 'NewTestRace'},
+                    {'race': 'NewSecTestRace'}]),
+                'operation': 'insert_only'
+            },
+            'Male': {
+                'collection': Male,
+                'data': list([
+                    {'race': 'TestRace',        #already exist
+                    'name': 'TestName'},
+                    {'race': 'NewTestRace',
+                    'name': 'NewTestName'}]),
+                'operation': 'insert_only'
+            }
+        })
+
+        _ = MongoDBTools.writeDatabase(collectionsData)
+        
+        res = list()
+        for collection in [Race, Male]:
+            docs = collection.objects()
+            tmp = docs.to_json()
+            res.extend(json.loads(tmp))
+        for r in res:
+            _ = r.pop('_id')
+
+        race1 = Race.objects(race='TestRace').first()
+        race2 = Race.objects(race='NewTestRace').first()
+        
+        self.assertListEqual(res, [ {'race': 'TestRace'},
+                                    {'race': 'NewTestRace'},
+                                    {'race': 'NewSecTestRace'},
+                                    {'_cls': 'Male',
+                                    'race': {'$oid': str(race1.id)},
+                                    'name': 'TestName'},
+                                    {'_cls': 'Male',
+                                    'race': {'$oid': str(race2.id)},
+                                    'name': 'NewTestName'}
+                                ])
+
+    @FunctionalClass.descript
+    def test_writeDatabase_insertingDocumentsForFewCollections_expectedRightAnswer(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of writes prepared data for 
+        few collections in the database.
+        '''
+        collectionsData = dict({
+            'Race': {
+                'collection': Race,
+                'data': list([
+                    {'race': 'TestRace'},       #already exist
+                    {'race': 'NewTestRace'},
+                    {'race': 'NewSecTestRace'}]),
+                'operation': 'insert_only'
+            },
+            'Male': {
+                'collection': Male,
+                'data': list([
+                    {'race': 'TestRace',        #already exist
+                    'name': 'TestName'},
+                    {'race': 'NewTestRace',
+                    'name': 'NewTestName'}]),
+                'operation': 'insert_only'
+            }
+        })
+
+        res = MongoDBTools.writeDatabase(collectionsData)
+        self.assertListEqual(res, [
+            "INF: Document already exist. Insert canceled.",
+            "INF: Document already exist. Insert canceled."])
 
 
 class ME_DBService_Test(FunctionalClass):

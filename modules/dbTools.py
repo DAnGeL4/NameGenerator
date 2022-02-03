@@ -407,15 +407,19 @@ class MongoDBTools:
     def writeDatabase(cls, collectionsData: typ.Dict[str, dict]
                                         ) -> typ.Union[list, None]:
         '''
-        Writes prepared data for all collections in the database.
+        Writes prepared data for few collections in the database.
         '''
+        allAnswers = list()
         for collectionName in collectionsData.keys():
             collection = collectionsData[collectionName]['collection']
             listOfData = collectionsData[collectionName]['data']
             operation = collectionsData[collectionName]['operation']
             answers = cls.writeDocuments(collection, listOfData, operation)
+            
+            if answers:
+                allAnswers.extend(answers)
 
-        return answers
+        return allAnswers
 
 
 class ME_DBService():
