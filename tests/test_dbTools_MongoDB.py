@@ -17,11 +17,10 @@ from tests.test_Service import FunctionalClass
 #from database.medbCheckSumSchemas import GlobalFlags
 #from database.medbCheckSumSchemas import ChecksumFiles
 
-from database.medbNameSchemas import Race, GenderGroups
-from database.medbNameSchemas import Male, Female, Surnames
+from database.medbNameSchemas import Race, GenderGroups, Male
 
 from database.medbAnalyticSchemas import GlobalCounts, VowelsChains
-from database.medbAnalyticSchemas import FirstLettersCounts
+from database.medbAnalyticSchemas import FirstLettersCounts, NameLettersCount
 
 ###FINISH ImportBlock
 
@@ -40,6 +39,7 @@ class MongoDBTools_Test(FunctionalClass):
     getReferenceID;
     getReferenceFields;
     getFieldsContainersCollections;
+    getUniqueIndexes;
     getUniqueRAWData;
     getConnectString;
     getConnect;
@@ -51,10 +51,11 @@ class MongoDBTools_Test(FunctionalClass):
     setDocument;
     insertDocument;
     updateDocument;
-    
     checkDocExist;
     updateOrInsertDocument;
+    updateDocumentIfExist;
     writeDocuments;
+
     writeDatabase;
     '''
 
@@ -118,12 +119,11 @@ class MongoDBTools_Test(FunctionalClass):
         
         GlobalCounts.drop_collection()
         VowelsChains.drop_collection()
+        NameLettersCount.drop_collection()
 
         Race.drop_collection()
         GenderGroups.drop_collection()
         Male.drop_collection()
-        Female.drop_collection()
-        Surnames.drop_collection()
 
         medb.disconnect(alias=self.mdb_test_alias)
 
@@ -184,6 +184,20 @@ class MongoDBTools_Test(FunctionalClass):
         res: tuple = MongoDBTools.getFieldsContainersCollections()
         
         self.assertTupleEqual(res, containersFields)
+
+    @FunctionalClass.descript
+    def test_getUniqueIndexes_getingUniqueIndexes_expectedListOfIndexes(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of Gets the unique indexes of collection.
+        '''
+        res: list = MongoDBTools.getUniqueIndexes(NameLettersCount)
+        
+        self.assertListEqual(res, [{'fields': [
+                                        ('race', 1), 
+                                        ('gender_group', 1), 
+                                        ('key', 1)
+                                    ]}])
 
     @FunctionalClass.descript
     def test_getUniqueRAWData_makingRawData_expectedDict(
@@ -471,7 +485,7 @@ class MongoDBTools_Test(FunctionalClass):
 
         res = MongoDBTools.insertDocument(collection, data)
 
-        self.assertEqual(res, "INF: Document already exist. Insert canceled")
+        self.assertEqual(res, "INF: Document already exist. Insert canceled.")
 
     @FunctionalClass.descript
     def test_insertDocument_savingExistingDocument_expectedNoDuplicate(
@@ -616,6 +630,277 @@ class MongoDBTools_Test(FunctionalClass):
 
         res = Race.objects(race='NewTestRace').count()
         self.assertEqual(res, 1)
+
+    @FunctionalClass.descript
+    def test_updateDocumentIfExist_updatingExistingDocument_expectedChangedDocument(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of only updates the document.
+        '''
+        race = Race.objects(race='TestRace').first()
+        collection = GlobalCounts
+        data = dict({
+            'race': 'TestRace',
+            'maxNamesCount': 9,
+            'femaleNamesCount': 3,
+            'maleNamesCount': 3,
+            'surnamesCount': 3,
+            'firstLettersCounts': dict({
+                'vowelsCount': 3,
+                'consonantsCount': 3
+            })
+        })
+        
+        doc = collection()
+        doc.race = race.id
+        doc.firstLettersCounts = FirstLettersCounts()
+        doc.save()
+
+        _ = MongoDBTools.updateDocumentIfExist(collection, data)
+
+        doc = GlobalCounts.objects.first()
+        tmp = doc.to_json()
+        res = json.loads(tmp)
+        _ = res.pop('_id')
+
+        self.assertDictEqual(res, { 'race': {'$oid': str(race.id)},
+                                    'maxNamesCount': 9,
+                                    'femaleNamesCount': 3,
+                                    'maleNamesCount': 3,
+                                    'surnamesCount': 3,
+                                    'firstLettersCounts': {
+                                        'vowelsCount': 3,
+                                        'consonantsCount': 3}
+                                })
+
+    @FunctionalClass.descript
+    def test_updateDocumentIfExist_updatingNewDocument_expectedWarningAnswer(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of only updates the document.
+        '''
+        collection = Race
+        data = dict({
+            'race': 'NewTestRace'
+        })
+
+        res = MongoDBTools.updateDocumentIfExist(collection, data)
+        self.assertEqual(res, "WRN: Document not exist. Update canceled.")
+
+    @FunctionalClass.descript
+    def test_writeDocuments_sendingIncorrectOperation_expectedRightAnswer(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of writes document data for the entire collection.
+        '''
+        oprtn = 'incorrect'
+
+        res = MongoDBTools.writeDocuments(None, None, oprtn)
+        self.assertListEqual(res, ['ERR: Unknown operation.'])
+
+    @FunctionalClass.descript
+    def test_writeDocuments_savingNewDocuments_expectedDocuments(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of writes document data for the 
+        entire collection. Checking the insertion of a new document 
+        and canceling the insertion of an existing one.
+        '''
+        collection = Race
+        dataList = list([
+            {'race': 'TestRace'},
+            {'race': 'NewTestRace'},
+            {'race': 'NewSecTestRace'}
+        ])
+        oprtn = 'insert_only'
+
+        _ = MongoDBTools.writeDocuments(collection, dataList, oprtn)
+
+        res = Race.objects.count()
+        self.assertEqual(res, 3)
+
+    @FunctionalClass.descript
+    def test_writeDocuments_savingNewDocuments_expectedRightAnswer(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of writes document data for the 
+        entire collection. Checking the insertion of a new document 
+        and canceling the insertion of an existing one.
+        '''
+        collection = Race
+        dataList = list([
+            {'race': 'TestRace'},
+            {'race': 'NewTestRace'},
+            {'race': 'NewSecTestRace'}
+        ])
+        oprtn = 'insert_only'
+
+        res = MongoDBTools.writeDocuments(collection, dataList, oprtn)
+        self.assertListEqual(res, 
+                        ["INF: Document already exist. Insert canceled."])
+
+    @FunctionalClass.descript
+    def test_writeDocuments_updatingOrInsertingDocuments_expectedChangedDocuments(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepaires and updates document.
+        Checking inserting a new document and updating an existing one.
+        '''
+        race = Race.objects(race='TestRace').first()
+        gender = GenderGroups.objects(gender_group='TestGender').first()
+        collection = NameLettersCount
+        dataList = list([
+            {'race': 'TestRace',
+            'gender_group': 'TestGender',
+            'key': 3,
+            'count': 3,
+            'chance': 3.3},
+            {'race': 'TestRace',
+            'gender_group': 'TestGender',
+            'key': 4,
+            'count': 4,
+            'chance': 4.4}
+        ])
+        oprtn = 'update_or_insert'
+        
+        doc = collection()
+        doc.race = race.id
+        doc.gender_group = gender.id
+        doc.key = 3
+        doc.save()
+
+        _ = MongoDBTools.writeDocuments(collection, dataList, oprtn)
+        
+        docs = NameLettersCount.objects()
+        tmp = docs.to_json()
+        res: list = json.loads(tmp)
+
+        for r in res:
+            _ = r.pop('_id')
+            _ = r.pop('_cls')
+
+        self.assertListEqual(res, [{'race': {'$oid': str(race.id)},
+                                    'gender_group': {'$oid': str(gender.id)},
+                                    'key': 3,
+                                    'count': 3,
+                                    'chance': 3.3},
+                                    {'race': {'$oid': str(race.id)},
+                                    'gender_group': {'$oid': str(gender.id)},
+                                    'key': 4,
+                                    'count': 4,
+                                    'chance': 4.4}])
+
+    @FunctionalClass.descript
+    def test_writeDocuments_updatingOrInsertingDocuments_expectedRightAnswer(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepaires and updates document.
+        Checking inserting a new document and updating an existing one.
+        '''
+        race = Race.objects(race='TestRace').first()
+        gender = GenderGroups.objects(gender_group='TestGender').first()
+        collection = NameLettersCount
+        dataList = list([
+            {'race': 'TestRace',
+            'gender_group': 'TestGender',
+            'key': 3,
+            'count': 3,
+            'chance': 3.3},
+            {'race': 'TestRace',
+            'gender_group': 'TestGender',
+            'key': 4,
+            'count': 4,
+            'chance': 4.4}
+        ])
+        oprtn = 'update_or_insert'
+        
+        doc = collection()
+        doc.race = race.id
+        doc.gender_group = gender.id
+        doc.key = 3
+        doc.save()
+
+        res = MongoDBTools.writeDocuments(collection, dataList, oprtn)
+        self.assertIsNone(res)
+
+    @FunctionalClass.descript
+    def test_writeDocuments_onlyUpdatingDocuments_expectedChangedSomeDocuments(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepaires and updates document.
+        Checking only updating an existing document.
+        '''
+        race = Race.objects(race='TestRace').first()
+        gender = GenderGroups.objects(gender_group='TestGender').first()
+        collection = NameLettersCount
+        dataList = list([
+            {'race': 'TestRace',
+            'gender_group': 'TestGender',
+            'key': 3,
+            'count': 3,
+            'chance': 3.3},
+            {'race': 'TestRace',
+            'gender_group': 'TestGender',
+            'key': 4,
+            'count': 4,
+            'chance': 4.4}
+        ])
+        oprtn = 'update_only'
+        
+        doc = collection()
+        doc.race = race.id
+        doc.gender_group = gender.id
+        doc.key = 3
+        doc.save()
+
+        _ = MongoDBTools.writeDocuments(collection, dataList, oprtn)
+        
+        docs = NameLettersCount.objects()
+        tmp = docs.to_json()
+        res: list = json.loads(tmp)
+
+        for r in res:
+            _ = r.pop('_id')
+            _ = r.pop('_cls')
+
+        self.assertListEqual(res, [{'race': {'$oid': str(race.id)},
+                                    'gender_group': {'$oid': str(gender.id)},
+                                    'key': 3,
+                                    'count': 3,
+                                    'chance': 3.3}])
+
+    @FunctionalClass.descript
+    def test_writeDocuments_onlyUpdatingDocuments_expectedRightAnswer(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepaires and updates document.
+        Checking only updating an existing document.
+        '''
+        race = Race.objects(race='TestRace').first()
+        gender = GenderGroups.objects(gender_group='TestGender').first()
+        collection = NameLettersCount
+        dataList = list([
+            {'race': 'TestRace',
+            'gender_group': 'TestGender',
+            'key': 3,
+            'count': 3,
+            'chance': 3.3},
+            {'race': 'TestRace',
+            'gender_group': 'TestGender',
+            'key': 4,
+            'count': 4,
+            'chance': 4.4}
+        ])
+        oprtn = 'update_only'
+        
+        doc = collection()
+        doc.race = race.id
+        doc.gender_group = gender.id
+        doc.key = 3
+        doc.save()
+
+        res = MongoDBTools.writeDocuments(collection, dataList, oprtn)
+        self.assertListEqual(res, ["WRN: Document not exist. Update canceled."])
 
 
 class ME_DBService_Test(FunctionalClass):
