@@ -105,15 +105,42 @@ class MongoDBTools:
         return fieldsContainersCollections
 
     @classmethod
+    def getUniqueIndexes(cls, collection: MECollection) -> typ.List[dict]:
+        '''
+        Gets the unique indexes of collection.
+        '''
+        uniqueFields = dict({'fields': list()})
+
+        indexes = collection._meta.get('index_specs')
+        for index in indexes:
+            if 'unique' not in index or not index['unique']:
+                continue
+            elif ('_cls', 1) in index['fields']:
+                _ = index['fields'].remove(('_cls', 1))
+            elif ('_id', 1) in index['fields']:
+                _ = index['fields'].remove(('_id', 1))
+            
+            if not all(field in uniqueFields['fields'] 
+                       for field in index['fields']):
+                uniqueFields['fields'].extend(index['fields'])
+
+        if not uniqueFields['fields']:
+            return None
+        return list([uniqueFields])
+
+    @classmethod
     def getUniqueRAWData(cls, collection: MECollection,
                          data: typ.Dict[str, dict]) -> typ.Dict[str, dict]:
         '''
         Gets unique fields and makes raw data from them.
         '''
         rawData = dict()
+
         uniqueFieldsData = collection._unique_with_indexes()
         if not uniqueFieldsData:
-            return None
+            uniqueFieldsData = cls.getUniqueIndexes(collection)
+            if not uniqueFieldsData:
+                return None
 
         uniqueFieldsData = uniqueFieldsData[0]
 
@@ -273,7 +300,7 @@ class MongoDBTools:
         '''        
         document = cls.checkDocExist(collection, data)
         if document:
-            return "INF: Document already exist. Insert canceled"
+            return "INF: Document already exist. Insert canceled."
 
         document = cls.setDocument(collection, data)
         answer = None
@@ -336,18 +363,31 @@ class MongoDBTools:
         return answer
 
     @classmethod
+    def updateDocumentIfExist(cls, collection: MECollection,
+                               data: typ.Dict[str, dict]) -> str:
+        '''
+        Only updates the document if it exists.
+        '''
+        document = cls.checkDocExist(collection, data)
+        if not document:
+            return "WRN: Document not exist. Update canceled."
+
+        answer = cls.updateDocument(document, data)
+        return answer    
+
+    @classmethod
     def writeDocuments(cls, collection: MECollection,
                        listOfData: typ.List[dict],
                        operation: str) -> typ.Union[list, None]:
         '''
         Writes document data for the entire collection.
         '''
-        answers = list()
+        answers = list([])
         operations = {
             'insert_only': cls.insertDocument,
             'update_or_insert': cls.updateOrInsertDocument,
-            'update_only': cls.insertDocument
-        }  #need to do
+            'update_only': cls.updateDocumentIfExist
+        }
 
         if operation not in operations:
             answers.append('ERR: Unknown operation.')
