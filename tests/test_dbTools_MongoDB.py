@@ -10,7 +10,7 @@ from mongomock import Database
 ##customImport
 from configs.CFGNames import ME_SETTINGS
 #from configs.CFGNames import CHECKSUM_DB_GLOBAL_FLAG
-from modules.dbTools import MongoDBTools
+from modules.dbTools import MongoDBTools, ME_DBService
 
 from tests.test_Service import FunctionalClass
 
@@ -986,7 +986,216 @@ class MongoDBTools_Test(FunctionalClass):
 
 
 class ME_DBService_Test(FunctionalClass):
-    pass
+    '''
+    Testing next methods of class #MongoDBTools:
+    getTemplate;
+    getNamesByRace;
+    getPreparedRaceData
+    getIdByField
+    getLocalAnalyticDataByKeys
+    prepareToWriteNamesData
+
+    readNamesDBByRace
+    setChecksumGlobalDB_ME
+    fillRaceData
+    fillGlobalCountsData
+    prepareGlobalCountsData
+    fillAnalyticCountCollection
+    prepareAnalyticCountCollections
+    fillLocalChainData
+    unpackAnalyticChainData
+    fillAnalyticChainCollection
+    prepareAnalyticChainCollection
+    writeGendersDB_ME
+    readBaseOfNamesDB_ME
+    writeBaseOfNamesDB_ME
+    readChecksumDB_ME
+    writeChecksumDB_ME
+    writeAnalyticsDB_ME
+    '''
+
+    ##BEGIN ConstantBlock
+    mdb_alias = ME_SETTINGS.MDB_n_Aliases['mdbName']['alias']
+    mdb_analytic_alias = ME_SETTINGS.MDB_n_Aliases['mdbAnalytic']['alias']
+    mdb_checksum_alias = ME_SETTINGS.MDB_n_Aliases['mdbCheckSum']['alias']
+
+    #tst_mdbNAliases = MongoDBTools.mdbNAliases
+    #tst_getConnectString = MongoDBTools.getConnectString
+    #mdb_test = 'test_db'
+    #mdb_test_alias = 'test_alias'
+    TestFiles = {}
+    ##END ConstantBlock
+
+    ##BEGIN PrepareBlock
+    @classmethod
+    def setUpClass(cls) -> typ.NoReturn:
+        '''Set up for class.'''
+        cls.printSetUpClassMsg()
+        cls.createTestFiles()
+
+        #Using mongomock for testing
+        medb.connect('mongoenginetest', 
+                host='mongomock://localhost', 
+                alias=cls.mdb_alias)
+        medb.connect('mongoenginetest2', 
+                host='mongomock://localhost', 
+                alias=cls.mdb_analytic_alias)
+        medb.connect('mongoenginetest3', 
+                host='mongomock://localhost', 
+                alias=cls.mdb_checksum_alias)
+
+    @classmethod
+    def tearDownClass(cls) -> typ.NoReturn:
+        '''Tear down for class.'''
+        medb.disconnect(alias=cls.mdb_alias)
+        medb.disconnect(alias=cls.mdb_analytic_alias)
+        medb.disconnect(alias=cls.mdb_checksum_alias)
+
+        cls.removeTestFiles()
+        cls.printTearDownClassMsg()
+
+    def setUp(self) -> typ.NoReturn:
+        '''Set up for test.'''
+        self.printSetUpMethodMsg()
+
+        race = Race()
+        race.race = 'TestRace'
+        race.save()
+
+        genderGp = GenderGroups()
+        genderGp.gender_group = 'TestGender'
+        genderGp.save()
+
+        male = Male()
+        male.race = race
+        male.name = 'TestName'
+        male.save()
+        
+        lettersCount = NameLettersCount()
+        lettersCount.race = race.id
+        lettersCount.gender_group = genderGp.id
+        lettersCount.key = 3
+        lettersCount.save()
+
+    def tearDown(self) -> typ.NoReturn:
+        '''Tear down for test.'''
+        #Return class data back after manipulation in tests
+        #MongoDBTools.mdbNAliases = self.tst_mdbNAliases
+        #MongoDBTools.getConnectString = self.tst_getConnectString
+        
+        GlobalCounts.drop_collection()
+        #VowelsChains.drop_collection()
+        #NameLettersCount.drop_collection()
+
+        Race.drop_collection()
+        GenderGroups.drop_collection()
+        Male.drop_collection()
+
+        #medb.disconnect(alias=self.mdb_test_alias)
+
+        self.printTearDownMethodMsg()
+
+    ##END PrepareBlock
+
+    @FunctionalClass.descript
+    def test_getTemplate_gettingDeepCopy_expectedSeparateDict(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets fast deepcopy of template.
+        '''
+        data = dict({'test_key': 1})
+        template = dict({
+            'SomeTemplate': {
+                'some_list': list(),
+                'some_dict': {'data': data}}
+        })
+
+        res = ME_DBService().getTemplate(template)
+        data['test_key'] = 3
+
+        self.assertDictEqual(res, { 'SomeTemplate': {
+                                        'some_list': [],
+                                        'some_dict': {
+                                            'data': {'test_key': 1}
+                                        }}})
+
+    @FunctionalClass.descript
+    def test_getNamesByRace_gettingDeepCopy_expectedSeparateDict(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets fast deepcopy of template.
+        '''
+        race = Race.objects(race='TestRace').first()
+
+        res = ME_DBService().getNamesByRace(race, Male)
+        self.assertListEqual(res, ['TestName'])
+
+    @FunctionalClass.descript
+    def test_getPreparedRaceData_preparingTemplate_expectedCorrectTemplate(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepairs template by current race.
+        '''
+        race = Race.objects(race='TestRace').first()
+
+        res = ME_DBService().getPreparedRaceData(race)
+        self.assertDictEqual(res, {"TestRace": {
+                                    "Genders": {
+                                        "Female": {"Names": []}, 
+                                        "Male": {"Names": []}},
+                                    "Surnames": []
+                                    }})
+
+    @FunctionalClass.descript
+    def test_getIdByField_gettingDocID_expectedDocID(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets id by field from collection.
+        '''
+        race = Race.objects(race='TestRace').first()
+
+        res = ME_DBService.getIdByField(Male, 'race', 'TestRace')
+        self.assertEqual(res, race.id)
+
+    @FunctionalClass.descript
+    def test_getLocalAnalyticDataByKeys_readingData_expectedDict(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of reads analytic data 
+        from collection by target keys.
+        '''
+        race = Race.objects(race='TestRace').first()
+        gender = GenderGroups.objects(gender_group='TestGender').first()
+
+        res = ME_DBService.getLocalAnalyticDataByKeys(NameLettersCount, 
+                                            'TestRace', 'TestGender')
+        for r in res:
+            _ = r.pop('_id')
+            _ = r.pop('_cls')
+
+        self.assertListEqual(res, [{'race': {'$oid': str(race.id)},
+                                    'gender_group': {'$oid': str(gender.id)},
+                                    'key': 3,
+                                    'count': 0,
+                                    'chance': 0.0}])
+
+    @FunctionalClass.descript
+    def test_prepareToWriteNamesData_preparingData_expectedAdaptedData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of adapts the names database 
+        to the mongoengine schema.
+        '''
+        race = 'TestRace'
+        data = list([
+            'TestName1',
+            'TestName2'
+        ])
+
+        res = ME_DBService().prepareToWriteNamesData(race, data)
+
+        self.assertListEqual(res, [{'name': 'TestName1', 'race': 'TestRace'},
+                                    {'name': 'TestName2', 'race': 'TestRace'}])
                             
 ###FINISH FunctionalBlock
 

@@ -444,6 +444,8 @@ class ME_DBService():
         '''
         Returns names list by target race.
         '''
+        assert getattr(collection, 'name', None) is not None, \
+                "The collection does not have a 'name' field."
         objs = collection.objects(race=raceObject).only('name').all()
         names = list([str(obj.name) for obj in objs])
 
@@ -489,13 +491,13 @@ class ME_DBService():
         if not raceId or not genderId:
             return list()
 
-        filterdObjects = collection.objects(medb.Q(race=raceId) & 
+        filteredObjects = collection.objects(medb.Q(race=raceId) & 
                                             medb.Q(gender_group=genderId))
 
-        filterdData = filterdObjects.to_json()
-        filterdData = json.loads(filterdData)
+        filteredData = filteredObjects.to_json()
+        filteredData = json.loads(filteredData)
         
-        return filterdData
+        return filteredData
 
     def prepareToWriteNamesData(self, race: str, data: list) -> typ.Dict[str, dict]:
         '''
