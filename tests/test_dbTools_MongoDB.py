@@ -990,28 +990,28 @@ class ME_DBService_Test(FunctionalClass):
     Testing next methods of class #MongoDBTools:
     getTemplate;
     getNamesByRace;
-    getPreparedRaceData
-    getIdByField
-    getLocalAnalyticDataByKeys
-    prepareToWriteNamesData
-    readNamesDBByRace
-    setChecksumGlobalDB_ME
-    
-    fillRaceData
-    fillGlobalCountsData
-    prepareGlobalCountsData
-    fillAnalyticCountCollection
-    prepareAnalyticCountCollections
-    fillLocalChainData
-    unpackAnalyticChainData
-    fillAnalyticChainCollection
-    prepareAnalyticChainCollection
-    writeGendersDB_ME
-    readBaseOfNamesDB_ME
-    writeBaseOfNamesDB_ME
-    readChecksumDB_ME
-    writeChecksumDB_ME
-    writeAnalyticsDB_ME
+    getPreparedRaceData;
+    getIdByField;
+    getLocalAnalyticDataByKeys;
+    prepareToWriteNamesData;
+    readNamesDBByRace;
+    setChecksumGlobalDB_ME;
+    fillRaceData;
+    fillGlobalCountsData;
+    prepareGlobalCountsData;
+
+    fillAnalyticCountCollection;
+    prepareAnalyticCountCollections;
+    fillLocalChainData;
+    unpackAnalyticChainData;
+    fillAnalyticChainCollection;
+    prepareAnalyticChainCollection;
+    writeGendersDB_ME;
+    readBaseOfNamesDB_ME;
+    writeBaseOfNamesDB_ME;
+    readChecksumDB_ME;
+    writeChecksumDB_ME;
+    writeAnalyticsDB_ME.
     '''
 
     ##BEGIN ConstantBlock
@@ -1247,6 +1247,68 @@ class ME_DBService_Test(FunctionalClass):
                                         "Female": {"Names": []}, 
                                         "Male": {"Names": ['TestName']}},
                                     "Surnames": []
+                                    }})
+
+    @FunctionalClass.descript
+    def test_fillGlobalCountsData_adaptsData_expectedFilledSchema(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of adapts the global counts data 
+        to the mongoengine schema.
+        '''
+        race = 'TestRace'
+        analyticTemplate = {
+            'Max_Names_Count': 1,
+            'Male_Names_Count': 2,
+            'Female_Names_Count': 3,
+            'Surnames_Count': 4,
+            "First_Letters": {
+                "Vowels_Count": 5,
+                "Consonants_Count": 6,}
+        }
+
+        res = ME_DBService().fillGlobalCountsData(race, analyticTemplate)
+        self.assertListEqual(res, [{'race': 'TestRace', 
+                                    'maxNamesCount': 1,
+                                    'maleNamesCount': 2,
+                                    'femaleNamesCount': 3,
+                                    'surnamesCount': 4,
+                                    'firstLettersCounts': {
+                                        'vowelsCount': 5,
+                                        'consonantsCount': 6}
+                                    }])
+
+    @FunctionalClass.descript
+    def test_prepareGlobalCountsData_adaptsData_expectedFilledSchema(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepares and arranges 
+        the global counts data for writing.
+        '''
+        race = 'TestRace'
+        analyticTemplate = {
+            'Max_Names_Count': 1,
+            'Male_Names_Count': 2,
+            'Female_Names_Count': 3,
+            'Surnames_Count': 4,
+            "First_Letters": {
+                "Vowels_Count": 5,
+                "Consonants_Count": 6,}
+        }
+
+        res = ME_DBService().prepareGlobalCountsData(race, analyticTemplate)
+        self.assertDictEqual(res, { 'GlobalCounts': {
+                                        'collection': GlobalCounts,
+                                        'data': [{'race': 'TestRace', 
+                                                'maxNamesCount': 1,
+                                                'maleNamesCount': 2,
+                                                'femaleNamesCount': 3,
+                                                'surnamesCount': 4,
+                                                'firstLettersCounts': {
+                                                    'vowelsCount': 5,
+                                                    'consonantsCount': 6}
+                                                }],
+                                        'operation': 'update_or_insert'
                                     }})
                             
 ###FINISH FunctionalBlock
