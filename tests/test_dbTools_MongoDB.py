@@ -1225,6 +1225,29 @@ class ME_DBService_Test(FunctionalClass):
         res = GlobalFlags.objects.first()
         
         self.assertFalse(res.globalExist)
+
+    @FunctionalClass.descript
+    def test_fillRaceData_fillingTemplate_expectedFilledTemplate(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of populates a prepared race template 
+        with names data for analytic module.
+        '''
+        race = Race.objects(race='TestRace').first()
+        namesTemplate = {"TestRace": {
+                            "Genders": {
+                                "Female": {"Names": []}, 
+                                "Male": {"Names": []}},
+                            "Surnames": []
+                            }}
+
+        res = ME_DBService().fillRaceData(race, namesTemplate)
+        self.assertDictEqual(res, {"TestRace": {
+                                    "Genders": {
+                                        "Female": {"Names": []}, 
+                                        "Male": {"Names": ['TestName']}},
+                                    "Surnames": []
+                                    }})
                             
 ###FINISH FunctionalBlock
 
