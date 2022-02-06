@@ -14,7 +14,7 @@ from modules.dbTools import MongoDBTools, ME_DBService
 
 from tests.test_Service import FunctionalClass
 
-#from database.medbCheckSumSchemas import GlobalFlags
+from database.medbCheckSumSchemas import GlobalFlags
 #from database.medbCheckSumSchemas import ChecksumFiles
 
 from database.medbNameSchemas import Race, GenderGroups, Male
@@ -994,9 +994,9 @@ class ME_DBService_Test(FunctionalClass):
     getIdByField
     getLocalAnalyticDataByKeys
     prepareToWriteNamesData
-
     readNamesDBByRace
     setChecksumGlobalDB_ME
+    
     fillRaceData
     fillGlobalCountsData
     prepareGlobalCountsData
@@ -1077,6 +1077,10 @@ class ME_DBService_Test(FunctionalClass):
         lettersCount.key = 3
         lettersCount.save()
 
+        existFlag = GlobalFlags()
+        existFlag.globalExist = True
+        existFlag.save()
+
     def tearDown(self) -> typ.NoReturn:
         '''Tear down for test.'''
         #Return class data back after manipulation in tests
@@ -1090,6 +1094,8 @@ class ME_DBService_Test(FunctionalClass):
         Race.drop_collection()
         GenderGroups.drop_collection()
         Male.drop_collection()
+        
+        GlobalFlags.drop_collection()
 
         #medb.disconnect(alias=self.mdb_test_alias)
 
@@ -1196,6 +1202,29 @@ class ME_DBService_Test(FunctionalClass):
 
         self.assertListEqual(res, [{'name': 'TestName1', 'race': 'TestRace'},
                                     {'name': 'TestName2', 'race': 'TestRace'}])
+
+    @FunctionalClass.descript
+    def test_readNamesDBByRace_readingData_expectedGroupedData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of reading the base of names.
+        '''
+        race = Race.objects(race='TestRace').first()
+
+        res = ME_DBService().readNamesDBByRace(race)
+        self.assertDictEqual(res, {'Male': ['TestName'], 
+                                    'Female': [], 'Surnames': []})
+
+    @FunctionalClass.descript
+    def test_setChecksumGlobalDB_ME_settingFlag_expectedRightValue(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of sets the global exist flag.
+        '''
+        _ = ME_DBService().setChecksumGlobalDB_ME(False)
+        res = GlobalFlags.objects.first()
+        
+        self.assertFalse(res.globalExist)
                             
 ###FINISH FunctionalBlock
 
