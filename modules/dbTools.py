@@ -613,9 +613,7 @@ class ME_DBService():
                     'gender_group': genderGroupKey,
                     'key': key,
                     'count': keyData['Count'],
-                    'chance': keyData['Chance']
-                    }
-                )
+                    'chance': keyData['Chance']})
 
         return collectionData
 
@@ -638,12 +636,17 @@ class ME_DBService():
             })
 
         for localAnalyticKey in analyticCountCollections.keys():
-            collectionName = analyticCountCollections[localAnalyticKey]._class_name
-            collectionData = self.fillAnalyticCountCollection(raceKey, raceData, localAnalyticKey)
+            if localAnalyticKey not in raceData:
+                continue
+                
+            collection = analyticCountCollections[localAnalyticKey]
+            collectionName = collection._class_name
+            collectionData = self.fillAnalyticCountCollection(raceKey, 
+                                            raceData, localAnalyticKey)
 
             collectionsData.update({
                 collectionName: {
-                    'collection': analyticCountCollections[localAnalyticKey],
+                    'collection': collection,
                     'data': collectionData,
                     'operation': 'update_or_insert'
                 }

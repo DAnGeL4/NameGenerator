@@ -21,6 +21,7 @@ from database.medbNameSchemas import Race, GenderGroups, Male
 
 from database.medbAnalyticSchemas import GlobalCounts, VowelsChains
 from database.medbAnalyticSchemas import FirstLettersCounts, NameLettersCount
+from database.medbAnalyticSchemas import FirstLetters
 
 ###FINISH ImportBlock
 
@@ -999,9 +1000,9 @@ class ME_DBService_Test(FunctionalClass):
     fillRaceData;
     fillGlobalCountsData;
     prepareGlobalCountsData;
-
     fillAnalyticCountCollection;
     prepareAnalyticCountCollections;
+
     fillLocalChainData;
     unpackAnalyticChainData;
     fillAnalyticChainCollection;
@@ -1250,7 +1251,7 @@ class ME_DBService_Test(FunctionalClass):
                                     }})
 
     @FunctionalClass.descript
-    def test_fillGlobalCountsData_adaptsData_expectedFilledSchema(
+    def test_fillGlobalCountsData_adaptingData_expectedFilledSchema(
             self) -> typ.NoReturn:
         '''
         Testing the method of adapts the global counts data 
@@ -1279,7 +1280,7 @@ class ME_DBService_Test(FunctionalClass):
                                     }])
 
     @FunctionalClass.descript
-    def test_prepareGlobalCountsData_adaptsData_expectedFilledSchema(
+    def test_prepareGlobalCountsData_preparingData_expectedCorrectData(
             self) -> typ.NoReturn:
         '''
         Testing the method of prepares and arranges 
@@ -1308,6 +1309,68 @@ class ME_DBService_Test(FunctionalClass):
                                                     'vowelsCount': 5,
                                                     'consonantsCount': 6}
                                                 }],
+                                        'operation': 'update_or_insert'
+                                    }})
+
+    @FunctionalClass.descript
+    def test_fillAnalyticCountCollection_adaptingData_expectedFilledSchema(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of adapts the analytic counts data.
+        '''
+        race = 'TestRace'
+        analyticTemplate = {
+            'Name_Letters_Count': {
+                'TestGender': {
+                    3: {'Count': 3, 'Chance': 3.3}
+                }}
+        }
+
+        res = ME_DBService().fillAnalyticCountCollection(race, 
+                            analyticTemplate, 'Name_Letters_Count')
+        self.assertListEqual(res, [{'race': 'TestRace', 
+                                    'gender_group': 'TestGender',
+                                    'key': 3,
+                                    'count': 3,
+                                    'chance': 3.3}])
+
+    @FunctionalClass.descript
+    def test_prepareAnalyticCountCollections_preparingData_expectedCorrectData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepares and arranges 
+        the analytic counts data for writing.   
+        '''
+        race = 'TestRace'
+        analyticTemplate = {
+            'Name_Letters_Count': {
+                'TestGender': {
+                    3: {'Count': 3, 'Chance': 3.3}
+                }},
+            'First_Letters': {
+                'TestGender': {
+                    'a': {'Count': 1, 'Chance': 1.1}
+                }}
+        }
+
+        res = ME_DBService().prepareAnalyticCountCollections(race, 
+                                                analyticTemplate)
+        self.assertDictEqual(res,  { 'NameLettersCount': {
+                                        'collection': NameLettersCount,
+                                        'data': [{'race': 'TestRace', 
+                                                'gender_group': 'TestGender',
+                                                'key': 3,
+                                                'count': 3,
+                                                'chance': 3.3}],
+                                        'operation': 'update_or_insert'
+                                    },
+                                    'FirstLetters': {
+                                        'collection': FirstLetters,
+                                        'data': [{'race': 'TestRace', 
+                                                'gender_group': 'TestGender',
+                                                'key': 'a',
+                                                'count': 1,
+                                                'chance': 1.1}],
                                         'operation': 'update_or_insert'
                                     }})
                             
