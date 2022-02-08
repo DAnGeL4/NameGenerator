@@ -667,7 +667,7 @@ class ME_DBService():
             if 'Max_Count_In_Name' in keyData.keys():
                 editedKey = key.split('_')[0]
                 localKeyData = {
-                    'length': editedKey, 
+                    'length': int(editedKey), 
                     'maxCountInName': keyData['Max_Count_In_Name'], 
                     'namesCount': keyData['Names_Count'], 
                     'chance': keyData['Chance']}
@@ -705,7 +705,7 @@ class ME_DBService():
 
     def fillAnalyticChainCollection(self, raceKey: str, 
                                     unpackedData: typ.Dict[str, dict]
-                                    ) -> typ.Dict[str, dict]:
+                                    ) -> typ.List[dict]:
         '''
         Adapts the analytic chain data to the mongoengine schema.
         '''
@@ -745,15 +745,20 @@ class ME_DBService():
             })
         
         for localAnalyticKey in analyticCountCollections.keys():
+            if localAnalyticKey not in raceData:
+                continue
+                
             localAnalyticData = raceData.pop(localAnalyticKey)
             unpackedData = self.unpackAnalyticChainData(localAnalyticData)
 
-            collectionName = analyticCountCollections[localAnalyticKey]._class_name
-            collectionData = self.fillAnalyticChainCollection(raceKey, unpackedData)
+            collection = analyticCountCollections[localAnalyticKey]
+            collectionName = collection._class_name
+            collectionData = self.fillAnalyticChainCollection(raceKey, 
+                                                              unpackedData)
 
             collectionsData.update({
                 collectionName: {
-                    'collection': analyticCountCollections[localAnalyticKey],
+                    'collection': collection,
                     'data': collectionData,
                     'operation': 'update_or_insert'
                 }

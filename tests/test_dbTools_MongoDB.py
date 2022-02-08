@@ -1002,11 +1002,11 @@ class ME_DBService_Test(FunctionalClass):
     prepareGlobalCountsData;
     fillAnalyticCountCollection;
     prepareAnalyticCountCollections;
-
     fillLocalChainData;
     unpackAnalyticChainData;
     fillAnalyticChainCollection;
     prepareAnalyticChainCollection;
+    
     writeGendersDB_ME;
     readBaseOfNamesDB_ME;
     writeBaseOfNamesDB_ME;
@@ -1258,7 +1258,7 @@ class ME_DBService_Test(FunctionalClass):
         to the mongoengine schema.
         '''
         race = 'TestRace'
-        analyticTemplate = {
+        analyticData = {
             'Max_Names_Count': 1,
             'Male_Names_Count': 2,
             'Female_Names_Count': 3,
@@ -1268,7 +1268,7 @@ class ME_DBService_Test(FunctionalClass):
                 "Consonants_Count": 6,}
         }
 
-        res = ME_DBService().fillGlobalCountsData(race, analyticTemplate)
+        res = ME_DBService().fillGlobalCountsData(race, analyticData)
         self.assertListEqual(res, [{'race': 'TestRace', 
                                     'maxNamesCount': 1,
                                     'maleNamesCount': 2,
@@ -1287,7 +1287,7 @@ class ME_DBService_Test(FunctionalClass):
         the global counts data for writing.
         '''
         race = 'TestRace'
-        analyticTemplate = {
+        analyticData = {
             'Max_Names_Count': 1,
             'Male_Names_Count': 2,
             'Female_Names_Count': 3,
@@ -1297,7 +1297,7 @@ class ME_DBService_Test(FunctionalClass):
                 "Consonants_Count": 6,}
         }
 
-        res = ME_DBService().prepareGlobalCountsData(race, analyticTemplate)
+        res = ME_DBService().prepareGlobalCountsData(race, analyticData)
         self.assertDictEqual(res, { 'GlobalCounts': {
                                         'collection': GlobalCounts,
                                         'data': [{'race': 'TestRace', 
@@ -1319,7 +1319,7 @@ class ME_DBService_Test(FunctionalClass):
         Testing the method of adapts the analytic counts data.
         '''
         race = 'TestRace'
-        analyticTemplate = {
+        analyticData = {
             'Name_Letters_Count': {
                 'TestGender': {
                     3: {'Count': 3, 'Chance': 3.3}
@@ -1327,7 +1327,7 @@ class ME_DBService_Test(FunctionalClass):
         }
 
         res = ME_DBService().fillAnalyticCountCollection(race, 
-                            analyticTemplate, 'Name_Letters_Count')
+                            analyticData, 'Name_Letters_Count')
         self.assertListEqual(res, [{'race': 'TestRace', 
                                     'gender_group': 'TestGender',
                                     'key': 3,
@@ -1342,7 +1342,7 @@ class ME_DBService_Test(FunctionalClass):
         the analytic counts data for writing.   
         '''
         race = 'TestRace'
-        analyticTemplate = {
+        analyticData = {
             'Name_Letters_Count': {
                 'TestGender': {
                     3: {'Count': 3, 'Chance': 3.3}
@@ -1354,7 +1354,7 @@ class ME_DBService_Test(FunctionalClass):
         }
 
         res = ME_DBService().prepareAnalyticCountCollections(race, 
-                                                analyticTemplate)
+                                                analyticData)
         self.assertDictEqual(res,  { 'NameLettersCount': {
                                         'collection': NameLettersCount,
                                         'data': [{'race': 'TestRace', 
@@ -1371,6 +1371,143 @@ class ME_DBService_Test(FunctionalClass):
                                                 'key': 'a',
                                                 'count': 1,
                                                 'chance': 1.1}],
+                                        'operation': 'update_or_insert'
+                                    }})
+
+    @FunctionalClass.descript
+    def test_fillLocalChainData_adaptingData_expectedFilledSchema(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of adapts the analytic chain data.
+        '''
+        genderAnalyticData = {1: {'Count': 1, 'Chance': 1.1}}
+
+        res = ME_DBService().fillLocalChainData(genderAnalyticData)
+        self.assertListEqual(res, [{'key': 1,
+                                    'count': 1,
+                                    'chance': 1.1}])
+
+    @FunctionalClass.descript
+    def test_fillLocalChainData_adaptingData_expectedFilledLengthCountSchema(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of adapts the local analytic chain data.
+        '''
+        genderAnalyticData = {'1_1': {'Max_Count_In_Name': 1, 
+                                    'Names_Count': 1, 'Chance': 1.1}}
+
+        res = ME_DBService().fillLocalChainData(genderAnalyticData)
+        self.assertListEqual(res, [{'length': 1, 
+                                    'maxCountInName': 1, 
+                                    'namesCount': 1, 
+                                    'chance': 1.1}])
+
+    @FunctionalClass.descript
+    def test_unpackAnalyticChainData_adaptingData_expectedPreparedData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of unpacks the gender groups data 
+        from analytic subkeys.
+        '''
+        analyticData = {
+            'Chain_Frequency': {
+                'TestGender': {
+                    1: {'Count': 1, 'Chance': 1.1}
+                }}, 
+            'Length_Count_Names': {
+                'TestGender': {
+                    '1_1': {'Max_Count_In_Name': 1, 
+                            'Names_Count': 1, 'Chance': 1.1}
+                }}}
+        
+
+        res = ME_DBService().unpackAnalyticChainData(analyticData)
+        self.assertDictEqual(res, {'TestGender': {
+                                        'Chain_Frequency': [
+                                            {'key': 1,
+                                            'count': 1,
+                                            'chance': 1.1}],
+                                        'Length_Count_Names': [
+                                            {'length': 1, 
+                                            'maxCountInName': 1, 
+                                            'namesCount': 1, 
+                                            'chance': 1.1}]
+                                    }})
+
+    @FunctionalClass.descript
+    def test_fillAnalyticChainCollection_adaptingData_expectedPreparedData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of adapts the analytic chain data.
+        '''
+        race = 'TestRace'
+        unpackedData = {
+            'TestGender': {
+                'Chains': [],
+                'Chain_Frequency': [
+                    {'key': 1,
+                    'count': 1,
+                    'chance': 1.1}],
+                'Length_Count_Names': [
+                    {'length': 1, 
+                    'maxCountInName': 1, 
+                    'namesCount': 1, 
+                    'chance': 1.1}]
+            }}
+
+        res = ME_DBService().fillAnalyticChainCollection(race, unpackedData)
+        self.assertListEqual(res, [{'race': 'TestRace',
+                                    'gender_group': 'TestGender',
+                                    'chains': [],
+                                    'chainFrequency': [
+                                        {'key': 1,
+                                        'count': 1,
+                                        'chance': 1.1}],
+                                    'lengthCountNames': [
+                                        {'length': 1, 
+                                        'maxCountInName': 1, 
+                                        'namesCount': 1, 
+                                        'chance': 1.1}]
+                                   }])
+
+    @FunctionalClass.descript
+    def test_prepareAnalyticChainCollection_preparingData_expectedCorrectData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepares and arranges 
+        the analytic chain data for writing.
+        '''
+        race = 'TestRace'
+        analyticData = {
+            'Vowels_Chains':{
+                'Chains': {'TestGender': {}},
+                'Chain_Frequency': {
+                    'TestGender': {
+                        1: {'Count': 1, 'Chance': 1.1}
+                    }}, 
+                'Length_Count_Names': {
+                    'TestGender': {
+                        '1_1': {'Max_Count_In_Name': 1, 
+                                'Names_Count': 1, 'Chance': 1.1}
+                    }}
+            }}
+
+        res = ME_DBService().prepareAnalyticChainCollection(race, 
+                                                    analyticData)
+        self.assertDictEqual(res, { 'VowelsChains': {
+                                        'collection': VowelsChains,
+                                        'data': [{'race': 'TestRace',
+                                                'gender_group': 'TestGender',
+                                                'chains': [],
+                                                'chainFrequency': [
+                                                    {'key': 1,
+                                                    'count': 1,
+                                                    'chance': 1.1}],
+                                                'lengthCountNames': [
+                                                    {'length': 1, 
+                                                    'maxCountInName': 1, 
+                                                    'namesCount': 1, 
+                                                    'chance': 1.1}]}],
                                         'operation': 'update_or_insert'
                                     }})
                             
