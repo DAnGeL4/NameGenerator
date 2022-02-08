@@ -329,9 +329,8 @@ class MongoDBTools_Test(FunctionalClass):
         doc = collection()
         doc = MongoDBTools.insertEmbeddedField(doc, field, data)
 
-        tmp = doc.to_json()
-        tmp = json.loads(tmp)
-        res = tmp[field]
+        res = json.loads(doc.to_json())
+        res = res[field]
 
         self.assertDictEqual(res, {'vowelsCount': 3, 'consonantsCount': 3})
 
@@ -352,9 +351,8 @@ class MongoDBTools_Test(FunctionalClass):
         doc = collection()
         doc = MongoDBTools.insertEmbeddedField(doc, field, data)
 
-        tmp = doc.to_json()
-        tmp = json.loads(tmp)
-        res = tmp[field]
+        res = json.loads(doc.to_json())
+        res = res[field]
 
         self.assertListEqual(res, [{'key': 'c', 'count': 3, 'chance': 3.0}])
 
@@ -372,9 +370,8 @@ class MongoDBTools_Test(FunctionalClass):
         doc = collection()
         doc = MongoDBTools.insertField(doc, field, data)
 
-        tmp = doc.to_json()
-        tmp = json.loads(tmp)
-        res = tmp[field]
+        res = json.loads(doc.to_json())
+        res = res[field]
 
         self.assertDictEqual(res, {'$oid': str(race.id)})
 
@@ -391,9 +388,8 @@ class MongoDBTools_Test(FunctionalClass):
         doc = collection()
         doc = MongoDBTools.insertField(doc, field, data)
 
-        tmp = doc.to_json()
-        tmp = json.loads(tmp)
-        res = tmp[field]
+        res = json.loads(doc.to_json())
+        res = res[field]
 
         self.assertEqual(res, 3)
 
@@ -415,9 +411,8 @@ class MongoDBTools_Test(FunctionalClass):
         doc = collection()
         doc = MongoDBTools.insertField(doc, field, data)
 
-        tmp = doc.to_json()
-        tmp = json.loads(tmp)
-        res = tmp[field]
+        res = json.loads(doc.to_json())
+        res = res[field]
 
         self.assertDictEqual(res, {'vowelsCount': 3, 'consonantsCount': 3})
 
@@ -442,9 +437,7 @@ class MongoDBTools_Test(FunctionalClass):
         })
 
         doc = MongoDBTools.setDocument(collection, data)
-
-        tmp = doc.to_json()
-        res = json.loads(tmp)
+        res = json.loads(doc.to_json())
 
         self.assertDictEqual(res, { 'race': {'$oid': str(race.id)},
                                     'maxNamesCount': 9,
@@ -531,8 +524,7 @@ class MongoDBTools_Test(FunctionalClass):
         _ = MongoDBTools.updateDocument(doc, data)
 
         doc = GlobalCounts.objects.first()
-        tmp = doc.to_json()
-        res = json.loads(tmp)
+        res = json.loads(doc.to_json())
         _ = res.pop('_id')
 
         self.assertDictEqual(res, { 'race': {'$oid': str(race.id)},
@@ -601,8 +593,7 @@ class MongoDBTools_Test(FunctionalClass):
         _ = MongoDBTools.updateOrInsertDocument(collection, data)
 
         doc = GlobalCounts.objects.first()
-        tmp = doc.to_json()
-        res = json.loads(tmp)
+        res = json.loads(doc.to_json())
         _ = res.pop('_id')
 
         self.assertDictEqual(res, { 'race': {'$oid': str(race.id)},
@@ -659,8 +650,7 @@ class MongoDBTools_Test(FunctionalClass):
         _ = MongoDBTools.updateDocumentIfExist(collection, data)
 
         doc = GlobalCounts.objects.first()
-        tmp = doc.to_json()
-        res = json.loads(tmp)
+        res = json.loads(doc.to_json())
         _ = res.pop('_id')
 
         self.assertDictEqual(res, { 'race': {'$oid': str(race.id)},
@@ -772,20 +762,18 @@ class MongoDBTools_Test(FunctionalClass):
         _ = MongoDBTools.writeDocuments(collection, dataList, oprtn)
         
         docs = NameLettersCount.objects()
-        tmp = docs.to_json()
-        res: list = json.loads(tmp)
-
-        for r in res:
-            _ = r.pop('_id')
-            _ = r.pop('_cls')
+        res: list = json.loads(docs.to_json())
+        for r in res: r.pop('_id')
 
         self.assertListEqual(res, [{'race': {'$oid': str(race.id)},
                                     'gender_group': {'$oid': str(gender.id)},
+                                    '_cls': 'NameLettersCount',
                                     'key': 3,
                                     'count': 3,
                                     'chance': 3.3},
                                     {'race': {'$oid': str(race.id)},
                                     'gender_group': {'$oid': str(gender.id)},
+                                    '_cls': 'NameLettersCount',
                                     'key': 4,
                                     'count': 4,
                                     'chance': 4.4}])
@@ -856,15 +844,12 @@ class MongoDBTools_Test(FunctionalClass):
         _ = MongoDBTools.writeDocuments(collection, dataList, oprtn)
         
         docs = NameLettersCount.objects()
-        tmp = docs.to_json()
-        res: list = json.loads(tmp)
-
-        for r in res:
-            _ = r.pop('_id')
-            _ = r.pop('_cls')
+        res: list = json.loads(docs.to_json())
+        for r in res: r.pop('_id')
 
         self.assertListEqual(res, [{'race': {'$oid': str(race.id)},
                                     'gender_group': {'$oid': str(gender.id)},
+                                    '_cls': 'NameLettersCount',
                                     'key': 3,
                                     'count': 3,
                                     'chance': 3.3}])
@@ -934,8 +919,7 @@ class MongoDBTools_Test(FunctionalClass):
         res = list()
         for collection in [Race, Male]:
             docs = collection.objects()
-            tmp = docs.to_json()
-            res.extend(json.loads(tmp))
+            res.extend(json.loads(docs.to_json()))
         for r in res:
             _ = r.pop('_id')
 
@@ -1176,12 +1160,11 @@ class ME_DBService_Test(FunctionalClass):
 
         res = ME_DBService.getLocalAnalyticDataByKeys(NameLettersCount, 
                                             'TestRace', 'TestGender')
-        for r in res:
-            _ = r.pop('_id')
-            _ = r.pop('_cls')
+        for r in res: r.pop('_id')
 
         self.assertListEqual(res, [{'race': {'$oid': str(race.id)},
                                     'gender_group': {'$oid': str(gender.id)},
+                                    '_cls': 'NameLettersCount',
                                     'key': 3,
                                     'count': 0,
                                     'chance': 0.0}])
@@ -1510,6 +1493,25 @@ class ME_DBService_Test(FunctionalClass):
                                                     'chance': 1.1}]}],
                                         'operation': 'update_or_insert'
                                     }})
+
+    @FunctionalClass.descript
+    def test_writeGendersDB_ME_writingGenders_expectedAllGenders(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepares and arranges 
+        the analytic chain data for writing.
+        '''
+        _ = ME_DBService().writeGendersDB_ME()
+
+        docs = GenderGroups.objects()
+        res: list = json.loads(docs.to_json())
+        for r in res: r.pop('_id')
+                
+        self.assertListEqual(res, [{'gender_group': 'TestGender'}, 
+                                   {'gender_group': 'Male'}, 
+                                   {'gender_group': 'Female'}, 
+                                   {'gender_group': 'Surnames'}, 
+                                   {'gender_group': 'Common'}])
                             
 ###FINISH FunctionalBlock
 
