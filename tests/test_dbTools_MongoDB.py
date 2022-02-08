@@ -990,10 +990,10 @@ class ME_DBService_Test(FunctionalClass):
     unpackAnalyticChainData;
     fillAnalyticChainCollection;
     prepareAnalyticChainCollection;
-    
     writeGendersDB_ME;
     readBaseOfNamesDB_ME;
     writeBaseOfNamesDB_ME;
+    
     readChecksumDB_ME;
     writeChecksumDB_ME;
     writeAnalyticsDB_ME.
@@ -1512,6 +1512,85 @@ class ME_DBService_Test(FunctionalClass):
                                    {'gender_group': 'Female'}, 
                                    {'gender_group': 'Surnames'}, 
                                    {'gender_group': 'Common'}])
+
+    @FunctionalClass.descript
+    def test_readBaseOfNamesDB_ME_readingNames_expectedNamesBase(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of reading a base of names 
+        grouped by races.
+        '''
+        res = ME_DBService().readBaseOfNamesDB_ME()                
+        self.assertDictEqual(res, { "Races": [{
+                                        "TestRace": {
+                                            "Genders": {
+                                                "Female": {"Names": []}, 
+                                                "Male": {
+                                                    "Names": ['TestName']}},
+                                            "Surnames": []}
+                                    }]
+                                })
+
+    @FunctionalClass.descript
+    def test_writeBaseOfNamesDB_ME_writingNamesBase_expectedNames(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of reading a base of names 
+        grouped by races.
+        '''
+        baseOfNames = { "Races": [{
+                            "TestRace": {
+                                "Genders": {
+                                    "Female": {"Names": []}, 
+                                    "Male": {
+                                        "Names": [
+                                            'TestName',
+                                            'TestName1',
+                                            'TestName2']}},
+                                "Surnames": []}
+                        }] }
+                
+        _ = ME_DBService().writeBaseOfNamesDB_ME(baseOfNames)        
+
+        race = Race.objects(race='TestRace').first()
+        docs = Male.objects()
+        res: list = json.loads(docs.to_json())
+        for r in res: r.pop('_id')
+            
+        self.assertListEqual(res, [{'_cls': 'Male', 
+                                    'name': 'TestName', 
+                                    'race': {'$oid': str(race.id)}},
+                                    {'_cls': 'Male', 
+                                    'name': 'TestName1', 
+                                    'race': {'$oid': str(race.id)}},
+                                    {'_cls': 'Male', 
+                                    'name': 'TestName2', 
+                                    'race': {'$oid': str(race.id)}},
+                                ])
+
+    @FunctionalClass.descript
+    def test_writeBaseOfNamesDB_ME_writingNamesBase_expectedErrorAnswer(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of reading a base of names 
+        grouped by races.
+        '''
+        baseOfNames = { "Races": [{
+                            "TestRace": {                  #already exist
+                                "Genders": {
+                                    "Female": {"Names": []}, 
+                                    "Male": {
+                                        "Names": [
+                                            'TestName',    #already exist
+                                            'TestName1',
+                                            'TestName2']}},
+                                "Surnames": []}
+                        }] }
+                
+        res = ME_DBService().writeBaseOfNamesDB_ME(baseOfNames)
+            
+        self.assertListEqual(res, ["INF: Document already exist. Insert canceled.",
+                                   "INF: Document already exist. Insert canceled."])
                             
 ###FINISH FunctionalBlock
 
