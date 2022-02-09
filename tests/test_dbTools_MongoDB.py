@@ -3,25 +3,21 @@
 import typing as typ
 import json
 import mongoengine as medb
-
 from mongomock import MongoClient
 from mongomock import Database
 
 ##customImport
 from configs.CFGNames import ME_SETTINGS
-#from configs.CFGNames import CHECKSUM_DB_GLOBAL_FLAG
-from modules.dbTools import MongoDBTools, ME_DBService
-
 from tests.test_Service import FunctionalClass
 
 from database.medbCheckSumSchemas import GlobalFlags
-#from database.medbCheckSumSchemas import ChecksumFiles
-
+from database.medbCheckSumSchemas import ChecksumFiles
 from database.medbNameSchemas import Race, GenderGroups, Male
-
 from database.medbAnalyticSchemas import GlobalCounts, VowelsChains
 from database.medbAnalyticSchemas import FirstLettersCounts, NameLettersCount
 from database.medbAnalyticSchemas import FirstLetters
+
+from modules.dbTools import MongoDBTools, ME_DBService
 
 ###FINISH ImportBlock
 
@@ -993,7 +989,6 @@ class ME_DBService_Test(FunctionalClass):
     writeGendersDB_ME;
     readBaseOfNamesDB_ME;
     writeBaseOfNamesDB_ME;
-    
     readChecksumDB_ME;
     writeChecksumDB_ME;
     writeAnalyticsDB_ME.
@@ -1003,11 +998,7 @@ class ME_DBService_Test(FunctionalClass):
     mdb_alias = ME_SETTINGS.MDB_n_Aliases['mdbName']['alias']
     mdb_analytic_alias = ME_SETTINGS.MDB_n_Aliases['mdbAnalytic']['alias']
     mdb_checksum_alias = ME_SETTINGS.MDB_n_Aliases['mdbCheckSum']['alias']
-
-    #tst_mdbNAliases = MongoDBTools.mdbNAliases
-    #tst_getConnectString = MongoDBTools.getConnectString
-    #mdb_test = 'test_db'
-    #mdb_test_alias = 'test_alias'
+    
     TestFiles = {}
     ##END ConstantBlock
 
@@ -1068,21 +1059,16 @@ class ME_DBService_Test(FunctionalClass):
 
     def tearDown(self) -> typ.NoReturn:
         '''Tear down for test.'''
-        #Return class data back after manipulation in tests
-        #MongoDBTools.mdbNAliases = self.tst_mdbNAliases
-        #MongoDBTools.getConnectString = self.tst_getConnectString
-        
         GlobalCounts.drop_collection()
-        #VowelsChains.drop_collection()
-        #NameLettersCount.drop_collection()
+        VowelsChains.drop_collection()
+        NameLettersCount.drop_collection()
 
         Race.drop_collection()
         GenderGroups.drop_collection()
         Male.drop_collection()
         
         GlobalFlags.drop_collection()
-
-        #medb.disconnect(alias=self.mdb_test_alias)
+        ChecksumFiles.drop_collection()
 
         self.printTearDownMethodMsg()
 
@@ -1591,6 +1577,179 @@ class ME_DBService_Test(FunctionalClass):
             
         self.assertListEqual(res, ["INF: Document already exist. Insert canceled.",
                                    "INF: Document already exist. Insert canceled."])
+
+    @FunctionalClass.descript
+    def test_readChecksumDB_ME_readingChecksums_expectedChecksumBase(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of reads and adapts 
+        the checksum database to the dictionary format.
+        '''
+        checksumFile = ChecksumFiles()
+        checksumFile.file = 'DBNames_Test_Data'
+        checksumFile.checksum = 'f8ecbed43362ae6ecf00726de6ae17ea'
+        checksumFile.save()
+                
+        res = ME_DBService().readChecksumDB_ME()
+        self.assertDictEqual(res, {'DBNames_Test_Data': 
+                                        'f8ecbed43362ae6ecf00726de6ae17ea',
+                                   'globalExist': True})
+
+    @FunctionalClass.descript
+    def test_writeChecksumDB_ME_writingChecksumBase_expectedChecksums(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of writes checksum base to the database.
+        '''
+        checksumData = {'DBNames_Test_File': 'test_hash',
+                       'globalExist': False}
+                
+        _ = ME_DBService().writeChecksumDB_ME(checksumData)        
+
+        gFlag = GlobalFlags.objects.first()
+        docs = ChecksumFiles.objects()
+                
+        res: list = json.loads(docs.to_json())
+        res.append(json.loads(gFlag.to_json()))
+        for r in res: r.pop('_id')
+            
+        self.assertListEqual(res, [{'file': 'DBNames_Test_File', 
+                                    'checksum': 'test_hash'},
+                                   {'globalExist': False}
+                                ])
+
+    @FunctionalClass.descript
+    def test_writeChecksumDB_ME_writingChecksumBase_expectedAnswer(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of writes checksum base to the database.
+        '''
+        checksumData = {'DBNames_Test_File': 'test_hash',
+                       'globalExist': False}
+                
+        res = ME_DBService().writeChecksumDB_ME(checksumData)
+        self.assertListEqual(res, ["Checksun db writed in mongoDB."])
+
+    @FunctionalClass.descript
+    def test_writeAnalyticsDB_ME_writingAnalyticBase_expectedAnalyticsDB(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of writes analytic base to the database.
+        '''
+        analyticData = {"Analytics": { 'TestRace': {
+            'Max_Names_Count': 1,
+            'Male_Names_Count': 2,
+            'Female_Names_Count': 3,
+            'Surnames_Count': 4,
+            "First_Letters": {
+                "Vowels_Count": 5,
+                "Consonants_Count": 6,
+                'TestGender': {
+                    'a': {'Count': 1, 'Chance': 1.1}
+                }},
+            'Name_Letters_Count': {
+                'TestGender': {
+                    3: {'Count': 3, 'Chance': 3.3}
+                }},
+            'Vowels_Chains':{
+                'Chains': {'TestGender': {}},
+                'Chain_Frequency': {
+                    'TestGender': {
+                        1: {'Count': 1, 'Chance': 1.1}
+                    }}, 
+                'Length_Count_Names': {
+                    'TestGender': {
+                        '1_1': {'Max_Count_In_Name': 1, 
+                                'Names_Count': 1, 'Chance': 1.1}
+                    }}
+            }
+        }} }
+                
+        _ = ME_DBService().writeAnalyticsDB_ME(analyticData)        
+
+        res = list()
+        collections = [GlobalCounts, NameLettersCount, 
+                       FirstLetters, VowelsChains]
+        for collection in collections:
+            docs = collection.objects()
+            dictDocs = json.loads(docs.to_json())
+            for doc in dictDocs: doc.pop('_id')
+            res.extend(dictDocs)
+
+        race = Race.objects(race='TestRace').first()
+        gender = GenderGroups.objects(gender_group='TestGender').first()
+        self.assertListEqual(res, [{'race': {'$oid': str(race.id)},
+                                    'maxNamesCount': 1,
+                                    'maleNamesCount': 2,
+                                    'femaleNamesCount': 3,
+                                    'surnamesCount': 4,
+                                    'firstLettersCounts': {
+                                        'vowelsCount': 5,
+                                        'consonantsCount': 6}},
+                                    {'_cls': 'NameLettersCount', 
+                                    'race': {'$oid': str(race.id)},
+                                    'gender_group': {'$oid': str(gender.id)},
+                                    'key': 3,
+                                    'count': 3,
+                                    'chance': 3.3},
+                                    {'_cls': 'FirstLetters', 
+                                    'race': {'$oid': str(race.id)},
+                                    'gender_group': {'$oid': str(gender.id)},
+                                    'key': 'a',
+                                    'count': 1,
+                                    'chance': 1.1},
+                                    {'_cls': 'VowelsChains', 
+                                    'race': {'$oid': str(race.id)},
+                                    'gender_group': {'$oid': str(gender.id)},
+                                    'chains': [],
+                                    'chainFrequency': [
+                                        {'key': 1,
+                                        'count': 1,
+                                        'chance': 1.1}],
+                                    'lengthCountNames': [
+                                        {'length': 1, 
+                                        'maxCountInName': 1, 
+                                        'namesCount': 1, 
+                                        'chance': 1.1}]}
+                                ])
+
+    @FunctionalClass.descript
+    def test_writeAnalyticsDB_ME_writingAnalyticBase_expectedAnswer(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of writes analytic base to the database.
+        '''
+        analyticData = {"Analytics": { 'TestRace': {
+            'Max_Names_Count': 1,
+            'Male_Names_Count': 2,
+            'Female_Names_Count': 3,
+            'Surnames_Count': 4,
+            "First_Letters": {
+                "Vowels_Count": 5,
+                "Consonants_Count": 6,
+                'TestGender': {
+                    'a': {'Count': 1, 'Chance': 1.1}
+                }},
+            'Name_Letters_Count': {
+                'TestGender': {
+                    3: {'Count': 3, 'Chance': 3.3}
+                }},
+            'Vowels_Chains':{
+                'Chains': {'TestGender': {}},
+                'Chain_Frequency': {
+                    'TestGender': {
+                        1: {'Count': 1, 'Chance': 1.1}
+                    }}, 
+                'Length_Count_Names': {
+                    'TestGender': {
+                        '1_1': {'Max_Count_In_Name': 1, 
+                                'Names_Count': 1, 'Chance': 1.1}
+                    }}
+            }
+        }} }
+                
+        res = ME_DBService().writeAnalyticsDB_ME(analyticData)
+        self.assertListEqual(res, ["Analytic db writed in mongoDB."])
                             
 ###FINISH FunctionalBlock
 

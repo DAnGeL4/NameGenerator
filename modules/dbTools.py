@@ -892,30 +892,24 @@ class ME_DBService():
         Adapts the checksum database to the database format 
         and writes it out.
         '''
-        flagData = dict(
-            {CHECKSUM_DB_GLOBAL_FLAG: checksumDB.pop(CHECKSUM_DB_GLOBAL_FLAG)})
-        globFlagDB_ME = list([flagData])
+        globFlag = checksumDB.pop(CHECKSUM_DB_GLOBAL_FLAG)
+        _ = self.setChecksumGlobalDB_ME(globFlag)
 
         checksumDB_ME = list()
         for fileName in checksumDB.keys():
-            data = dict({'file': fileName, 'checksum': checksumDB[fileName]})
+            data = dict({'file': fileName, 
+                         'checksum': checksumDB[fileName]})
             checksumDB_ME.append(data)
 
         collectionsData = dict({
-            'GlobalFlags': {
-                'collection': GlobalFlags,
-                'data': globFlagDB_ME,
-                'operation': 'update_or_insert'
-            },
             'ChecksumFiles': {
                 'collection': ChecksumFiles,
                 'data': checksumDB_ME,
                 'operation': 'update_or_insert'
             },
         })
-
+        
         answers = MongoDBTools.writeDatabase(collectionsData)
-
         if not answers:
             answers = list(["Checksun db writed in mongoDB."])
         return answers
@@ -944,7 +938,7 @@ class ME_DBService():
 
             answer = MongoDBTools.writeDatabase(collectionsData)
             if answer: 
-                answers.append(answer)
+                answers.extend(answer)
 
         if not answers:
             answers = list(["Analytic db writed in mongoDB."])
