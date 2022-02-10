@@ -54,13 +54,22 @@ def redirectOutput(redirectedFunction: typ.Callable) -> typ.Callable:
 ###START FunctionalBlock
 class ManualNameGen_Stub():
     '''
+    A stub for a simple name generator.
     '''
+
+    def __init__(self, seed: int=None):
+        '''
+        Initial function.
+        Seed used for tests.
+        '''
+        if seed is not None:
+            random.seed(seed)
+    
     def randomNameSize(self, startRange=5, endRange=7):
         '''
         Returns a random integer #nameSize ranging 
         from #startRange to #endRange.
         '''
-
         nameSize = random.randint(startRange, endRange)
         return nameSize
 
@@ -69,7 +78,6 @@ class ManualNameGen_Stub():
         Returns a random lowercase letter #letter 
         from the ALPHABET alphabet.
         '''
-
         letter = random.choice(ALPHABET)
         return letter
 
@@ -79,7 +87,6 @@ class ManualNameGen_Stub():
         according to the rules: no more than 2 vowels 
         and 2 consonants in a row.
         '''
-
         nameSize = self.randomNameSize()
         tmpName = ""
         characterName = ""
