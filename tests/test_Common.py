@@ -12,6 +12,7 @@ from tests import test_nameAnalysis
 from tests import test_nameAnalysis_MongoDB 
 from tests import test_dbTools_MongoDB
 from tests import test_nameGen
+from tests import test_nameGen_MongoDB
 ###FINISH ImportBlock
 
 ###START GlobalConstantBlock
@@ -61,6 +62,8 @@ def createTestSuites() -> unittest.suite.TestSuite:
     suites.addTests(tests)
     
     tests = testLoad.loadTestsFromModule(test_nameGen)
+    suites.addTests(tests)
+    tests = testLoad.loadTestsFromModule(test_nameGen_MongoDB)
     suites.addTests(tests)
     
     return suites
