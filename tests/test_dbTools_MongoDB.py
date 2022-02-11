@@ -1135,7 +1135,7 @@ class ME_DBService_Test(FunctionalClass):
         self.assertEqual(res, race.id)
 
     @FunctionalClass.descript
-    def test_getLocalAnalyticDataByKeys_readingData_expectedDict(
+    def test_getLocalAnalyticDataByKeys_readingData_expectedData(
             self) -> typ.NoReturn:
         '''
         Testing the method of reads analytic data 
