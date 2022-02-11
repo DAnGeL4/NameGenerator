@@ -5,6 +5,7 @@ import typing as typ
 ##customImport
 from tests.test_Service import FunctionalClass
 from modules.nameGen import ManualNameGen_Stub
+from modules.nameGen import ManualNameGen
 
 ###FINISH ImportBlock
 
@@ -86,7 +87,114 @@ class ManualNameGen_Stub_Test(FunctionalClass):
         obj = ManualNameGen_Stub(seed=11)
 
         res = obj.createCharacterName()
-        self.assertEqual(res, 'Ryqsut')
+        self.assertEqual(res, 'Ryqsut')         
+
+                
+class ManualNameGen_Test(FunctionalClass):
+    '''
+    Testing next methods of class #ManualNameGen:
+    modifyChance;
+    getFreeRandomChance;
+    prepareEmbeddedData;
+    setRangeByChances;
+    '''
+
+    ##BEGIN ConstantBlock
+    ##END ConstantBlock
+
+    ##BEGIN PrepareBlock
+    @classmethod
+    def setUpClass(cls) -> typ.NoReturn:
+        '''Set up for class.'''
+        cls.printSetUpClassMsg()
+        cls.createTestFiles()
+
+    @classmethod
+    def tearDownClass(cls) -> typ.NoReturn:
+        '''Tear down for class.'''
+
+        cls.removeTestFiles()
+        cls.printTearDownClassMsg()
+
+    def setUp(self) -> typ.NoReturn:
+        '''Set up for test.'''
+        self.printSetUpMethodMsg()
+
+    def tearDown(self) -> typ.NoReturn:
+        '''Tear down for test.'''
+
+        self.printTearDownMethodMsg()
+
+    ##END PrepareBlock
+
+    @FunctionalClass.descript
+    def test_modifyChance_updatingChance_expectedModifiedChance(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of modifies the chance to 
+        a free global random chance.
+        '''
+        res = ManualNameGen().modifyChance(65.5)
+        self.assertEqual(res, 64.845)
+    
+    @FunctionalClass.descript
+    def test_getFreeRandomChance_makingRule_expectedRule(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of makes range rule 
+        for a free global random chance.
+        '''
+        res = ManualNameGen().getFreeRandomChance(65.5)
+        self.assertDictEqual(res, { 'range': tuple((65.5, 66.5)),
+                                    'key': None})
+    
+    @FunctionalClass.descript
+    def test_prepareEmbeddedData_extractingData_expectedPreparedData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of extracts data 
+        from embedded field.
+        '''
+        data = [{'embedded':[{'data'}, {'data'}]}]
+                
+        res = ManualNameGen().prepareEmbeddedData('embedded', data)
+        self.assertListEqual(res, [{'data'}, {'data'}])
+    
+    @FunctionalClass.descript
+    def test_setRangeByChances_makingRanges_expectedRules(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of specifies key ranges by 
+        key chances for analytic data.
+        '''
+        data = [{'key': 'a', 'count': 3, 'chance': 5.0},
+               {'key': 'b', 'count': 4, 'chance': 6.67}]
+                
+        res = ManualNameGen().setRangeByChances(data, modify=False)
+        self.assertListEqual(res, [{'range': tuple((0, 5.0)),
+                                    'key': 'a'},
+                                   {'range': tuple((5.0, 11.67)),
+                                    'key': 'b'},
+                                  ])
+    
+    @FunctionalClass.descript
+    def test_setRangeByChances_makingRanges_expectedModifiedRules(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of specifies key ranges by 
+        key chances for analytic data.
+        '''
+        data = [{'key': 'a', 'count': 3, 'chance': 5.0},
+               {'key': 'b', 'count': 4, 'chance': 6.67}]
+                
+        res = ManualNameGen().setRangeByChances(data, modify=True)
+        self.assertListEqual(res, [{'range': tuple((0, 4.95)),
+                                    'key': 'a'},
+                                   {'range': tuple((4.95, 11.5533)),
+                                    'key': 'b'},
+                                   {'range': tuple((11.5533, 12.5533)),
+                                    'key': None}
+                                  ])
 
 ###FINISH FunctionalBlock
 

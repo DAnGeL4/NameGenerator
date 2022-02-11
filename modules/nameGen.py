@@ -150,6 +150,14 @@ class ManualNameGen():
     chanceFreeCombination = 25.0
     chanceCombinationLetter = 75.0
 
+    def __init__(self, seed: int=None):
+        '''
+        Initial function.
+        Seed used for tests.
+        '''
+        if seed is not None:
+            random.seed(seed)
+
     def modifyChance(self, currChance: float) -> float:
         '''
         Modifies the chance to a free global random chance.
@@ -172,7 +180,7 @@ class ManualNameGen():
 
     def prepareEmbeddedData(
             self, embedded: str,
-            localAnalyticData: typ.Dict[str, list]) -> typ.List[dict]:
+            localAnalyticData: typ.List[dict]) -> typ.List[dict]:
         '''
         Extracts data from embedded field.
         '''
