@@ -36,9 +36,8 @@ class ManualNameGen_Test(FunctionalClass):
     Testing next methods of class #ManualNameGen:
     getDBAnalyticData;
     getRandomByAnalytic;
-    
     getMinMaxSize;
-    getMaxRange;
+    
     getRandomKey;
     getAlphabetByChainType;
     getRandomLetter;
@@ -259,6 +258,102 @@ class ManualNameGen_Test(FunctionalClass):
         self.assertListEqual(res, [{'key': 'key_6', 'range': (0, 0.594)},
                                   {'key': None, 
                                    'range': (0.594, 1.5939999999999999)}])
+
+    @FunctionalClass.descript
+    def test_getMinMaxSize_findingValues_expectedMinMaxValues(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of finding the minimum and 
+        maximum key, or key length.
+        '''
+        genObj = ManualNameGen()
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+                
+        race = Race.objects(race='TestRace').first()
+        gender = GenderGroups.objects(gender_group='TestGender').first()
+        
+        lettersCount = NameLettersCount()
+        lettersCount.race = race.id
+        lettersCount.gender_group = gender.id
+        lettersCount.key = 5
+        lettersCount.count = 5
+        lettersCount.chance = 5.0
+        lettersCount.save()
+        
+        res = genObj.getMinMaxSize(NameLettersCount)
+                
+        self.assertTupleEqual(res, (3, 5))
+
+    @FunctionalClass.descript
+    def test_getMinMaxSize_findingValues_expectedRandomMaxValue(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of finding the minimum and 
+        maximum key, or key length.
+        '''
+        genObj = ManualNameGen(0)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+                
+        race = Race.objects(race='TestRace').first()
+        gender = GenderGroups.objects(gender_group='TestGender').first()
+        
+        lettersCount = NameLettersCount()
+        lettersCount.race = race.id
+        lettersCount.gender_group = gender.id
+        lettersCount.key = 500
+        lettersCount.count = 500
+        lettersCount.chance = 500.0
+        lettersCount.save()
+        
+        res = genObj.getMinMaxSize(NameLettersCount)
+                
+        self.assertTupleEqual(res, (3, 1500))
+
+    @FunctionalClass.descript
+    def test_getMinMaxSize_findingEmbeddedValues_expectedMinMaxValue(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of finding the minimum and 
+        maximum key, or key length.
+        '''
+        genObj = ManualNameGen()
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+                
+        embedded_vowels_chains = ChainsTemplate()
+        embedded_vowels_chains.key = 'long_key_8'
+        embedded_vowels_chains.count = 8
+        embedded_vowels_chains.chance = 0.8
+    
+        vowels_chains = VowelsChains.objects.first()
+        vowels_chains.chains.append(embedded_vowels_chains)
+        vowels_chains.save()
+        
+        res = genObj.getMinMaxSize(VowelsChains, 
+                                   embedded='chains')
+                
+        self.assertTupleEqual(res, (5, 10))
+
+    @FunctionalClass.descript
+    def test_getMinMaxSize_findingValuesInRules_expectedMinMaxValue(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of finding the minimum and 
+        maximum key, or key length.
+        '''
+        genObj = ManualNameGen()
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+
+        data = [{'key': 'key_6', 'range': (0, 0.6)}, 
+                {'key': 'long_key_8', 'range': (0.6, 1.4)}]
+        
+        res = genObj.getMinMaxSize(NameLettersCount, 
+                                   randomRules=data)
+                
+        self.assertTupleEqual(res, (5, 10))
                             
 ###FINISH FunctionalBlock
 
