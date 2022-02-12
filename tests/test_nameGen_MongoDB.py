@@ -37,8 +37,6 @@ class ManualNameGen_Test(FunctionalClass):
     getDBAnalyticData;
     getRandomByAnalytic;
     
-    getRandomChance;
-    inRange;
     getMinMaxSize;
     getMaxRange;
     getRandomKey;

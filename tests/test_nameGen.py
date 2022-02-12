@@ -97,6 +97,8 @@ class ManualNameGen_Test(FunctionalClass):
     getFreeRandomChance;
     prepareEmbeddedData;
     setRangeByChances;
+    getRandomChance;
+    inRange;
     '''
 
     ##BEGIN ConstantBlock
@@ -195,6 +197,48 @@ class ManualNameGen_Test(FunctionalClass):
                                    {'range': tuple((11.5533, 12.5533)),
                                     'key': None}
                                   ])
+    
+    @FunctionalClass.descript
+    def test_getRandomChance_generingChance_expectedRandomChance(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of generating a random floating 
+        point chance within the given range.
+        '''
+        res = ManualNameGen(10).getRandomChance()
+        self.assertEqual(res, 57.14025946899135)
+    
+    @FunctionalClass.descript
+    def test_getRandomChance_generingChance_expectedInRangeChance(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of generating a random floating 
+        point chance within the given range.
+        '''
+        res = ManualNameGen(10).getRandomChance(5, 50)
+        self.assertEqual(res, 24.28688323895389)
+    
+    @FunctionalClass.descript
+    def test_inRange_checkingChance_expectedTrue(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of checking the chance 
+        is in the target range.
+        '''
+        res = ManualNameGen().inRange(24.28688323895389, 
+                                      5, 50)
+        self.assertTrue(res)
+    
+    @FunctionalClass.descript
+    def test_inRange_checkingChance_expectedFalse(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of checking the chance 
+        is in the target range.
+        '''
+        res = ManualNameGen().inRange(57.14025946899135, 
+                                      5, 50)
+        self.assertFalse(res)
 
 ###FINISH FunctionalBlock
 
