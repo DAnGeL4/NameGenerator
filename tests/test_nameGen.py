@@ -99,6 +99,7 @@ class ManualNameGen_Test(FunctionalClass):
     setRangeByChances;
     getRandomChance;
     inRange;
+    getMaxRange;
     '''
 
     ##BEGIN ConstantBlock
@@ -239,6 +240,19 @@ class ManualNameGen_Test(FunctionalClass):
         res = ManualNameGen().inRange(57.14025946899135, 
                                       5, 50)
         self.assertFalse(res)
+    
+    @FunctionalClass.descript
+    def test_getMaxRange_findingMaxKey_expectedMaxKey(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of getting the max possible 
+        range in rules.
+        ''' 
+        data = [{'key': 'key_6', 'range': (0, 0.6)}, 
+                {'key': 'long_key_8', 'range': (0.6, 1.4)}]
+        
+        res = ManualNameGen().getMaxRange(randomRules=data)
+        self.assertEqual(res, 1.4)
 
 ###FINISH FunctionalBlock
 
