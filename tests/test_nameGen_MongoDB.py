@@ -35,8 +35,8 @@ class ManualNameGen_Test(FunctionalClass):
     '''
     Testing next methods of class #ManualNameGen:
     getDBAnalyticData;
-    
     getRandomByAnalytic;
+    
     getRandomChance;
     inRange;
     getMinMaxSize;
@@ -150,6 +150,8 @@ class ManualNameGen_Test(FunctionalClass):
         lettersCount.race = race.id
         lettersCount.gender_group = genderGp.id
         lettersCount.key = 3
+        lettersCount.count = 3
+        lettersCount.chance = 3.0
         lettersCount.save()
 
     def tearDown(self) -> typ.NoReturn:
@@ -193,8 +195,8 @@ class ManualNameGen_Test(FunctionalClass):
                                     'gender_group': {'$oid': str(gender.id)},
                                     '_cls': 'NameLettersCount',
                                     'key': 3,
-                                    'count': 0,
-                                    'chance': 0.0}])
+                                    'count': 3,
+                                    'chance': 3.0}])
 
     @FunctionalClass.descript
     def test_getDBAnalyticData_readingData_expectedEmbeddedData(
@@ -213,6 +215,52 @@ class ManualNameGen_Test(FunctionalClass):
         self.assertListEqual(res, [{'chance': 0.6, 
                                     'count': 6, 
                                     'key': 'key_6'}])
+
+    @FunctionalClass.descript
+    def test_getRandomByAnalytic_readingData_expectedRules(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of makes prepared analytic data.
+        '''
+        genObj = ManualNameGen()
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        
+        res = genObj.getRandomByAnalytic(NameLettersCount, modify=False)
+                
+        self.assertListEqual(res, [{'key': 3, 'range': (0, 3.0)}])
+
+    @FunctionalClass.descript
+    def test_getRandomByAnalytic_readingData_expectedModifiedRules(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of makes prepared analytic data.
+        '''
+        genObj = ManualNameGen()
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        
+        res = genObj.getRandomByAnalytic(NameLettersCount, modify=True)
+                
+        self.assertListEqual(res, [{'key': 3, 'range': (0, 2.97)},
+                                  {'key': None, 'range': (2.97, 3.97)}])
+
+    @FunctionalClass.descript
+    def test_getRandomByAnalytic_readingEmbeddedData_expectedModifiedRules(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of makes prepared analytic data.
+        '''
+        genObj = ManualNameGen()
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        
+        res = genObj.getRandomByAnalytic(VowelsChains, 
+                                        embedded='chains')
+                
+        self.assertListEqual(res, [{'key': 'key_6', 'range': (0, 0.594)},
+                                  {'key': None, 
+                                   'range': (0.594, 1.5939999999999999)}])
                             
 ###FINISH FunctionalBlock
 
