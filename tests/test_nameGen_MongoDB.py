@@ -37,10 +37,8 @@ class ManualNameGen_Test(FunctionalClass):
     getDBAnalyticData;
     getRandomByAnalytic;
     getMinMaxSize;
-    
     getRandomKey;
-    getAlphabetByChainType;
-    getRandomLetter;
+    
     getNameSize;
     getEndSizeChances;
     convertDictToListRules;
@@ -354,6 +352,76 @@ class ManualNameGen_Test(FunctionalClass):
                                    randomRules=data)
                 
         self.assertTupleEqual(res, (5, 10))
+
+    @FunctionalClass.descript
+    def test_getRandomKey_gettingKey_expectedKeyFromDB(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets a random key 
+        according to the rules of randomness.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+                
+        race = Race.objects(race='TestRace').first()
+        gender = GenderGroups.objects(gender_group='TestGender').first()
+        
+        lettersCount = NameLettersCount()
+        lettersCount.race = race.id
+        lettersCount.gender_group = gender.id
+        lettersCount.key = 8
+        lettersCount.count = 8
+        lettersCount.chance = 8.0
+        lettersCount.save()
+        
+        res = genObj.getRandomKey(NameLettersCount)
+                
+        self.assertEqual(res, 8)
+
+    @FunctionalClass.descript
+    def test_getRandomKey_gettingEmbeddedKey_expectedKeyFromDB(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets a random key 
+        according to the rules of randomness.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        
+        embedded_vowels_chains = ChainsTemplate()
+        embedded_vowels_chains.key = 'long_key_8'
+        embedded_vowels_chains.count = 8
+        embedded_vowels_chains.chance = 0.8
+    
+        vowels_chains = VowelsChains.objects.first()
+        vowels_chains.chains.append(embedded_vowels_chains)
+        vowels_chains.save()
+        
+        res = genObj.getRandomKey(VowelsChains,
+                                  embedded='chains')
+                
+        self.assertEqual(res, 'long_key_8')
+
+    @FunctionalClass.descript
+    def test_getRandomKey_gettingKey_expectedKey(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets a random key 
+        according to the rules of randomness.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+
+        data = [{'key': 6, 'range': (0, 0.6)}, 
+                {'key': 8, 'range': (0.6, 1.4)}]
+        
+        res = genObj.getRandomKey(NameLettersCount, 
+                                  randomRules=data)
+                
+        self.assertEqual(res, 8)
                             
 ###FINISH FunctionalBlock
 
