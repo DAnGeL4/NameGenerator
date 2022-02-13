@@ -100,6 +100,8 @@ class ManualNameGen_Test(FunctionalClass):
     getRandomChance;
     inRange;
     getMaxRange;
+    getAlphabetByChainType;
+    getRandomLetter;
     '''
 
     ##BEGIN ConstantBlock
@@ -253,6 +255,66 @@ class ManualNameGen_Test(FunctionalClass):
         
         res = ManualNameGen().getMaxRange(randomRules=data)
         self.assertEqual(res, 1.4)
+    
+    @FunctionalClass.descript
+    def test_getAlphabetByChainType_gettingAlphabet_expectedVowel(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of getting a string of 
+        letters (vowels, consonants, or all) by chain type.
+        '''         
+        res = ManualNameGen().getAlphabetByChainType('vowel')
+        self.assertEqual(res, "aeiouy")
+    
+    @FunctionalClass.descript
+    def test_getAlphabetByChainType_gettingAlphabet_expectedConsonant(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of getting a string of 
+        letters (vowels, consonants, or all) by chain type.
+        '''         
+        res = ManualNameGen().getAlphabetByChainType('consonant')
+        self.assertEqual(res, "bcdfghjklmnpqrstvwxz")
+    
+    @FunctionalClass.descript
+    def test_getAlphabetByChainType_gettingAlphabet_expectedAll(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of getting a string of 
+        letters (vowels, consonants, or all) by chain type.
+        '''         
+        res = ManualNameGen().getAlphabetByChainType('')
+        self.assertEqual(res, "abcdefghijklmnopqrstuvwxyz")
+    
+    @FunctionalClass.descript
+    def test_getRandomLetter_gettingLetter_expectedVowel(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of getting a random letter 
+        from the alphabet by chain type.
+        '''         
+        res = ManualNameGen(10).getRandomLetter('vowel')
+        self.assertEqual(res, "u")
+    
+    @FunctionalClass.descript
+    def test_getRandomLetter_gettingLetter_expectedConsonant(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of getting a random letter 
+        from the alphabet by chain type.
+        '''         
+        res = ManualNameGen(10).getRandomLetter('consonant')
+        self.assertEqual(res, "x")
+    
+    @FunctionalClass.descript
+    def test_getRandomLetter_gettingLetter_expectedAll(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of getting a random letter 
+        from the alphabet by chain type.
+        '''         
+        res = ManualNameGen(10).getRandomLetter('')
+        self.assertEqual(res, "s")
 
 ###FINISH FunctionalBlock
 
