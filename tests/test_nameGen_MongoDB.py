@@ -38,10 +38,8 @@ class ManualNameGen_Test(FunctionalClass):
     getRandomByAnalytic;
     getMinMaxSize;
     getRandomKey;
-    
     getNameSize;
-    getEndSizeChances;
-    convertDictToListRules;
+    
     getNameEndSize;
     getNameFirstLetter;
     getLetterType;
@@ -422,6 +420,65 @@ class ManualNameGen_Test(FunctionalClass):
                                   randomRules=data)
                 
         self.assertEqual(res, 8)
+
+    @FunctionalClass.descript
+    def test_getNameSize_gettingSize_expectedNameSize(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets a random name length 
+        according to analytics.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+                
+        race = Race.objects(race='TestRace').first()
+        gender = GenderGroups.objects(gender_group='TestGender').first()
+        
+        lettersCount = NameLettersCount()
+        lettersCount.race = race.id
+        lettersCount.gender_group = gender.id
+        lettersCount.key = 8
+        lettersCount.count = 8
+        lettersCount.chance = 8.0
+        lettersCount.save()
+        
+        res = genObj.getNameSize()
+                
+        self.assertEqual(res, 8)
+
+    @FunctionalClass.descript
+    def test_getNameSize_queringEmptyKeys_expectedRandomSize(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets a random name length 
+        according to analytics.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = ''
+        genObj.genderGroup = ''
+        
+        res = genObj.getNameSize()
+                
+        self.assertEqual(res, 36)
+
+    @FunctionalClass.descript
+    def test_getNameSize_queringEmptyDB_expectedRandomSize(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets a random name length 
+        according to analytics.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        
+        lettersCount = NameLettersCount.objects.first()
+        lettersCount.delete()
+        
+        res = genObj.getNameSize()
+                
+        self.assertEqual(res, 36)
                             
 ###FINISH FunctionalBlock
 

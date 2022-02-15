@@ -268,7 +268,7 @@ class ManualNameGen():
         Returns the minimum and maximum key, or key length, 
         with the possibility of random probability.
         '''
-        if not randomRules:
+        if randomRules is None:
             randomRules = self.getRandomByAnalytic(collection,
                                                    embedded=embedded,
                                                    modify=modify)
@@ -360,7 +360,11 @@ class ManualNameGen():
         nameSize = self.getRandomKey(self.nameLettersCount)
         if not nameSize:
             minSize, maxSize = self.getMinMaxSize(self.nameLettersCount)
-            nameSize = random.randint(minSize, maxSize * 2)
+            if minSize > maxSize:
+                minSize = 0
+                maxSize = 50
+                
+            nameSize = random.randint(minSize, maxSize)
 
         return nameSize
 

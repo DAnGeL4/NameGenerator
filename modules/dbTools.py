@@ -485,6 +485,9 @@ class ME_DBService():
         '''
         Reads analytic data from collection by target keys.
         '''
+        if not race or not genderGroup:
+            return list([])
+            
         raceId = cls.getIdByField(collection, 'race', race)
         genderId = cls.getIdByField(collection, 'gender_group', genderGroup)
 
