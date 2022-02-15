@@ -369,7 +369,7 @@ class ManualNameGen():
         return nameSize
 
     def getEndSizeChances(self,
-                          nameEndings: typ.List[dict]) -> typ.Dict[str, dict]:
+                          nameEndings: typ.List[dict]) -> typ.Dict[int, float]:
         '''
         Returns the chances of the length of the endings.
         '''

@@ -102,6 +102,8 @@ class ManualNameGen_Test(FunctionalClass):
     getMaxRange;
     getAlphabetByChainType;
     getRandomLetter;
+    getEndSizeChances;
+    convertDictToListRules;
     '''
 
     ##BEGIN ConstantBlock
@@ -315,6 +317,45 @@ class ManualNameGen_Test(FunctionalClass):
         '''         
         res = ManualNameGen(10).getRandomLetter('')
         self.assertEqual(res, "s")
+    
+    @FunctionalClass.descript
+    def test_getEndSizeChances_makingData_expectedLengthChanceData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of making the chances 
+        of the length of the endings.
+        '''
+        data = [{'key': 'abcd', 'count': 3, 'chance': 5.0},
+               {'key': 'e', 'count': 4, 'chance': 6.67}]
+                
+        res = ManualNameGen().getEndSizeChances(data)
+        self.assertDictEqual(res, {4: 5.0, 1: 6.67})
+    
+    @FunctionalClass.descript
+    def test_convertDictToListRules_convertingData_expectedConvertedData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of making the chances 
+        of the length of the endings.
+        '''
+        data = {4: 5.0, 1: 6.67}
+                
+        res = ManualNameGen().convertDictToListRules(data, preparing=False)
+        self.assertListEqual(res, [{'key': 4, 'chance': 5.0}, 
+                                   {'key': 1, 'chance': 6.67}])
+    
+    @FunctionalClass.descript
+    def test_convertDictToListRules_convertingData_expectedRules(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of making the chances 
+        of the length of the endings.
+        '''
+        data = {4: 5.0, 1: 6.67}
+                
+        res = ManualNameGen().convertDictToListRules(data)
+        self.assertListEqual(res, [{'key': 4, 'range': (0, 5.0)}, 
+                                   {'key': 1, 'range': (5.0, 11.67)}])
 
 ###FINISH FunctionalBlock
 
