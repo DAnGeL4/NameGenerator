@@ -15,6 +15,7 @@ from tests.test_Service import FunctionalClass
 from database.medbNameSchemas import Race, GenderGroups, Male
 from database.medbAnalyticSchemas import GlobalCounts, VowelsChains
 from database.medbAnalyticSchemas import FirstLettersCounts, NameLettersCount
+from database.medbAnalyticSchemas import NameEndings
 from database.medbAnalyticSchemas import ChainsTemplate
 
 #from database.medbAnalyticSchemas import FirstLetters
@@ -39,8 +40,8 @@ class ManualNameGen_Test(FunctionalClass):
     getMinMaxSize;
     getRandomKey;
     getNameSize;
-    
     getNameEndSize;
+    
     getNameFirstLetter;
     getLetterType;
     getNextLetterType;
@@ -77,11 +78,7 @@ class ManualNameGen_Test(FunctionalClass):
     ##BEGIN ConstantBlock
     mdb_alias = ME_SETTINGS.MDB_n_Aliases['mdbName']['alias']
     mdb_analytic_alias = ME_SETTINGS.MDB_n_Aliases['mdbAnalytic']['alias']
-
-    #tst_mdbNAliases = MongoDBTools.mdbNAliases
-    #tst_getConnectString = MongoDBTools.getConnectString
-    #mdb_test = 'test_db'
-    #mdb_test_alias = 'test_alias'
+    
     TestFiles = {}
     ##END ConstantBlock
 
@@ -135,8 +132,6 @@ class ManualNameGen_Test(FunctionalClass):
         vowels_chains.race = race.id
         vowels_chains.gender_group = genderGp.id
         vowels_chains.chains.append(embedded_vowels_chains)
-        #vowels_chains.chainFrequency.append(embedded_vowels_frequency)
-        #vowels_chains.lengthCountNames.append(embedded_vowels_lencount)
         vowels_chains.save()
         
         lettersCount = NameLettersCount()
@@ -149,19 +144,15 @@ class ManualNameGen_Test(FunctionalClass):
 
     def tearDown(self) -> typ.NoReturn:
         '''Tear down for test.'''
-        #Return class data back after manipulation in tests
-        #MongoDBTools.mdbNAliases = self.tst_mdbNAliases
-        #MongoDBTools.getConnectString = self.tst_getConnectString
         
         GlobalCounts.drop_collection()
         VowelsChains.drop_collection()
         NameLettersCount.drop_collection()
+        NameEndings.drop_collection()
 
         Race.drop_collection()
         GenderGroups.drop_collection()
         Male.drop_collection()
-
-        #medb.disconnect(alias=self.mdb_test_alias)
 
         self.printTearDownMethodMsg()
 
@@ -460,7 +451,7 @@ class ManualNameGen_Test(FunctionalClass):
         
         res = genObj.getNameSize()
                 
-        self.assertEqual(res, 36)
+        self.assertEqual(res, 18)
 
     @FunctionalClass.descript
     def test_getNameSize_queringEmptyDB_expectedRandomSize(
@@ -478,7 +469,82 @@ class ManualNameGen_Test(FunctionalClass):
         
         res = genObj.getNameSize()
                 
-        self.assertEqual(res, 36)
+        self.assertEqual(res, 18)
+
+    @FunctionalClass.descript
+    def test_getNameEndSize_gettingSize_expectedNameSize(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets a random name length 
+        according to analytics.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+                
+        race = Race.objects(race='TestRace').first()
+        gender = GenderGroups.objects(gender_group='TestGender').first()
+        
+        endings = NameEndings()
+        endings.race = race.id
+        endings.gender_group = gender.id
+        endings.key = 'ending'
+        endings.count = 6
+        endings.chance = 6.0
+        endings.save()
+                
+        endings = NameEndings()
+        endings.race = race.id
+        endings.gender_group = gender.id
+        endings.key = 'endingtwo'
+        endings.count = 8
+        endings.chance = 8.0
+        endings.save()
+        
+        res = genObj.getNameEndSize()
+                
+        self.assertEqual(res, 9)
+
+    @FunctionalClass.descript
+    def test_getNameEndSize_queringEmptyKeys_expectedRandomSize(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets a random name length 
+        according to analytics.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = ''
+        genObj.genderGroup = ''
+                
+        race = Race.objects(race='TestRace').first()
+        gender = GenderGroups.objects(gender_group='TestGender').first()
+                
+        endings = NameEndings()
+        endings.race = race.id
+        endings.gender_group = gender.id
+        endings.key = 'ending'
+        endings.count = 6
+        endings.chance = 6.0
+        endings.save()
+        
+        res = genObj.getNameEndSize()
+                
+        self.assertEqual(res, 13)
+
+    @FunctionalClass.descript
+    def test_getNameEndSize_queringEmptyDB_expectedRandomSize(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets the length 
+        of the end of the name.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        
+        res = genObj.getNameEndSize()
+                
+        self.assertEqual(res, 13)
                             
 ###FINISH FunctionalBlock
 

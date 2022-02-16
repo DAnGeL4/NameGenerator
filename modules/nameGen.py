@@ -362,7 +362,7 @@ class ManualNameGen():
             minSize, maxSize = self.getMinMaxSize(self.nameLettersCount)
             if minSize > maxSize:
                 minSize = 0
-                maxSize = 50
+                maxSize = 30
                 
             nameSize = random.randint(minSize, maxSize)
 
@@ -407,6 +407,9 @@ class ManualNameGen():
         endingChances = self.getEndSizeChances(nameEndings)
         endingRules = self.convertDictToListRules(endingChances)
         nameEndSize = self.getRandomKey(None, randomRules=endingRules)
+        
+        if nameEndSize is None:
+            nameEndSize = random.randint(0, 21)
 
         return nameEndSize
 
