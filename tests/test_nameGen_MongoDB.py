@@ -42,9 +42,6 @@ class ManualNameGen_Test(FunctionalClass):
     getNameEndSize;
     getNameFirstLetter;
     
-    getLetterType;
-    getNextLetterType;
-    getCollectionByType;
     makeFrequencyData;
     makeRangesByTypes;
     prepareFrequencyData;

@@ -104,6 +104,8 @@ class ManualNameGen_Test(FunctionalClass):
     getRandomLetter;
     getEndSizeChances;
     convertDictToListRules;
+    getLetterType;
+    getNextLetterType;
     '''
 
     ##BEGIN ConstantBlock
@@ -356,6 +358,46 @@ class ManualNameGen_Test(FunctionalClass):
         res = ManualNameGen().convertDictToListRules(data)
         self.assertListEqual(res, [{'key': 4, 'range': (0, 5.0)}, 
                                    {'key': 1, 'range': (5.0, 11.67)}])
+    
+    @FunctionalClass.descript
+    def test_getLetterType_checkingType_expectedVowel(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of checking type (vowel 
+        or consonant) for target letter.
+        '''
+        res = ManualNameGen().getLetterType('a')
+        self.assertEqual(res, "vowel")
+    
+    @FunctionalClass.descript
+    def test_getLetterType_checkingType_expectedConsonant(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of checking type (vowel 
+        or consonant) for target letter.
+        '''
+        res = ManualNameGen().getLetterType('b')
+        self.assertEqual(res, "consonant")
+    
+    @FunctionalClass.descript
+    def test_getNextLetterType_checkingType_expectedConsonant(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of getting the next letter type 
+        (vowel or consonant) given the current type.
+        '''
+        res = ManualNameGen().getNextLetterType("vowel")
+        self.assertEqual(res, "consonant")
+    
+    @FunctionalClass.descript
+    def test_getNextLetterType_checkingType_expectedVowel(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of getting the next letter type 
+        (vowel or consonant) given the current type.
+        '''
+        res = ManualNameGen().getNextLetterType("consonant")
+        self.assertEqual(res, "vowel")
 
 ###FINISH FunctionalBlock
 
