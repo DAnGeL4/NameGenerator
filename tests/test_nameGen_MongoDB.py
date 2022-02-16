@@ -16,6 +16,7 @@ from database.medbNameSchemas import Race, GenderGroups, Male
 from database.medbAnalyticSchemas import GlobalCounts, VowelsChains
 from database.medbAnalyticSchemas import NameLettersCount, NameEndings
 from database.medbAnalyticSchemas import ChainsTemplate, FirstLetters
+from database.medbAnalyticSchemas import ConsonantsChains
 
 #from database.medbAnalyticSchemas import FirstLetters
 
@@ -41,6 +42,7 @@ class ManualNameGen_Test(FunctionalClass):
     getNameSize;
     getNameEndSize;
     getNameFirstLetter;
+    getCollectionByType;
     
     makeFrequencyData;
     makeRangesByTypes;
@@ -575,6 +577,27 @@ class ManualNameGen_Test(FunctionalClass):
         res = genObj.getNameFirstLetter()
                 
         self.assertEqual(res, 'N')
+    
+    @FunctionalClass.descript
+    def test_getCollectionByType_getsCollectionData_expectedConsonant(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of getting a Mongoengine collection 
+        by chain type and embedded type.
+        '''
+        res = ManualNameGen().getCollectionByType("consonant")
+        self.assertTupleEqual(res, (ConsonantsChains, "chains"))
+    
+    @FunctionalClass.descript
+    def test_getCollectionByType_getsCollectionData_expectedVowel(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of getting a Mongoengine collection 
+        by chain type and embedded type.
+        '''
+        res = ManualNameGen().getCollectionByType("vowel",
+                                                 embeddedType='testType')
+        self.assertTupleEqual(res, (VowelsChains, "testType"))
                             
 ###FINISH FunctionalBlock
 
