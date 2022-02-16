@@ -112,10 +112,12 @@ class ManualNameGen_Test(FunctionalClass):
         race = Race()
         race.race = 'TestRace'
         race.save()
+        self.race = race
 
         genderGp = GenderGroups()
         genderGp.gender_group = 'TestGender'
         genderGp.save()
+        self.gender = genderGp
 
         male = Male()
         male.race = race
@@ -171,12 +173,9 @@ class ManualNameGen_Test(FunctionalClass):
         
         res = genObj.getDBAnalyticData(NameLettersCount)
         for r in res: r.pop('_id')
-
-        race = Race.objects(race='TestRace').first()
-        gender = GenderGroups.objects(gender_group='TestGender').first()
                 
-        self.assertListEqual(res, [{'race': {'$oid': str(race.id)},
-                                    'gender_group': {'$oid': str(gender.id)},
+        self.assertListEqual(res, [{'race': {'$oid': str(self.race.id)},
+                                    'gender_group': {'$oid': str(self.gender.id)},
                                     '_cls': 'NameLettersCount',
                                     'key': 3,
                                     'count': 3,
@@ -256,13 +255,10 @@ class ManualNameGen_Test(FunctionalClass):
         genObj = ManualNameGen()
         genObj.race = 'TestRace'
         genObj.genderGroup = 'TestGender'
-                
-        race = Race.objects(race='TestRace').first()
-        gender = GenderGroups.objects(gender_group='TestGender').first()
         
         lettersCount = NameLettersCount()
-        lettersCount.race = race.id
-        lettersCount.gender_group = gender.id
+        lettersCount.race = self.race.id
+        lettersCount.gender_group = self.gender.id
         lettersCount.key = 5
         lettersCount.count = 5
         lettersCount.chance = 5.0
@@ -282,13 +278,10 @@ class ManualNameGen_Test(FunctionalClass):
         genObj = ManualNameGen(0)
         genObj.race = 'TestRace'
         genObj.genderGroup = 'TestGender'
-                
-        race = Race.objects(race='TestRace').first()
-        gender = GenderGroups.objects(gender_group='TestGender').first()
         
         lettersCount = NameLettersCount()
-        lettersCount.race = race.id
-        lettersCount.gender_group = gender.id
+        lettersCount.race = self.race.id
+        lettersCount.gender_group = self.gender.id
         lettersCount.key = 500
         lettersCount.count = 500
         lettersCount.chance = 500.0
@@ -352,13 +345,10 @@ class ManualNameGen_Test(FunctionalClass):
         genObj = ManualNameGen(10)
         genObj.race = 'TestRace'
         genObj.genderGroup = 'TestGender'
-                
-        race = Race.objects(race='TestRace').first()
-        gender = GenderGroups.objects(gender_group='TestGender').first()
         
         lettersCount = NameLettersCount()
-        lettersCount.race = race.id
-        lettersCount.gender_group = gender.id
+        lettersCount.race = self.race.id
+        lettersCount.gender_group = self.gender.id
         lettersCount.key = 8
         lettersCount.count = 8
         lettersCount.chance = 8.0
@@ -422,13 +412,10 @@ class ManualNameGen_Test(FunctionalClass):
         genObj = ManualNameGen(10)
         genObj.race = 'TestRace'
         genObj.genderGroup = 'TestGender'
-                
-        race = Race.objects(race='TestRace').first()
-        gender = GenderGroups.objects(gender_group='TestGender').first()
         
         lettersCount = NameLettersCount()
-        lettersCount.race = race.id
-        lettersCount.gender_group = gender.id
+        lettersCount.race = self.race.id
+        lettersCount.gender_group = self.gender.id
         lettersCount.key = 8
         lettersCount.count = 8
         lettersCount.chance = 8.0
@@ -481,21 +468,18 @@ class ManualNameGen_Test(FunctionalClass):
         genObj = ManualNameGen(10)
         genObj.race = 'TestRace'
         genObj.genderGroup = 'TestGender'
-                
-        race = Race.objects(race='TestRace').first()
-        gender = GenderGroups.objects(gender_group='TestGender').first()
         
         endings = NameEndings()
-        endings.race = race.id
-        endings.gender_group = gender.id
+        endings.race = self.race.id
+        endings.gender_group = self.gender.id
         endings.key = 'ending'
         endings.count = 6
         endings.chance = 6.0
         endings.save()
                 
         endings = NameEndings()
-        endings.race = race.id
-        endings.gender_group = gender.id
+        endings.race = self.race.id
+        endings.gender_group = self.gender.id
         endings.key = 'endingtwo'
         endings.count = 8
         endings.chance = 8.0
@@ -516,12 +500,9 @@ class ManualNameGen_Test(FunctionalClass):
         genObj.race = ''
         genObj.genderGroup = ''
                 
-        race = Race.objects(race='TestRace').first()
-        gender = GenderGroups.objects(gender_group='TestGender').first()
-                
         endings = NameEndings()
-        endings.race = race.id
-        endings.gender_group = gender.id
+        endings.race = self.race.id
+        endings.gender_group = self.gender.id
         endings.key = 'ending'
         endings.count = 6
         endings.chance = 6.0
@@ -556,21 +537,18 @@ class ManualNameGen_Test(FunctionalClass):
         genObj = ManualNameGen(1)
         genObj.race = 'TestRace'
         genObj.genderGroup = 'TestGender'
-                
-        race = Race.objects(race='TestRace').first()
-        gender = GenderGroups.objects(gender_group='TestGender').first()
         
         endings = FirstLetters()
-        endings.race = race.id
-        endings.gender_group = gender.id
+        endings.race = self.race.id
+        endings.gender_group = self.gender.id
         endings.key = 'A'
         endings.count = 6
         endings.chance = 6.0
         endings.save()
                 
         endings = FirstLetters()
-        endings.race = race.id
-        endings.gender_group = gender.id
+        endings.race = self.race.id
+        endings.gender_group = self.gender.id
         endings.key = 'B'
         endings.count = 8
         endings.chance = 8.0
@@ -590,13 +568,10 @@ class ManualNameGen_Test(FunctionalClass):
         genObj = ManualNameGen(10)
         genObj.race = 'TestRace'
         genObj.genderGroup = 'TestGender'
-                
-        race = Race.objects(race='TestRace').first()
-        gender = GenderGroups.objects(gender_group='TestGender').first()
         
         endings = FirstLetters()
-        endings.race = race.id
-        endings.gender_group = gender.id
+        endings.race = self.race.id
+        endings.gender_group = self.gender.id
         endings.key = 'A'
         endings.save()
         
