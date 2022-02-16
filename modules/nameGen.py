@@ -422,6 +422,7 @@ class ManualNameGen():
         letter = self.getRandomKey(self.firstLetters)
         if not letter:
             letter = self.getRandomLetter()
+            letter = letter.capitalize()
 
         return letter
 

@@ -14,9 +14,8 @@ from tests.test_Service import FunctionalClass
 #from database.medbCheckSumSchemas import ChecksumFiles
 from database.medbNameSchemas import Race, GenderGroups, Male
 from database.medbAnalyticSchemas import GlobalCounts, VowelsChains
-from database.medbAnalyticSchemas import FirstLettersCounts, NameLettersCount
-from database.medbAnalyticSchemas import NameEndings
-from database.medbAnalyticSchemas import ChainsTemplate
+from database.medbAnalyticSchemas import NameLettersCount, NameEndings
+from database.medbAnalyticSchemas import ChainsTemplate, FirstLetters
 
 #from database.medbAnalyticSchemas import FirstLetters
 
@@ -41,8 +40,8 @@ class ManualNameGen_Test(FunctionalClass):
     getRandomKey;
     getNameSize;
     getNameEndSize;
-    
     getNameFirstLetter;
+    
     getLetterType;
     getNextLetterType;
     getCollectionByType;
@@ -149,6 +148,7 @@ class ManualNameGen_Test(FunctionalClass):
         VowelsChains.drop_collection()
         NameLettersCount.drop_collection()
         NameEndings.drop_collection()
+        FirstLetters.drop_collection()
 
         Race.drop_collection()
         GenderGroups.drop_collection()
@@ -545,6 +545,64 @@ class ManualNameGen_Test(FunctionalClass):
         res = genObj.getNameEndSize()
                 
         self.assertEqual(res, 13)
+
+    @FunctionalClass.descript
+    def test_getNameFirstLetter_gettingFirstLetter_expectedLetter(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets a random first letter 
+        from the analytic with a probability of any letter.
+        '''
+        genObj = ManualNameGen(1)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+                
+        race = Race.objects(race='TestRace').first()
+        gender = GenderGroups.objects(gender_group='TestGender').first()
+        
+        endings = FirstLetters()
+        endings.race = race.id
+        endings.gender_group = gender.id
+        endings.key = 'A'
+        endings.count = 6
+        endings.chance = 6.0
+        endings.save()
+                
+        endings = FirstLetters()
+        endings.race = race.id
+        endings.gender_group = gender.id
+        endings.key = 'B'
+        endings.count = 8
+        endings.chance = 8.0
+        endings.save()
+        
+        res = genObj.getNameFirstLetter()
+                
+        self.assertEqual(res, 'A')
+
+    @FunctionalClass.descript
+    def test_getNameFirstLetter_gettingFirstLetter_expectedRandomLetter(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets a random first letter 
+        from the analytic with a probability of any letter.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+                
+        race = Race.objects(race='TestRace').first()
+        gender = GenderGroups.objects(gender_group='TestGender').first()
+        
+        endings = FirstLetters()
+        endings.race = race.id
+        endings.gender_group = gender.id
+        endings.key = 'A'
+        endings.save()
+        
+        res = genObj.getNameFirstLetter()
+                
+        self.assertEqual(res, 'N')
                             
 ###FINISH FunctionalBlock
 
