@@ -272,6 +272,8 @@ class ManualNameGen():
             randomRules = self.getRandomByAnalytic(collection,
                                                    embedded=embedded,
                                                    modify=modify)
+        if not randomRules:
+            return (0, 0)
 
         minSize = sys.maxsize
         maxSize = -sys.maxsize - 1

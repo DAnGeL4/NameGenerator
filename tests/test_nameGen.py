@@ -106,6 +106,7 @@ class ManualNameGen_Test(FunctionalClass):
     convertDictToListRules;
     getLetterType;
     getNextLetterType;
+    makeRangesByTypes;
     '''
 
     ##BEGIN ConstantBlock
@@ -398,6 +399,23 @@ class ManualNameGen_Test(FunctionalClass):
         '''
         res = ManualNameGen().getNextLetterType("consonant")
         self.assertEqual(res, "vowel")
+                
+    @FunctionalClass.descript
+    def test_makeRangesByTypes_makingRanges_expectedData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of making the chain ranges, 
+        ordered by chain type.
+        '''
+        data = {'consonant': [], 
+                'vowel': [{
+                   'key':4,
+                   'count': 0,
+                   'chance': 40.0
+                }]}
+                
+        res = ManualNameGen(10).makeRangesByTypes(data)
+        self.assertDictEqual(res, {'consonant': (0, 0), 'vowel': (4, 4)})
 
 ###FINISH FunctionalBlock
 
