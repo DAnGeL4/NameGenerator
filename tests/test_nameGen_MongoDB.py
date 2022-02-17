@@ -1,7 +1,6 @@
 ###START ImportBlock
 ##systemImport
 import typing as typ
-import json
 import mongoengine as medb
 #from mongomock import MongoClient
 #from mongomock import Database
@@ -17,6 +16,7 @@ from database.medbAnalyticSchemas import GlobalCounts, VowelsChains
 from database.medbAnalyticSchemas import NameLettersCount, NameEndings
 from database.medbAnalyticSchemas import ChainsTemplate, FirstLetters
 from database.medbAnalyticSchemas import ConsonantsChains
+from database.medbAnalyticSchemas import ChainFrequencyTemplate
 
 #from database.medbAnalyticSchemas import FirstLetters
 
@@ -43,9 +43,8 @@ class ManualNameGen_Test(FunctionalClass):
     getNameEndSize;
     getNameFirstLetter;
     getCollectionByType;
-    
     makeFrequencyData;
-    makeRangesByTypes;
+    
     prepareFrequencyData;
     getChainSize;
     makeChainsOrder;
@@ -598,7 +597,34 @@ class ManualNameGen_Test(FunctionalClass):
         res = ManualNameGen().getCollectionByType("vowel",
                                                  embeddedType='testType')
         self.assertTupleEqual(res, (VowelsChains, "testType"))
-                            
+                
+    @FunctionalClass.descript
+    def test_makeFrequencyData_makingData_expectedCollectionData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of making the chain frequency, 
+        ordered by chain type.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+                
+        embedded = ChainFrequencyTemplate()
+        embedded.key = 4
+        embedded.chance = 40.0
+                
+        vow_chains = VowelsChains.objects.first()
+        vow_chains.chainFrequency.append(embedded)
+        vow_chains.save()
+                
+        res = genObj.makeFrequencyData()
+        self.assertDictEqual(res, {'consonant': [], 
+                                   'vowel': [{
+                                       'key':4,
+                                       'count': 0,
+                                       'chance': 40.0
+                                   }]})
+        
 ###FINISH FunctionalBlock
 
 ###START MainBlock
