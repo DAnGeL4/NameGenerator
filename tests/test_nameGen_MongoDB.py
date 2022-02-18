@@ -45,8 +45,6 @@ class ManualNameGen_Test(FunctionalClass):
     getCollectionByType;
     makeFrequencyData;
     
-    prepareFrequencyData;
-    getChainSize;
     makeChainsOrder;
     getChainsData;
     getChainsList;

@@ -107,6 +107,8 @@ class ManualNameGen_Test(FunctionalClass):
     getLetterType;
     getNextLetterType;
     makeRangesByTypes;
+    prepareFrequencyData;
+    getChainSize;
     '''
 
     ##BEGIN ConstantBlock
@@ -416,6 +418,85 @@ class ManualNameGen_Test(FunctionalClass):
                 
         res = ManualNameGen(10).makeRangesByTypes(data)
         self.assertDictEqual(res, {'consonant': (0, 0), 'vowel': (4, 4)})
+                
+    @FunctionalClass.descript
+    def test_prepareFrequencyData_cuttingData_expectedCuttedData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of preaparing rules 
+        by match of the range.
+        '''
+        min_max = tuple((2, 4))
+        data = [{'key': 4, 'range': tuple((0, 5.0))}, 
+                {'key': 1, 'range': tuple((5.0, 11.0))}]
+                
+        res = ManualNameGen().prepareFrequencyData(min_max, data)
+        self.assertListEqual(res, [{'key': 4, 'range': tuple((0, 5.0))}])
+                
+    @FunctionalClass.descript
+    def test_prepareFrequencyData_cuttingData_expectedEmptyData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of preaparing rules 
+        by match of the range.
+        '''
+        min_max = tuple((2, 3))
+        data = [{'key': 4, 'range': tuple((0, 5.0))}, 
+                {'key': 1, 'range': tuple((5.0, 11.0))}]
+                
+        res = ManualNameGen().prepareFrequencyData(min_max, data)
+        self.assertListEqual(res, [])
+                
+    @FunctionalClass.descript
+    def test_getChainSize_gettingProbablySize_expectedSize(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of getting a 
+        random chain size by analytics.
+        '''
+        croppedSize = 7
+        min_max = tuple((1, 4))
+        data = [{'key': 3, 'count': 0, 'chance': 5.0}, 
+                {'key': 2, 'count': 0, 'chance': 5.0},
+                {'key': 1, 'count': 0, 'chance': 9.0}]
+                
+        res = ManualNameGen(10).getChainSize(croppedSize, 
+                                           min_max, data)
+        self.assertEqual(res, 1)
+                
+    @FunctionalClass.descript
+    def test_getChainSize_gettingWithoutProbableSize_expectedCroppedSize(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of getting a 
+        random chain size by analytics.
+        '''
+        croppedSize = 2
+        min_max = tuple((1, 4))
+        data = [{'key': 3, 'count': 0, 'chance': 50.0}, 
+                {'key': 2, 'count': 0, 'chance': 0.0},
+                {'key': 1, 'count': 0, 'chance': 0.0}]
+                
+        res = ManualNameGen(10).getChainSize(croppedSize, 
+                                           min_max, data)
+        self.assertEqual(res, 2)
+                
+    @FunctionalClass.descript
+    def test_getChainSize_checkingLowestCroppedSize_expectedCroppedSize(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of getting a 
+        random chain size by analytics.
+        '''
+        croppedSize = 1
+        min_max = tuple((2, 4))
+        data = [{'key': 3, 'count': 0, 'chance': 50.0}, 
+                {'key': 2, 'count': 0, 'chance': 0.0},
+                {'key': 1, 'count': 0, 'chance': 0.0}]
+                
+        res = ManualNameGen(10).getChainSize(croppedSize, 
+                                           min_max, data)
+        self.assertEqual(res, 1)
 
 ###FINISH FunctionalBlock
 
