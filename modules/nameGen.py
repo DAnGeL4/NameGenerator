@@ -453,6 +453,9 @@ class ManualNameGen():
         '''
         Returns a Mongoengine collection by chain type and embedded type.
         '''
+        assert chainType in self.chainTypes.values(),\
+                "ERR: Unknown chain type."
+                
         collectionsByTypes = dict({
             self.chainTypes['v']: {
                 'type': self.vowelsChains,
@@ -539,6 +542,9 @@ class ManualNameGen():
         '''
         Returns the order of chains by type and length.
         '''
+        if not croppedSize: 
+            return []
+            
         chainType = self.getLetterType(self.lastLetter)
         frequencyData = self.makeFrequencyData()
         rangeByTypes = self.makeRangesByTypes(frequencyData)

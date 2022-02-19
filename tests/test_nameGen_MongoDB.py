@@ -44,9 +44,9 @@ class ManualNameGen_Test(FunctionalClass):
     getNameFirstLetter;
     getCollectionByType;
     makeFrequencyData;
-    
     makeChainsOrder;
     getChainsData;
+    
     getChainsList;
     prepareLettersAnalytic;
     getCombinationsAnalyticObject;
@@ -131,6 +131,11 @@ class ManualNameGen_Test(FunctionalClass):
         vowels_chains.chains.append(embedded_vowels_chains)
         vowels_chains.save()
         
+        cons_chains = ConsonantsChains()
+        cons_chains.race = race.id
+        cons_chains.gender_group = genderGp.id
+        cons_chains.save()
+        
         lettersCount = NameLettersCount()
         lettersCount.race = race.id
         lettersCount.gender_group = genderGp.id
@@ -144,6 +149,7 @@ class ManualNameGen_Test(FunctionalClass):
         
         GlobalCounts.drop_collection()
         VowelsChains.drop_collection()
+        ConsonantsChains.drop_collection()
         NameLettersCount.drop_collection()
         NameEndings.drop_collection()
         FirstLetters.drop_collection()
@@ -622,6 +628,149 @@ class ManualNameGen_Test(FunctionalClass):
                                        'count': 0,
                                        'chance': 40.0
                                    }]})
+                
+    @FunctionalClass.descript
+    def test_makeChainsOrder_makingOrderStartsVow_expectedIntList(self) -> typ.NoReturn:
+        '''
+        Testing the method of making 
+        the order of chains by type and length.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        genObj.lastLetter = 'a'
+
+        collections = [ConsonantsChains, VowelsChains]
+        for collection in collections:
+            chains = collection.objects.first()
+            
+            for i in range(3):
+                embedded = ChainFrequencyTemplate()
+                embedded.key = i
+                embedded.chance = 6.0 - i
+                chains.chainFrequency.append(embedded)
+            chains.save()
+                
+        res = genObj.makeChainsOrder(croppedSize=7)
+        self.assertListEqual(res, [2,1,2,2])
+                
+    @FunctionalClass.descript
+    def test_makeChainsOrder_makingOrderStartsCons_expectedIntList(self) -> typ.NoReturn:
+        '''
+        Testing the method of making 
+        the order of chains by type and length.
+        '''
+        genObj = ManualNameGen(1)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        genObj.lastLetter = 'b'
+
+        collections = [ConsonantsChains, VowelsChains]
+        for collection in collections:
+            chains = collection.objects.first()
+            
+            for i in range(3):
+                embedded = ChainFrequencyTemplate()
+                embedded.key = i
+                embedded.chance = 6.0 - i
+                chains.chainFrequency.append(embedded)
+            chains.save()
+                
+        res = genObj.makeChainsOrder(croppedSize=7)
+        self.assertListEqual(res, [2,1,1,1,2])
+                
+    @FunctionalClass.descript
+    def test_makeChainsOrder_makingOrderLowestSize_expectedIntList(self) -> typ.NoReturn:
+        '''
+        Testing the method of making 
+        the order of chains by type and length.
+        '''
+        genObj = ManualNameGen(1)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        genObj.lastLetter = 'a'
+
+        embedded = ChainFrequencyTemplate()
+        embedded.key = 1
+        embedded.chance = 5.0
+        
+        chains = VowelsChains.objects.first()
+        chains.chainFrequency.append(embedded)
+        chains.save()
+                
+        res = genObj.makeChainsOrder(croppedSize=1)
+        self.assertListEqual(res, [1])
+                
+    @FunctionalClass.descript
+    def test_makeChainsOrder_makingOrderEmptySize_expectedEmptyList(self) -> typ.NoReturn:
+        '''
+        Testing the method of making 
+        the order of chains by type and length.
+        '''
+        genObj = ManualNameGen(1)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        genObj.lastLetter = 'a'
+
+        embedded = ChainFrequencyTemplate()
+        embedded.key = 1
+        embedded.chance = 5.0
+        
+        chains = VowelsChains.objects.first()
+        chains.chainFrequency.append(embedded)
+        chains.save()
+                
+        res = genObj.makeChainsOrder(croppedSize=0)
+        self.assertListEqual(res, [])
+                
+    @FunctionalClass.descript
+    def test_getChainsData_readingVowelDBData_expectedData(self) -> typ.NoReturn:
+        '''
+        Testing the method of reading chains data 
+        from database by chain type.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+                
+        res = genObj.getChainsData(chainType='vowel')
+        self.assertListEqual(res, [{'count': 6, 'chance': 0.6, 
+                                    'key': 'key_6'}])
+                
+    @FunctionalClass.descript
+    def test_getChainsData_readingConsonantDBData_expectedData(self) -> typ.NoReturn:
+        '''
+        Testing the method of reading chains data 
+        from database by chain type.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+
+        embedded = ChainsTemplate()
+        embedded.key = 'key_3'
+        embedded.count = 3
+        embedded.chance = 3.6
+    
+        cons_chains = ConsonantsChains.objects.first()
+        cons_chains.chains.append(embedded)
+        cons_chains.save()
+                
+        res = genObj.getChainsData(chainType='consonant')
+        self.assertListEqual(res, [{'count': 3, 'chance': 3.6, 
+                                    'key': 'key_3'}])
+                
+    @FunctionalClass.descript
+    def test_getChainsData_checkingChainType_expectedRaise(self) -> typ.NoReturn:
+        '''
+        Testing the method of reading chains data 
+        from database by chain type.
+        '''
+        genObj = ManualNameGen(10)
+        
+        self.assertRaises(AssertionError, 
+                          genObj.getChainsData, 
+                          chainType='wrong_type')
         
 ###FINISH FunctionalBlock
 
