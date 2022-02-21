@@ -46,11 +46,8 @@ class ManualNameGen_Test(FunctionalClass):
     makeFrequencyData;
     makeChainsOrder;
     getChainsData;
-    
     getChainsList;
-    prepareLettersAnalytic;
-    getCombinationsAnalyticObject;
-    getChainsAnalyticObject;
+    
     makeAllChainLettersData;
     makeAllNamesLetters;
     getGivenLengthChains;
@@ -771,6 +768,36 @@ class ManualNameGen_Test(FunctionalClass):
         self.assertRaises(AssertionError, 
                           genObj.getChainsData, 
                           chainType='wrong_type')
+                
+    @FunctionalClass.descript
+    def test_getChainsList_readingVowelDBData_expectedChains(self) -> typ.NoReturn:
+        '''
+        Testing the method of making list 
+        of chains from chain rules.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+                
+        res = genObj.getChainsList(chainType='vowel')
+        self.assertListEqual(res, ['key_6'])
+                
+    @FunctionalClass.descript
+    def test_getChainsList_makingChains_expectedChains(self) -> typ.NoReturn:
+        '''
+        Testing the method of making list 
+        of chains from chain rules.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+
+        data = [{'count': 3, 'chance': 3.6, 'key': 'chain_3'},
+                {'count': 4, 'chance': 4.8, 'key': 'chain_4'}]
+                
+        res = genObj.getChainsList(chainType='vowel',
+                                  chainRules=data)
+        self.assertListEqual(res, ['chain_3', 'chain_4'])
         
 ###FINISH FunctionalBlock
 
