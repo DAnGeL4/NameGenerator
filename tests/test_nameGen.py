@@ -7,6 +7,9 @@ from tests.test_Service import FunctionalClass
 from modules.nameGen import ManualNameGen_Stub
 from modules.nameGen import ManualNameGen
 
+from modules.nameAnalysis import AnalyticChains, AnalyticCombinations
+from modules.nameAnalysis import AnalyticLetters
+
 ###FINISH ImportBlock
 
 ###START GlobalConstantBlock
@@ -109,6 +112,9 @@ class ManualNameGen_Test(FunctionalClass):
     makeRangesByTypes;
     prepareFrequencyData;
     getChainSize;
+    prepareLettersAnalytic;
+    getCombinationsAnalyticObject;
+    getChainsAnalyticObject;
     '''
 
     ##BEGIN ConstantBlock
@@ -497,6 +503,72 @@ class ManualNameGen_Test(FunctionalClass):
         res = ManualNameGen(10).getChainSize(croppedSize, 
                                            min_max, data)
         self.assertEqual(res, 1)
+                
+    @FunctionalClass.descript
+    def test_prepareLettersAnalytic_fillingObject_expectedFilledData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepares initial data 
+        for an analytic object.
+        '''
+        data = ['chainone', 'chaintwo', 'chainthree']
+                
+        obj = ManualNameGen(10).prepareLettersAnalytic(chainList=data)
+        res = obj.tmp_NamesDB['Common']
+        self.assertListEqual(res, ['chainone', 'chaintwo', 
+                                   'chainthree'])
+                
+    @FunctionalClass.descript
+    def test_prepareLettersAnalytic_fillingObject_expectedFilledTemplate(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepares initial data 
+        for an analytic object.
+        '''
+        data = ['chainone', 'chaintwo', 'chainthree']
+                
+        obj = ManualNameGen(10).prepareLettersAnalytic(chainList=data)
+        res = obj.tmp_NamesAnalytic
+        self.assertDictEqual(res, {'tmp_Race': {
+                                        'Max_Names_Count': 3,
+                                        'First_Letters': {
+                                            'Vowels_Count': 0,
+                                            'Consonants_Count': 0,
+                                        },
+                                        "Letters": {}
+                                    }})
+                
+    @FunctionalClass.descript
+    def test_prepareLettersAnalytic_fillingObject_expectedObject(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepares initial data 
+        for an analytic object.
+        '''
+        data = ['chainone', 'chaintwo', 'chainthree']
+                
+        res = ManualNameGen(10).prepareLettersAnalytic(chainList=data)
+        self.assertIsInstance(res, AnalyticLetters)
+                
+    @FunctionalClass.descript
+    def test_getCombinationsAnalyticObject_initializingObject_expectedObject(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of initializing 
+        combination analytics object.
+        '''
+        res = ManualNameGen(10).getCombinationsAnalyticObject()
+        self.assertIsInstance(res, AnalyticCombinations)
+                
+    @FunctionalClass.descript
+    def test_getChainsAnalyticObject_initializingObject_expectedObject(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of initializing 
+        chains analytics object.
+        '''
+        res = ManualNameGen(10).getChainsAnalyticObject()
+        self.assertIsInstance(res, AnalyticChains)
 
 ###FINISH FunctionalBlock
 
