@@ -15,7 +15,7 @@ from database.medbNameSchemas import Race, GenderGroups, Male
 from database.medbAnalyticSchemas import GlobalCounts, VowelsChains
 from database.medbAnalyticSchemas import NameLettersCount, NameEndings
 from database.medbAnalyticSchemas import ChainsTemplate, FirstLetters
-from database.medbAnalyticSchemas import ConsonantsChains
+from database.medbAnalyticSchemas import ConsonantsChains, Letters
 from database.medbAnalyticSchemas import ChainFrequencyTemplate
 
 #from database.medbAnalyticSchemas import FirstLetters
@@ -47,13 +47,8 @@ class ManualNameGen_Test(FunctionalClass):
     makeChainsOrder;
     getChainsData;
     getChainsList;
-    
     makeAllNamesLetters;
-    getGivenLengthChains;
-    prepareFirstChainLetters;
-    cutChains;
-    prepareLettersRules;
-    makeLetterRules;
+    
     getLettersRules;
     cutChance;
     createChain;
@@ -149,6 +144,7 @@ class ManualNameGen_Test(FunctionalClass):
         NameLettersCount.drop_collection()
         NameEndings.drop_collection()
         FirstLetters.drop_collection()
+        Letters.drop_collection()
 
         Race.drop_collection()
         GenderGroups.drop_collection()
@@ -797,6 +793,67 @@ class ManualNameGen_Test(FunctionalClass):
         res = genObj.getChainsList(chainType='vowel',
                                   chainRules=data)
         self.assertListEqual(res, ['chain_3', 'chain_4'])
+                
+    @FunctionalClass.descript
+    def test_makeAllNamesLetters_makingLettersRules_expectedVowels(self) -> typ.NoReturn:
+        '''
+        Testing the method of making rules 
+        by the chances of all letters.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+
+        race = Race.objects.first()
+        genderGp = GenderGroups.objects.first()
+        
+        letter = Letters()
+        letter.race = race.id
+        letter.gender_group = genderGp.id
+        letter.key = 'a'
+        letter.count = 3
+        letter.chance = 3.0
+        letter.save()
+                
+        res = genObj.makeAllNamesLetters(chainType='vowel')
+        self.assertListEqual(res, [{'key': 'a', 'range': (0, 3.0)}])
+                
+    @FunctionalClass.descript
+    def test_makeAllNamesLetters_makingLettersRules_expectedConsonants(self) -> typ.NoReturn:
+        '''
+        Testing the method of making rules 
+        by the chances of all letters.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+
+        race = Race.objects.first()
+        genderGp = GenderGroups.objects.first()
+        
+        letter = Letters()
+        letter.race = race.id
+        letter.gender_group = genderGp.id
+        letter.key = 'b'
+        letter.count = 4
+        letter.chance = 4.0
+        letter.save()
+                
+        res = genObj.makeAllNamesLetters(chainType='consonant')
+        self.assertListEqual(res, [{'key': 'b', 'range': (0, 4.0)}])
+                
+    @FunctionalClass.descript
+    def test_makeAllNamesLetters_makingLettersRules_expectedEmpty(self) -> typ.NoReturn:
+        '''
+        Testing the method of making rules 
+        by the chances of all letters.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+                
+        res = genObj.makeAllNamesLetters(chainType='consonant')
+        self.assertListEqual(res, [])
         
 ###FINISH FunctionalBlock
 
