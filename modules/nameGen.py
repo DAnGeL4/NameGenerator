@@ -666,6 +666,9 @@ class ManualNameGen():
         '''
         Returns a list of chains of the given length.
         '''
+        assert lenChain is not None, "ERR: lenChain must be initialized."
+        assert lenChain >= 0, "ERR: lenChain must be positive."
+                                 
         preparedData = list()
         for chain in chainsData:
             if len(chain['key']) == lenChain:

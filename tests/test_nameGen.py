@@ -116,6 +116,12 @@ class ManualNameGen_Test(FunctionalClass):
     getCombinationsAnalyticObject;
     getChainsAnalyticObject;
     makeAllChainLettersData;
+    getGivenLengthChains;
+    
+    prepareFirstChainLetters;
+    cutChains;
+    prepareLettersRules;
+    makeLetterRules;
     '''
 
     ##BEGIN ConstantBlock
@@ -585,6 +591,48 @@ class ManualNameGen_Test(FunctionalClass):
                                    {'key': 'h', 'range': (100.0, 200.0)},
                                    {'key': 'o', 'range': (200.0, 250.0)},
                                    {'key': 't', 'range': (250.0, 300.0)}])
+                
+    @FunctionalClass.descript
+    def test_getGivenLengthChains_findingKeys_expectedKeys(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of finding a list of chains 
+        of the given length.
+        '''
+        data = [{'key': 'chainone', 'count': 0, 'chance': 0.0}, 
+                {'key': 'chaintwo', 'count': 0, 'chance': 0.0}, 
+                {'key': 'chainother', 'count': 0, 'chance': 0.0}]
+                
+        res = ManualNameGen(10).getGivenLengthChains(chainsData=data,
+                                                     lenChain=8)
+        self.assertListEqual(res, [{'key': 'chainone', 'count': 0, 'chance': 0.0}, 
+                                   {'key': 'chaintwo', 'count': 0, 'chance': 0.0}])
+                
+    @FunctionalClass.descript
+    def test_getGivenLengthChains_checkingEmptyLength_expectedRaise(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of finding a list of chains 
+        of the given length.
+        '''
+        genObj = ManualNameGen()
+                
+        self.assertRaises(AssertionError, 
+                          genObj.getGivenLengthChains, 
+                          chainsData=[], lenChain=None)
+                
+    @FunctionalClass.descript
+    def test_getGivenLengthChains_checkingNegativeLength_expectedRaise(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of finding a list of chains 
+        of the given length.
+        '''
+        genObj = ManualNameGen()
+                
+        self.assertRaises(AssertionError, 
+                          genObj.getGivenLengthChains, 
+                          chainsData=[], lenChain=-1)
 
 ###FINISH FunctionalBlock
 
