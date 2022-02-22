@@ -48,7 +48,6 @@ class ManualNameGen_Test(FunctionalClass):
     getChainsData;
     getChainsList;
     
-    makeAllChainLettersData;
     makeAllNamesLetters;
     getGivenLengthChains;
     prepareFirstChainLetters;

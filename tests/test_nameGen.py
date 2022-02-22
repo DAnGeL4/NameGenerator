@@ -115,6 +115,7 @@ class ManualNameGen_Test(FunctionalClass):
     prepareLettersAnalytic;
     getCombinationsAnalyticObject;
     getChainsAnalyticObject;
+    makeAllChainLettersData;
     '''
 
     ##BEGIN ConstantBlock
@@ -569,6 +570,21 @@ class ManualNameGen_Test(FunctionalClass):
         '''
         res = ManualNameGen(10).getChainsAnalyticObject()
         self.assertIsInstance(res, AnalyticChains)
+                
+    @FunctionalClass.descript
+    def test_makeAllChainLettersData_makingAnalytic_expectedChancesData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of makes rules by the chances 
+        of all letters in chains from the data.
+        '''
+        data = ['cho', 'cht']
+                
+        res = ManualNameGen(10).makeAllChainLettersData(chainList=data)
+        self.assertListEqual(res, [{'key': 'c', 'range': (0, 100.0)},
+                                   {'key': 'h', 'range': (100.0, 200.0)},
+                                   {'key': 'o', 'range': (200.0, 250.0)},
+                                   {'key': 't', 'range': (250.0, 300.0)}])
 
 ###FINISH FunctionalBlock
 

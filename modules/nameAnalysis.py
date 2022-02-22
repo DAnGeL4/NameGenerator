@@ -426,6 +426,9 @@ class AnalysysService:
         Creates, calculates and save maked analytic data for common group 
         key by current the analytic key (#localAnalyticKey).
         '''
+        if self.groupKey == self.GroupSubKey_Common:
+            return True
+            
         commonAnalyticData = dict({self.GroupSubKey_Common: {}})
         localAnalyticData = self.getLocalAnalyticData()
 
