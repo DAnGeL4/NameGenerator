@@ -694,6 +694,8 @@ class ManualNameGen():
         Selects chains starting with the received letter 
         and discards this letter from each chain.
         '''
+        assert prewLetter is not None, "ERR: letter cannot be None."
+                      
         preparedData = list()
         for chain in chainsData:
             key = chain['key']
@@ -715,6 +717,9 @@ class ManualNameGen():
         any of the possible letters in the name;
         any random letter.
         '''
+        assert all(key in rulesData for key in ['fcl', 'acl', 'anl']),\
+                "ERR: There is no one of the keys."
+                
         chanceLetterFirst = self.chanceLetterFirst
         if not rulesData['fcl']:
             chanceLetterFirst = 0

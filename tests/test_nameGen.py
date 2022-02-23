@@ -117,10 +117,10 @@ class ManualNameGen_Test(FunctionalClass):
     getChainsAnalyticObject;
     makeAllChainLettersData;
     getGivenLengthChains;
-    
     prepareFirstChainLetters;
     cutChains;
     prepareLettersRules;
+    
     makeLetterRules;
     '''
 
@@ -633,6 +633,113 @@ class ManualNameGen_Test(FunctionalClass):
         self.assertRaises(AssertionError, 
                           genObj.getGivenLengthChains, 
                           chainsData=[], lenChain=-1)
+                
+    @FunctionalClass.descript
+    def test_prepareFirstChainLetters_cutingLetters_expectedFirstLetters(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of gets the first letters 
+        in chains from rules.
+        '''
+        data = [{'key': 'onechain', 'count': 0, 'chance': 1.0}, 
+                {'key': 'twochain', 'count': 0, 'chance': 2.0}, 
+                {'key': 'anotherchain', 'count': 0, 'chance': 10.0}]
+                
+        res = ManualNameGen(10).prepareFirstChainLetters(chainsData=data)
+        self.assertListEqual(res, [{'key': 'o', 'count': 0, 'chance': 1.0}, 
+                                   {'key': 't', 'count': 0, 'chance': 2.0}, 
+                                   {'key': 'a', 'count': 0, 'chance': 10.0}])
+                
+    @FunctionalClass.descript
+    def test_cutChains_cutingLetters_expectedCroppedChains(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of selects chains and discards 
+        this received letter from each chain.
+        '''
+        data = [{'key': 'onechain', 'count': 0, 'chance': 1.0}, 
+                {'key': 'twochain', 'count': 0, 'chance': 2.0}, 
+                {'key': 'anotherchain', 'count': 0, 'chance': 10.0}]
+                
+        res = ManualNameGen(10).cutChains(chainsData=data,
+                                          prewLetter='o')
+        self.assertListEqual(res, [{'key': 'nechain', 
+                                    'count': 0, 
+                                    'chance': 1.0}])
+                
+    @FunctionalClass.descript
+    def test_cutChains_checkingNotExistLetter_expectedEmptyList(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of selects chains and discards 
+        this received letter from each chain.
+        '''
+        data = [{'key': 'onechain', 'count': 0, 'chance': 1.0}, 
+                {'key': 'twochain', 'count': 0, 'chance': 2.0}, 
+                {'key': 'anotherchain', 'count': 0, 'chance': 10.0}]
+                
+        res = ManualNameGen(10).cutChains(chainsData=data,
+                                          prewLetter='z')
+        self.assertListEqual(res, [])
+                
+    @FunctionalClass.descript
+    def test_cutChains_checkingNoneLetter_expectedRaise(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of selects chains and discards 
+        this received letter from each chain.
+        '''
+        genObj = ManualNameGen(10)
+                
+        self.assertRaises(AssertionError, 
+                          genObj.cutChains, 
+                          chainsData=[], prewLetter=None)
+                
+    @FunctionalClass.descript
+    def test_prepareLettersRules_makingData_expectedData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepares rules by types.
+        '''
+        data = {'fcl': [{'key': 'a', 'count': 0, 'chance': 10.0}], 
+                'acl': [], 
+                'anl': []}
+                
+        res = ManualNameGen(10).prepareLettersRules(rulesData=data)
+        self.assertListEqual(res, [(70.0, [{'key': 'a', 
+                                            'count': 0, 
+                                            'chance': 10.0}]),
+                                   (18.0, []),
+                                   (9.0, []),
+                                   (3.0, None)
+                                  ])
+                
+    @FunctionalClass.descript
+    def test_prepareLettersRules_checkingEmptyFirstKey_expectedData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepares rules by types.
+        '''
+        data = {'fcl': [], 'acl': [], 'anl': []}
+                
+        res = ManualNameGen(10).prepareLettersRules(rulesData=data)
+        self.assertListEqual(res, [(0.0, []),
+                                   (18.0, []),
+                                   (9.0, []),
+                                   (3.0, None)])
+                
+    @FunctionalClass.descript
+    def test_prepareLettersRules_checkingNotExistKey_expectedRaise(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepares rules by types.
+        '''
+        genObj = ManualNameGen(10)
+        data = {'fcl': [], 'acl': []}
+                
+        self.assertRaises(AssertionError, 
+                          genObj.prepareLettersRules, 
+                          rulesData=data)
 
 ###FINISH FunctionalBlock
 
