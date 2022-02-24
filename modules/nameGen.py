@@ -722,7 +722,7 @@ class ManualNameGen():
                 
         chanceLetterFirst = self.chanceLetterFirst
         if not rulesData['fcl']:
-            chanceLetterFirst = 0
+            chanceLetterFirst = 0.0
 
         dataList = list()
         dataList.append((chanceLetterFirst, rulesData['fcl']))
@@ -736,14 +736,14 @@ class ManualNameGen():
                         dataList: typ.List[tuple]) -> typ.List[dict]:
         '''
         Makes rules for several letter variants, 
-        chosen randomly according to their rules
+        chosen randomly according to their rules.
         '''
         startChance = 0
         randomRules = list()
         for data in dataList:
             chance = data[0]
 
-            if data[1] is None:
+            if not data[1]:
                 key = self.getRandomLetter(chainType)
             else:
                 key = self.getRandomKey(None, randomRules=data[1])
@@ -758,8 +758,8 @@ class ManualNameGen():
 
         return randomRules
 
-    def getLettersRules(self, rulesData: typ.Dict[str, list],
-                        chainType: str) -> typ.List[dict]:
+    def getLettersRules(self, chainType: str,
+                        rulesData: typ.Dict[str, list]) -> typ.List[dict]:
         '''
         Prepares and makes rules for several variants of letters.
         '''
@@ -835,7 +835,7 @@ class ManualNameGen():
             preRulesData.update({'acl': allChainLetters})
             preRulesData.update({'anl': allNamesLetters})
 
-            randomRules = self.getLettersRules(preRulesData, chainType)
+            randomRules = self.getLettersRules(chainType, preRulesData)
             letter = self.getRandomKey(None, randomRules=randomRules)
             generalChain += letter
 

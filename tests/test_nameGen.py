@@ -120,8 +120,9 @@ class ManualNameGen_Test(FunctionalClass):
     prepareFirstChainLetters;
     cutChains;
     prepareLettersRules;
-    
     makeLetterRules;
+    getLettersRules;
+    cutChance;
     '''
 
     ##BEGIN ConstantBlock
@@ -701,14 +702,13 @@ class ManualNameGen_Test(FunctionalClass):
         '''
         Testing the method of prepares rules by types.
         '''
-        data = {'fcl': [{'key': 'a', 'count': 0, 'chance': 10.0}], 
+        data = {'fcl': [{'key': 'a', 'range': (0, 10.0)}], 
                 'acl': [], 
                 'anl': []}
                 
         res = ManualNameGen(10).prepareLettersRules(rulesData=data)
         self.assertListEqual(res, [(70.0, [{'key': 'a', 
-                                            'count': 0, 
-                                            'chance': 10.0}]),
+                                            'range': (0, 10.0)}]),
                                    (18.0, []),
                                    (9.0, []),
                                    (3.0, None)
@@ -740,6 +740,127 @@ class ManualNameGen_Test(FunctionalClass):
         self.assertRaises(AssertionError, 
                           genObj.prepareLettersRules, 
                           rulesData=data)
+                
+    @FunctionalClass.descript
+    def test_makeLetterRules_makingRules_expectedRules(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of makes rules 
+        for several letter variants, 
+        chosen randomly according to their rules.
+        '''
+        data = [(70.0, [{'key': 'd', 'range': (0.0, 10.0)}]),
+               (18.0, [{'key': 'b', 'range': (0.0, 11.0)},
+                       {'key': 'f', 'range': (11.0, 12.0)}]),
+               (9.0, [{'key': 'c', 'range': (0.0, 12.0)}]),
+               (3.0, None)]
+                
+        res = ManualNameGen(10).makeLetterRules(chainType='consonant', 
+                                                dataList=data)
+        self.assertListEqual(res, [{'key': 'd', 'range': (0.0, 70.0)},
+                                   {'key': 'b', 'range': (70.0, 88.0)},
+                                   {'key': 'c', 'range': (88.0, 97.0)},
+                                   {'key': 'j', 'range': (97.0, 100.0)}])
+                
+    @FunctionalClass.descript
+    def test_makeLetterRules_checkingEmptyRule_expectedRules(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of makes rules 
+        for several letter variants, 
+        chosen randomly according to their rules.
+        '''
+        data = [(70.0, [{'key': 'd', 'range': (0.0, 10.0)}]),
+               (18.0, [{'key': 'b', 'range': (0.0, 11.0)},
+                       {'key': 'f', 'range': (11.0, 12.0)}]),
+               (9.0, []),
+               (3.0, None)]
+                
+        res = ManualNameGen(10).makeLetterRules(chainType='consonant', 
+                                                dataList=data)
+        self.assertListEqual(res, [{'key': 'd', 'range': (0.0, 70.0)},
+                                   {'key': 'b', 'range': (70.0, 88.0)},
+                                   {'key': 'x', 'range': (88.0, 97.0)},
+                                   {'key': 'b', 'range': (97.0, 100.0)}])
+                
+    @FunctionalClass.descript
+    def test_getLettersRules_makingRules_expectedRules(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepares and makes rules 
+        for several variants of letters.
+        '''
+        data = {'fcl': [{'key': 'd', 'range': (0.0, 10.0)}], 
+                'acl': [{'key': 'b', 'range': (0.0, 11.0)},
+                       {'key': 'f', 'range': (11.0, 12.0)}], 
+                'anl': [{'key': 'c', 'range': (0.0, 12.0)}]}
+                
+        res = ManualNameGen(10).getLettersRules(chainType='consonant', 
+                                                rulesData=data)
+        self.assertListEqual(res, [{'key': 'd', 'range': (0.0, 70.0)},
+                                   {'key': 'b', 'range': (70.0, 88.0)},
+                                   {'key': 'c', 'range': (88.0, 97.0)},
+                                   {'key': 'j', 'range': (97.0, 100.0)}])
+                
+    @FunctionalClass.descript
+    def test_getLettersRules_checkingEmptyRule_expectedRules(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prepares and makes rules 
+        for several variants of letters.
+        '''
+        data = {'fcl': [{'key': 'd', 'range': (0.0, 10.0)}], 
+                'acl': [{'key': 'b', 'range': (0.0, 11.0)},
+                       {'key': 'f', 'range': (11.0, 12.0)}], 
+                'anl': []}
+                
+        res = ManualNameGen(10).getLettersRules(chainType='consonant', 
+                                                rulesData=data)
+        self.assertListEqual(res, [{'key': 'd', 'range': (0.0, 70.0)},
+                                   {'key': 'b', 'range': (70.0, 88.0)},
+                                   {'key': 'x', 'range': (88.0, 97.0)},
+                                   {'key': 'b', 'range': (97.0, 100.0)}])
+                
+    @FunctionalClass.descript
+    def test_cutChance_recalculatingRanges_expectedRecalcRules(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of reduces the chance of dropping 
+        an already dropped letter and recalculates the ranges.
+        '''
+        data = [{'key': 'b', 'range': (0.0, 11.0)},
+                {'key': 'f', 'range': (11.0, 12.0)}]
+                
+        res = ManualNameGen(10).cutChance(currLetter='b', 
+                                          letterRules=data)
+        self.assertListEqual(res, [{'key': 'b', 'range': (0.0, 0.11)},
+                                   {'key': 'f', 'range': (0.11, 1.11)}])
+                
+    @FunctionalClass.descript
+    def test_cutChance_checkingNotExistLetter_expectedRules(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of reduces the chance of dropping 
+        an already dropped letter and recalculates the ranges.
+        '''
+        data = [{'key': 'b', 'range': (0.0, 11.0)},
+                {'key': 'f', 'range': (11.0, 12.0)}]
+                
+        res = ManualNameGen(10).cutChance(currLetter='c', 
+                                          letterRules=data)
+        self.assertListEqual(res, [{'key': 'b', 'range': (0.0, 11.0)},
+                                   {'key': 'f', 'range': (11.0, 12.0)}])
+                
+    @FunctionalClass.descript
+    def test_cutChance_checkingEmptyRules_expectedEmptyList(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of reduces the chance of dropping 
+        an already dropped letter and recalculates the ranges.
+        '''
+        res = ManualNameGen(10).cutChance(currLetter='b', 
+                                          letterRules=[])
+        self.assertListEqual(res, [])
 
 ###FINISH FunctionalBlock
 

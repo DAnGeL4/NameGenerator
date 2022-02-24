@@ -49,8 +49,6 @@ class ManualNameGen_Test(FunctionalClass):
     getChainsList;
     makeAllNamesLetters;
     
-    getLettersRules;
-    cutChance;
     createChain;
     findValidCombinations;
     createCombinationChances;
