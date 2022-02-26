@@ -796,6 +796,45 @@ class ManualNameGen():
 
         return letterRules
 
+    def clearTempVars(self):
+        '''
+        Cleanes of temporary class variables.
+        '''
+        if hasattr(self, 'tmp_gen_chain'):
+            del self.tmp_gen_chain
+            
+        if hasattr(self, 'tmp_len'):
+            del self.tmp_len
+    
+    def prepareCreationChain(self, lenChain: int, chainType: str,
+                    chainsRules: typ.List[dict]) -> typ.Dict[str, list]:
+        '''
+        Prepars data for chain creation.
+        '''
+        self.globalRandomChance = 0.0
+        self.tmp_gen_chain = ''
+        self.tmp_len = lenChain
+
+        if not chainsRules:
+            chainsRules = self.getChainsData(chainType)
+            
+        chainsList = self.getChainsList(chainType, chainsRules)
+        chainsRules = self.getGivenLengthChains(chainsRules, lenChain)
+                        
+        if self.lastLetter:
+            self.tmp_len -= 1
+            chainsRules = self.cutChains(chainsRules, self.lastLetter)
+            self.tmp_gen_chain += self.lastLetter
+            self.lastLetter = None
+        
+        allRulesData = dict({
+            'fcl': [], 
+            'acl': self.makeAllChainLettersData(chainsList), 
+            'anl': self.makeAllNamesLetters(chainType),
+            'tmp': chainsRules
+        })
+        return allRulesData
+
     def createChain(self, lenChain: int, chainType: str,
                     chainsRules: typ.List[dict]) -> str:
         '''
@@ -806,43 +845,26 @@ class ManualNameGen():
         the chances of all letters in the database of names for given type;
         free random chance for any letter of the given type.
         '''
-        self.globalRandomChance = 0.0
-        generalChain = ''
+        allRulesData = self.prepareCreationChain(lenChain, chainType,
+                                                chainsRules)
+        lenChain = self.tmp_len
+        generalChain = self.tmp_gen_chain
+        chainsRules = allRulesData.pop('tmp')
 
-        if not chainsRules:
-            chainsRules = self.getChainsData(chainType)
-        chainsList = self.getChainsList(chainType, chainsRules)
+        _ = self.clearTempVars()
 
-        allChainLetters = self.makeAllChainLettersData(chainsList)
-        allNamesLetters = self.makeAllNamesLetters(chainType)
-
-        chainsRules = self.getGivenLengthChains(chainsRules, lenChain)
-        if self.lastLetter:
-            lenChain -= 1
-            chainsRules = self.cutChains(chainsRules, self.lastLetter)
-
-            generalChain += self.lastLetter
-            self.lastLetter = None
-
-        count = 0
-        while count < lenChain:
+        for count in range(lenChain):
             firstLettersRules = self.prepareFirstChainLetters(chainsRules)
-            firstChainLetters = self.setRangeByChances(firstLettersRules,
-                                                       False)
+            allRulesData['fcl'] = self.setRangeByChances(firstLettersRules,
+                                                         False)
 
-            preRulesData = dict()
-            preRulesData.update({'fcl': firstChainLetters})
-            preRulesData.update({'acl': allChainLetters})
-            preRulesData.update({'anl': allNamesLetters})
-
-            randomRules = self.getLettersRules(chainType, preRulesData)
+            randomRules = self.getLettersRules(chainType, allRulesData)
             letter = self.getRandomKey(None, randomRules=randomRules)
             generalChain += letter
 
             chainsRules = self.cutChains(chainsRules, letter)
-            allChainLetters = self.cutChance(letter, allChainLetters)
-            allNamesLetters = self.cutChance(letter, allNamesLetters)
-            count += 1
+            allRulesData['acl'] = self.cutChance(letter, allRulesData['acl'])
+            allRulesData['anl'] = self.cutChance(letter, allRulesData['anl'])
 
         return generalChain
 

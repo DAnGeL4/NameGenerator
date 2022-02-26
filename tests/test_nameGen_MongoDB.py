@@ -2,23 +2,17 @@
 ##systemImport
 import typing as typ
 import mongoengine as medb
-#from mongomock import MongoClient
-#from mongomock import Database
 
 ##customImport
 from configs.CFGNames import ME_SETTINGS
 from tests.test_Service import FunctionalClass
 
-#from database.medbCheckSumSchemas import GlobalFlags
-#from database.medbCheckSumSchemas import ChecksumFiles
 from database.medbNameSchemas import Race, GenderGroups, Male
 from database.medbAnalyticSchemas import GlobalCounts, VowelsChains
 from database.medbAnalyticSchemas import NameLettersCount, NameEndings
 from database.medbAnalyticSchemas import ChainsTemplate, FirstLetters
 from database.medbAnalyticSchemas import ConsonantsChains, Letters
 from database.medbAnalyticSchemas import ChainFrequencyTemplate
-
-#from database.medbAnalyticSchemas import FirstLetters
 
 from modules.nameGen import ManualNameGen
 
@@ -48,8 +42,9 @@ class ManualNameGen_Test(FunctionalClass):
     getChainsData;
     getChainsList;
     makeAllNamesLetters;
-    
+    prepareCreationChain;
     createChain;
+    
     findValidCombinations;
     createCombinationChances;
     setCombinationLetter;
@@ -852,6 +847,273 @@ class ManualNameGen_Test(FunctionalClass):
                 
         res = genObj.makeAllNamesLetters(chainType='consonant')
         self.assertListEqual(res, [])
+                
+    @FunctionalClass.descript
+    def test_prepareCreationChain_preparingData_expectedData(self) -> typ.NoReturn:
+        '''
+        Testing the method of preparing data for chain creation.
+        '''
+        genObj = ManualNameGen(1)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+
+        data = [{'count': 3, 'chance': 3.6, 'key': 'aei'},
+                {'count': 4, 'chance': 4.8, 'key': 'oi'}]
+        
+        race = Race.objects.first()
+        genderGp = GenderGroups.objects.first()
+        
+        letter = Letters()
+        letter.race = race.id
+        letter.gender_group = genderGp.id
+        letter.key = 'u'
+        letter.count = 4
+        letter.chance = 4.0
+        letter.save()
+                
+        res = genObj.prepareCreationChain(lenChain=3,
+                                          chainType='vowel',
+                                          chainsRules=data)
+        self.assertDictEqual(res, {'acl': [{'key': 'a', 'range': (0, 50.0)},
+                                           {'key': 'e', 'range': (50.0, 100.0)},
+                                           {'key': 'i', 'range': (100.0, 200.0)},
+                                           {'key': 'o', 'range': (200.0, 250.0)}],
+                                   'anl': [{'key': 'u', 'range': (0, 4.0)}],
+                                   'fcl': [],
+                                   'tmp': [{'chance': 3.6, 'count': 3, 'key': 'aei'}]
+                                  })
+                
+    @FunctionalClass.descript
+    def test_prepareCreationChain_checkingEmptyData_expectedData(self) -> typ.NoReturn:
+        '''
+        Testing the method of preparing data for chain creation.
+        '''
+        genObj = ManualNameGen(1)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+                
+        res = genObj.prepareCreationChain(lenChain=3,
+                                          chainType='vowel',
+                                          chainsRules=[])
+        self.assertDictEqual(res, {'acl': [{'range': (0, 100.0), 'key': 'k'}, 
+                                           {'range': (100.0, 200.0), 'key': 'e'}, 
+                                           {'range': (200.0, 300.0), 'key': 'y'}, 
+                                           {'range': (300.0, 400.0), 'key': '_'}, 
+                                           {'range': (400.0, 500.0), 'key': '6'}],
+                                   'anl': [], 'fcl': [], 'tmp': []})
+                
+    @FunctionalClass.descript
+    def test_prepareCreationChain_checkingFirstLetter_expectedReducedLen(self) -> typ.NoReturn:
+        '''
+        Testing the method of preparing data for chain creation.
+        '''
+        genObj = ManualNameGen(1)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        genObj.lastLetter = 'a'
+                
+        _ = genObj.prepareCreationChain(lenChain=3,
+                                        chainType='vowel',
+                                        chainsRules=[])
+        res = genObj.tmp_len
+        self.assertEqual(res, 2)
+                
+    @FunctionalClass.descript
+    def test_prepareCreationChain_checkingFirstLetter_expectedGenChain(self) -> typ.NoReturn:
+        '''
+        Testing the method of preparing data for chain creation.
+        '''
+        genObj = ManualNameGen(1)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        genObj.lastLetter = 'a'
+                
+        _ = genObj.prepareCreationChain(lenChain=3,
+                                        chainType='vowel',
+                                        chainsRules=[])
+        res = genObj.tmp_gen_chain
+        self.assertEqual(res, 'a')
+                
+    @FunctionalClass.descript
+    def test_prepareCreationChain_checkingFirstLetter_expectedData(self) -> typ.NoReturn:
+        '''
+        Testing the method of preparing data for chain creation.
+        '''
+        genObj = ManualNameGen(1)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        genObj.lastLetter = 'a'
+
+        data = [{'count': 3, 'chance': 3.6, 'key': 'aei'},
+                {'count': 4, 'chance': 4.8, 'key': 'oi'}]
+                
+        res = genObj.prepareCreationChain(lenChain=3,
+                                          chainType='vowel',
+                                          chainsRules=data)
+        self.assertDictEqual(res, {'acl': [{'key': 'a', 'range': (0, 50.0)},
+                                           {'key': 'e', 'range': (50.0, 100.0)},
+                                           {'key': 'i', 'range': (100.0, 200.0)},
+                                           {'key': 'o', 'range': (200.0, 250.0)}],
+                                   'anl': [],
+                                   'fcl': [],
+                                   'tmp': [{'chance': 3.6, 'count': 3, 'key': 'ei'}]
+                                  })
+                
+    @FunctionalClass.descript
+    def test_createChain_makingChain_expectedVowelChain(self) -> typ.NoReturn:
+        '''
+        Testing the method of making chain.
+        '''
+        genObj = ManualNameGen(1)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+
+        data = [{'count': 3, 'chance': 3.6, 'key': 'ae'},
+                {'count': 4, 'chance': 4.8, 'key': 'oi'}]
+        
+        race = Race.objects.first()
+        genderGp = GenderGroups.objects.first()
+        
+        letter = Letters()
+        letter.race = race.id
+        letter.gender_group = genderGp.id
+        letter.key = 'u'
+        letter.count = 4
+        letter.chance = 4.0
+        letter.save()
+                
+        res = genObj.createChain(lenChain=3,
+                                 chainType='vowel',
+                                 chainsRules=data)
+        self.assertEqual(res, 'oue')
+                
+    @FunctionalClass.descript
+    def test_createChain_checkingEmptyLetters_expectedVowelChain(self) -> typ.NoReturn:
+        '''
+        Testing the method of making chain.
+        '''
+        genObj = ManualNameGen(1)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+
+        data = [{'count': 3, 'chance': 3.6, 'key': 'ae'},
+                {'count': 4, 'chance': 4.8, 'key': 'oi'}]
+                
+        res = genObj.createChain(lenChain=3,
+                                 chainType='vowel',
+                                 chainsRules=data)
+        self.assertEqual(res, 'oeo')
+                
+    @FunctionalClass.descript
+    def test_createChain_checkingEmptyRules_expectedVowelChain(self) -> typ.NoReturn:
+        '''
+        Testing the method of making chain.
+        '''
+        genObj = ManualNameGen(1)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        
+        race = Race.objects.first()
+        genderGp = GenderGroups.objects.first()
+        
+        letter = Letters()
+        letter.race = race.id
+        letter.gender_group = genderGp.id
+        letter.key = 'u'
+        letter.count = 4
+        letter.chance = 4.0
+        letter.save()
+                
+        res = genObj.createChain(lenChain=3,
+                                 chainType='vowel',
+                                 chainsRules=[])
+        self.assertEqual(res, 'yue')
+                
+    @FunctionalClass.descript
+    def test_createChain_makingChain_expectedConsonantChain(self) -> typ.NoReturn:
+        '''
+        Testing the method of making chain.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+
+        data = [{'count': 3, 'chance': 3.6, 'key': 'bt'},
+                {'count': 4, 'chance': 4.8, 'key': 'fs'}]
+        
+        race = Race.objects.first()
+        genderGp = GenderGroups.objects.first()
+        
+        letter = Letters()
+        letter.race = race.id
+        letter.gender_group = genderGp.id
+        letter.key = 'l'
+        letter.count = 4
+        letter.chance = 4.0
+        letter.save()
+                
+        res = genObj.createChain(lenChain=3,
+                                 chainType='consonant',
+                                 chainsRules=data)
+        self.assertEqual(res, 'bst')
+                
+    @FunctionalClass.descript
+    def test_createChain_checkingConsFirstLetter_expectedVowelChain(self) -> typ.NoReturn:
+        '''
+        Testing the method of making chain.
+        '''
+        genObj = ManualNameGen(1)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        genObj.lastLetter = 'b'
+
+        data = [{'count': 3, 'chance': 3.6, 'key': 'ae'},
+                {'count': 4, 'chance': 4.8, 'key': 'oi'}]
+        
+        race = Race.objects.first()
+        genderGp = GenderGroups.objects.first()
+        
+        letter = Letters()
+        letter.race = race.id
+        letter.gender_group = genderGp.id
+        letter.key = 'u'
+        letter.count = 4
+        letter.chance = 4.0
+        letter.save()
+                
+        res = genObj.createChain(lenChain=3,
+                                 chainType='vowel',
+                                 chainsRules=data)
+        self.assertEqual(res, 'bou')
+                
+    @FunctionalClass.descript
+    def test_createChain_checkingVowFirstLetter_expectedVowelChain(self) -> typ.NoReturn:
+        '''
+        Testing the method of making chain.
+        '''
+        genObj = ManualNameGen(1)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        genObj.lastLetter = 'y'
+
+        data = [{'count': 3, 'chance': 3.6, 'key': 'ae'},
+                {'count': 4, 'chance': 4.8, 'key': 'oi'}]
+        
+        race = Race.objects.first()
+        genderGp = GenderGroups.objects.first()
+        
+        letter = Letters()
+        letter.race = race.id
+        letter.gender_group = genderGp.id
+        letter.key = 'u'
+        letter.count = 4
+        letter.chance = 4.0
+        letter.save()
+                
+        res = genObj.createChain(lenChain=3,
+                                 chainType='vowel',
+                                 chainsRules=data)
+        self.assertEqual(res, 'you')
         
 ###FINISH FunctionalBlock
 
