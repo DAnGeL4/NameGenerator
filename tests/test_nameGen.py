@@ -123,6 +123,7 @@ class ManualNameGen_Test(FunctionalClass):
     makeLetterRules;
     getLettersRules;
     cutChance;
+    clearTempVars;
     '''
 
     ##BEGIN ConstantBlock
@@ -861,6 +862,36 @@ class ManualNameGen_Test(FunctionalClass):
         res = ManualNameGen(10).cutChance(currLetter='b', 
                                           letterRules=[])
         self.assertListEqual(res, [])
+                
+    @FunctionalClass.descript
+    def test_clearTempVars_checkingCrearing_expectedNoVarLen(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of cleanes 
+        of temporary class variables.
+        '''
+        genObj = ManualNameGen()
+        genObj.tmp_len = 1
+
+        genObj.clearTempVars()
+                
+        res = getattr(genObj, 'tmp_len', None)
+        self.assertIsNone(res)
+                
+    @FunctionalClass.descript
+    def test_clearTempVars_checkingCrearing_expectedNoVarChain(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of cleanes 
+        of temporary class variables.
+        '''
+        genObj = ManualNameGen()
+        genObj.tmp_gen_chain = 'a'
+
+        genObj.clearTempVars()
+                
+        res = getattr(genObj, 'tmp_gen_chain', None)
+        self.assertIsNone(res)
 
 ###FINISH FunctionalBlock
 
