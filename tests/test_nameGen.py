@@ -8,7 +8,8 @@ from modules.nameGen import ManualNameGen_Stub
 from modules.nameGen import ManualNameGen
 
 from modules.nameAnalysis import AnalyticChains, AnalyticCombinations
-from modules.nameAnalysis import AnalyticLetters
+from modules.nameAnalysis import AnalyticLetters, AnalysysService 
+from modules.nameAnalysis import AnalyticCombinations
 
 ###FINISH ImportBlock
 
@@ -124,6 +125,7 @@ class ManualNameGen_Test(FunctionalClass):
     getLettersRules;
     cutChance;
     clearTempVars;
+    findValidCombinations;
     '''
 
     ##BEGIN ConstantBlock
@@ -892,6 +894,66 @@ class ManualNameGen_Test(FunctionalClass):
                 
         res = getattr(genObj, 'tmp_gen_chain', None)
         self.assertIsNone(res)
+                
+    @FunctionalClass.descript
+    def test_findValidCombinations_discardingChains_expectedData(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of finds valid combinations 
+        for the previous chain.
+        '''
+        genObj = ManualNameGen(10)
+                
+        analysisObj = AnalysysService(baseOfNames=dict())
+        analysisObj = AnalyticCombinations(analysisObj, baseOfNames=dict())
+                
+        data = [{'key': 'truth', 'count': 1, 'chance': 1.0},
+                {'key': 'lies', 'count': 2, 'chance': 2.0}]
+                
+        res = genObj.findValidCombinations(lastChain='tr', 
+                                           analysisObj=analysisObj,
+                                           combinationsData=data)
+        self.assertListEqual(res, [{'key': 'uth', 'count': 1, 'chance': 1.0}])
+                
+    @FunctionalClass.descript
+    def test_findValidCombinations_checkingMixedChains_expectedEmptyList(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of finds valid combinations 
+        for the previous chain.
+        '''
+        genObj = ManualNameGen(10)
+                
+        analysisObj = AnalysysService(baseOfNames=dict())
+        analysisObj = AnalyticCombinations(analysisObj, baseOfNames=dict())
+                
+        data = [{'key': 'truth', 'count': 1, 'chance': 1.0},
+                {'key': 'lies', 'count': 2, 'chance': 2.0}]
+                
+        res = genObj.findValidCombinations(lastChain='tru', 
+                                           analysisObj=analysisObj,
+                                           combinationsData=data)
+        self.assertListEqual(res, [])
+                
+    @FunctionalClass.descript
+    def test_findValidCombinations_checkingEmptyChain_expectedEmptyList(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of finds valid combinations 
+        for the previous chain.
+        '''
+        genObj = ManualNameGen(10)
+                
+        analysisObj = AnalysysService(baseOfNames=dict())
+        analysisObj = AnalyticCombinations(analysisObj, baseOfNames=dict())
+                
+        data = [{'key': 'truth', 'count': 1, 'chance': 1.0},
+                {'key': 'lies', 'count': 2, 'chance': 2.0}]
+                
+        res = genObj.findValidCombinations(lastChain='', 
+                                           analysisObj=analysisObj,
+                                           combinationsData=data)
+        self.assertListEqual(res, [])
 
 ###FINISH FunctionalBlock
 

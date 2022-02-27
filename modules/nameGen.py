@@ -879,7 +879,7 @@ class ManualNameGen():
         preparedData = list()
 
         for data in combinationsData:
-            if lastChain not in data['key']:
+            if not lastChain or lastChain not in data['key']:
                 continue
 
             chains = analysisObj.getListChainsData(data['key'])
@@ -900,7 +900,8 @@ class ManualNameGen():
             self, analysisObj: object,
             combinationsData: typ.List[dict]) -> typ.List[dict]:
         '''
-        Creates the chances data for the next letter in chains combinations.
+        Creates the chances data for 
+        the next letter in chains combinations.
         '''
         letterChances = dict()
 
