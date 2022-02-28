@@ -127,6 +127,7 @@ class ManualNameGen_Test(FunctionalClass):
     clearTempVars;
     findValidCombinations;
     createCombinationChances;
+    setCombinationLetter;
     '''
 
     ##BEGIN ConstantBlock
@@ -1002,6 +1003,63 @@ class ManualNameGen_Test(FunctionalClass):
         res = genObj.createCombinationChances(analysisObj=analysisObj,
                                               combinationsData=[])
         self.assertListEqual(res, [])
+                
+    @FunctionalClass.descript
+    def test_setCombinationLetter_selectingLetter_expectedLetter(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of selects 
+        the first letter from possible chains.
+        '''
+        genObj = ManualNameGen(10)
+        analysisObj = AnalysysService(baseOfNames=dict())
+        analysisObj = AnalyticCombinations(analysisObj, baseOfNames=dict())
+                
+        data = [{'key': 'truth', 'count': 1, 'chance': 1.0},
+                {'key': 'lies', 'count': 2, 'chance': 2.0}]
+                
+        _ = genObj.setCombinationLetter(lastChain='tr', 
+                                        analysisObj=analysisObj,
+                                        combinationsData=data)
+        res = genObj.lastLetter
+        self.assertEqual(res, 'u')
+                
+    @FunctionalClass.descript
+    def test_setCombinationLetter_checkingEmptyData_expectedRandomLetter(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of selects 
+        the first letter from possible chains.
+        '''
+        genObj = ManualNameGen(10)
+        analysisObj = AnalysysService(baseOfNames=dict())
+        analysisObj = AnalyticCombinations(analysisObj, baseOfNames=dict())
+                
+        _ = genObj.setCombinationLetter(lastChain='tr', 
+                                        analysisObj=analysisObj,
+                                        combinationsData=[])
+        res = genObj.lastLetter
+        self.assertEqual(res, 'p')
+                
+    @FunctionalClass.descript
+    def test_setCombinationLetter_checkingWrongChain_expectedRandomLetter(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of selects 
+        the first letter from possible chains.
+        '''
+        genObj = ManualNameGen(10)
+        analysisObj = AnalysysService(baseOfNames=dict())
+        analysisObj = AnalyticCombinations(analysisObj, baseOfNames=dict())
+                
+        data = [{'key': 'truth', 'count': 1, 'chance': 1.0},
+                {'key': 'lies', 'count': 2, 'chance': 2.0}]
+                
+        _ = genObj.setCombinationLetter(lastChain='', 
+                                        analysisObj=analysisObj,
+                                        combinationsData=data)
+        res = genObj.lastLetter
+        self.assertEqual(res, 'p')
 
 ###FINISH FunctionalBlock
 

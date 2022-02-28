@@ -742,11 +742,12 @@ class ManualNameGen():
         randomRules = list()
         for data in dataList:
             chance = data[0]
-
-            if not data[1]:
-                key = self.getRandomLetter(chainType)
-            else:
+            key = None
+            
+            if data[1]:
                 key = self.getRandomKey(None, randomRules=data[1])
+            if key is None:
+                key = self.getRandomLetter(chainType)
 
             endChance = startChance + chance
             randomRules.append({

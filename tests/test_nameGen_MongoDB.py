@@ -45,7 +45,6 @@ class ManualNameGen_Test(FunctionalClass):
     prepareCreationChain;
     createChain;
     
-    setCombinationLetter;
     createNamePart;
     makeEndingChainsRules;
     printLogLine;
