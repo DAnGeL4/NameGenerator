@@ -47,7 +47,6 @@ class ManualNameGen_Test(FunctionalClass):
     
     createNamePart;
     makeEndingChainsRules;
-    printLogLine;
     createCharacterName.
     '''
 

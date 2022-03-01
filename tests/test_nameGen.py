@@ -1,6 +1,8 @@
 ###START ImportBlock
 ##systemImport
+import io
 import typing as typ
+from unittest import mock
 
 ##customImport
 from tests.test_Service import FunctionalClass
@@ -9,7 +11,6 @@ from modules.nameGen import ManualNameGen
 
 from modules.nameAnalysis import AnalyticChains, AnalyticCombinations
 from modules.nameAnalysis import AnalyticLetters, AnalysysService 
-from modules.nameAnalysis import AnalyticCombinations
 
 ###FINISH ImportBlock
 
@@ -128,6 +129,7 @@ class ManualNameGen_Test(FunctionalClass):
     findValidCombinations;
     createCombinationChances;
     setCombinationLetter;
+    printLogLine.
     '''
 
     ##BEGIN ConstantBlock
@@ -1060,6 +1062,54 @@ class ManualNameGen_Test(FunctionalClass):
                                         combinationsData=data)
         res = genObj.lastLetter
         self.assertEqual(res, 'p')
+                
+    @FunctionalClass.descript
+    def test_printLogLine_printingInfoLvl0_expectedPrintLine(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prints message to log file.
+        '''
+        genObj = ManualNameGen()
+                
+        with mock.patch('sys.stdout', new=io.StringIO()) as testOut:
+            _ = genObj.printLogLine(msg='Test message', 
+                                    param='', 
+                                    lvl=0)
+    
+        res = testOut.getvalue()
+        self.assertEqual(res, 'Test message...\n')
+                
+    @FunctionalClass.descript
+    def test_printLogLine_printingInfoLvl1_expectedPrintLine(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prints message to log file.
+        '''
+        genObj = ManualNameGen()
+                
+        with mock.patch('sys.stdout', new=io.StringIO()) as testOut:
+            _ = genObj.printLogLine(msg='Test message', 
+                                    param='test_param', 
+                                    lvl=1)
+    
+        res = testOut.getvalue()
+        self.assertEqual(res, '* Test message: test_param\n')
+                
+    @FunctionalClass.descript
+    def test_printLogLine_printingInfoLvl2_expectedPrintLine(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of prints message to log file.
+        '''
+        genObj = ManualNameGen()
+                
+        with mock.patch('sys.stdout', new=io.StringIO()) as testOut:
+            _ = genObj.printLogLine(msg='Test message', 
+                                    param='test_param', 
+                                    lvl=2)
+    
+        res = testOut.getvalue()
+        self.assertEqual(res, '** Test message: test_param\n')
 
 ###FINISH FunctionalBlock
 

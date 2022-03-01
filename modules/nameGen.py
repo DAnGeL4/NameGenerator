@@ -1015,6 +1015,7 @@ class ManualNameGen():
         filler = "*" * lvl
         ident = "" if lvl == 0 else " "
         completion = "..." if lvl == 0 else ": "
+        param = "" if lvl == 0 else param
 
         logStr = "" + filler + ident
         logStr += msg + completion + str(param)
