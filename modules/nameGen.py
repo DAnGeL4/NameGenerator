@@ -920,8 +920,11 @@ class ManualNameGen():
         combinationRules = self.convertDictToListRules(letterChances)
         return combinationRules
 
-    def setCombinationLetter(self, lastChain: str, analysisObj: object,
-                             combinationsData: typ.List[dict]) -> typ.NoReturn:
+    def setCombinationLetter(self, 
+                             lastChain: str, 
+                             analysisObj: object,
+                             combinationsData: typ.List[dict],
+                             chainType=None) -> typ.NoReturn:
         '''
         Finds possible combinations for the previous chain 
         and randomly selects the first letter from those chains.
@@ -940,7 +943,7 @@ class ManualNameGen():
         dataList.append((chanceCombinationLetter, combinationRules))
         dataList.append((self.chanceFreeCombination, list([freeLetterRule])))
 
-        randomRules = self.makeLetterRules(None, dataList)
+        randomRules = self.makeLetterRules(chainType, dataList)
         letter = self.getRandomKey(None, randomRules=randomRules)
 
         self.lastLetter = letter
@@ -948,14 +951,13 @@ class ManualNameGen():
 
     def createNamePart(self,
                        chainsOrder: typ.List[int],
-                       chainRules: typ.List[dict] = None,
+                       chainRules: typ.Dict[str, list] = None,
                        end: bool = False) -> str:
         '''
         Creates the part of name by the analytic.
         Used analytics: chains combinations, chains,
         first letters, letters e.t.c.
         '''
-        orderedChains = list()
         chainType = self.getLetterType(self.lastLetter)
         if end:
             self.lastLetter = None
@@ -964,11 +966,13 @@ class ManualNameGen():
         combinationsData = self.getDBAnalyticData(self.chainsCombinations)
         analysisObj = self.getCombinationsAnalyticObject()
 
+        orderedChains = list()
         chain = None
         for lenChain in chainsOrder:
             if chain:
                 _ = self.setCombinationLetter(chain, analysisObj,
-                                              combinationsData)
+                                              combinationsData,
+                                              chainType)
 
             rules = None if not chainRules else chainRules[chainType]
             chain = self.createChain(lenChain, chainType, rules)

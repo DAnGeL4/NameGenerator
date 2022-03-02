@@ -12,7 +12,8 @@ from database.medbAnalyticSchemas import GlobalCounts, VowelsChains
 from database.medbAnalyticSchemas import NameLettersCount, NameEndings
 from database.medbAnalyticSchemas import ChainsTemplate, FirstLetters
 from database.medbAnalyticSchemas import ConsonantsChains, Letters
-from database.medbAnalyticSchemas import ChainFrequencyTemplate
+from database.medbAnalyticSchemas import ChainFrequencyTemplate 
+from database.medbAnalyticSchemas import ChainsCombinations
 
 from modules.nameGen import ManualNameGen
 
@@ -44,8 +45,8 @@ class ManualNameGen_Test(FunctionalClass):
     makeAllNamesLetters;
     prepareCreationChain;
     createChain;
-    
     createNamePart;
+    
     makeEndingChainsRules;
     createCharacterName.
     '''
@@ -134,6 +135,7 @@ class ManualNameGen_Test(FunctionalClass):
         NameEndings.drop_collection()
         FirstLetters.drop_collection()
         Letters.drop_collection()
+        ChainsCombinations.drop_collection()
 
         Race.drop_collection()
         GenderGroups.drop_collection()
@@ -1110,6 +1112,105 @@ class ManualNameGen_Test(FunctionalClass):
                                  chainType='vowel',
                                  chainsRules=data)
         self.assertEqual(res, 'you')
+                
+    @FunctionalClass.descript
+    def test_createNamePart_makingNamePart_expectedNamePart(self) -> typ.NoReturn:
+        '''
+        Testing the method of creates the part 
+        of name by the analytic.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        genObj.lastLetter = 'a'
+
+        order = [2, 1, 1]
+        data = {'vowel': [{'count': 3, 'chance': 3.6, 'key': 'ae'}],
+                'consonant': [{'count': 4, 'chance': 4.8, 'key': 'vt'}]}
+        
+        race = Race.objects.first()
+        genderGp = GenderGroups.objects.first()
+        
+        letter = Letters()
+        letter.race = race.id
+        letter.gender_group = genderGp.id
+        letter.key = 'u'
+        letter.count = 4
+        letter.chance = 4.0
+        letter.save()
+                
+        res = genObj.createNamePart(chainsOrder=order,
+                                    chainRules=data,
+                                    end=False)
+        self.assertEqual(res, 'aehe')
+                
+    @FunctionalClass.descript
+    def test_createNamePart_checkingEmptyData_expectedNamePart(self) -> typ.NoReturn:
+        '''
+        Testing the method of creates the part 
+        of name by the analytic.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        genObj.lastLetter = 'y'
+
+        order = [1, 2, 1]
+                
+        res = genObj.createNamePart(chainsOrder=order,
+                                    chainRules=None,
+                                    end=False)
+        self.assertEqual(res, 'ytto')
+                
+    @FunctionalClass.descript
+    def test_createNamePart_makingEndPart_expectedNamePart(self) -> typ.NoReturn:
+        '''
+        Testing the method of creates the part 
+        of name by the analytic.
+        '''
+        genObj = ManualNameGen(10)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        genObj.lastLetter = 'a'
+
+        order = [2, 1, 1]
+        data = {'vowel': [{'count': 3, 'chance': 3.6, 'key': 'ae'}],
+                'consonant': [{'count': 4, 'chance': 4.8, 'key': 'vt'}]}
+                
+        res = genObj.createNamePart(chainsOrder=order,
+                                    chainRules=data,
+                                    end=True)
+        self.assertEqual(res, 'vtyg')
+                
+    @FunctionalClass.descript
+    def test_createNamePart_checkingCombinationsData_expectedNamePart(self) -> typ.NoReturn:
+        '''
+        Testing the method of creates the part 
+        of name by the analytic.
+        '''
+        genObj = ManualNameGen(11)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        genObj.lastLetter = 'a'
+
+        order = [2, 1, 1]
+        
+        race = Race.objects.first()
+        genderGp = GenderGroups.objects.first()
+        VowelsChains.drop_collection()
+        
+        comb = ChainsCombinations()
+        comb.race = race.id
+        comb.gender_group = genderGp.id
+        comb.key = 'au'
+        comb.count = 4
+        comb.chance = 4.0
+        comb.save()
+                
+        res = genObj.createNamePart(chainsOrder=order,
+                                    chainRules=[],
+                                    end=False)
+        self.assertEqual(res, 'auva')
         
 ###FINISH FunctionalBlock
 
