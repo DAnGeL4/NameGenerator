@@ -46,8 +46,8 @@ class ManualNameGen_Test(FunctionalClass):
     prepareCreationChain;
     createChain;
     createNamePart;
-    
     makeEndingChainsRules;
+    
     createCharacterName.
     '''
 
@@ -794,13 +794,10 @@ class ManualNameGen_Test(FunctionalClass):
         genObj = ManualNameGen(10)
         genObj.race = 'TestRace'
         genObj.genderGroup = 'TestGender'
-
-        race = Race.objects.first()
-        genderGp = GenderGroups.objects.first()
         
         letter = Letters()
-        letter.race = race.id
-        letter.gender_group = genderGp.id
+        letter.race = self.race.id
+        letter.gender_group = self.gender.id
         letter.key = 'a'
         letter.count = 3
         letter.chance = 3.0
@@ -818,13 +815,10 @@ class ManualNameGen_Test(FunctionalClass):
         genObj = ManualNameGen(10)
         genObj.race = 'TestRace'
         genObj.genderGroup = 'TestGender'
-
-        race = Race.objects.first()
-        genderGp = GenderGroups.objects.first()
         
         letter = Letters()
-        letter.race = race.id
-        letter.gender_group = genderGp.id
+        letter.race = self.race.id
+        letter.gender_group = self.gender.id
         letter.key = 'b'
         letter.count = 4
         letter.chance = 4.0
@@ -858,12 +852,9 @@ class ManualNameGen_Test(FunctionalClass):
         data = [{'count': 3, 'chance': 3.6, 'key': 'aei'},
                 {'count': 4, 'chance': 4.8, 'key': 'oi'}]
         
-        race = Race.objects.first()
-        genderGp = GenderGroups.objects.first()
-        
         letter = Letters()
-        letter.race = race.id
-        letter.gender_group = genderGp.id
+        letter.race = self.race.id
+        letter.gender_group = self.gender.id
         letter.key = 'u'
         letter.count = 4
         letter.chance = 4.0
@@ -969,12 +960,9 @@ class ManualNameGen_Test(FunctionalClass):
         data = [{'count': 3, 'chance': 3.6, 'key': 'ae'},
                 {'count': 4, 'chance': 4.8, 'key': 'oi'}]
         
-        race = Race.objects.first()
-        genderGp = GenderGroups.objects.first()
-        
         letter = Letters()
-        letter.race = race.id
-        letter.gender_group = genderGp.id
+        letter.race = self.race.id
+        letter.gender_group = self.gender.id
         letter.key = 'u'
         letter.count = 4
         letter.chance = 4.0
@@ -1011,12 +999,9 @@ class ManualNameGen_Test(FunctionalClass):
         genObj.race = 'TestRace'
         genObj.genderGroup = 'TestGender'
         
-        race = Race.objects.first()
-        genderGp = GenderGroups.objects.first()
-        
         letter = Letters()
-        letter.race = race.id
-        letter.gender_group = genderGp.id
+        letter.race = self.race.id
+        letter.gender_group = self.gender.id
         letter.key = 'u'
         letter.count = 4
         letter.chance = 4.0
@@ -1039,12 +1024,9 @@ class ManualNameGen_Test(FunctionalClass):
         data = [{'count': 3, 'chance': 3.6, 'key': 'bt'},
                 {'count': 4, 'chance': 4.8, 'key': 'fs'}]
         
-        race = Race.objects.first()
-        genderGp = GenderGroups.objects.first()
-        
         letter = Letters()
-        letter.race = race.id
-        letter.gender_group = genderGp.id
+        letter.race = self.race.id
+        letter.gender_group = self.gender.id
         letter.key = 'l'
         letter.count = 4
         letter.chance = 4.0
@@ -1068,12 +1050,9 @@ class ManualNameGen_Test(FunctionalClass):
         data = [{'count': 3, 'chance': 3.6, 'key': 'ae'},
                 {'count': 4, 'chance': 4.8, 'key': 'oi'}]
         
-        race = Race.objects.first()
-        genderGp = GenderGroups.objects.first()
-        
         letter = Letters()
-        letter.race = race.id
-        letter.gender_group = genderGp.id
+        letter.race = self.race.id
+        letter.gender_group = self.gender.id
         letter.key = 'u'
         letter.count = 4
         letter.chance = 4.0
@@ -1097,12 +1076,9 @@ class ManualNameGen_Test(FunctionalClass):
         data = [{'count': 3, 'chance': 3.6, 'key': 'ae'},
                 {'count': 4, 'chance': 4.8, 'key': 'oi'}]
         
-        race = Race.objects.first()
-        genderGp = GenderGroups.objects.first()
-        
         letter = Letters()
-        letter.race = race.id
-        letter.gender_group = genderGp.id
+        letter.race = self.race.id
+        letter.gender_group = self.gender.id
         letter.key = 'u'
         letter.count = 4
         letter.chance = 4.0
@@ -1128,12 +1104,9 @@ class ManualNameGen_Test(FunctionalClass):
         data = {'vowel': [{'count': 3, 'chance': 3.6, 'key': 'ae'}],
                 'consonant': [{'count': 4, 'chance': 4.8, 'key': 'vt'}]}
         
-        race = Race.objects.first()
-        genderGp = GenderGroups.objects.first()
-        
         letter = Letters()
-        letter.race = race.id
-        letter.gender_group = genderGp.id
+        letter.race = self.race.id
+        letter.gender_group = self.gender.id
         letter.key = 'u'
         letter.count = 4
         letter.chance = 4.0
@@ -1195,13 +1168,11 @@ class ManualNameGen_Test(FunctionalClass):
 
         order = [2, 1, 1]
         
-        race = Race.objects.first()
-        genderGp = GenderGroups.objects.first()
         VowelsChains.drop_collection()
         
         comb = ChainsCombinations()
-        comb.race = race.id
-        comb.gender_group = genderGp.id
+        comb.race = self.race.id
+        comb.gender_group = self.gender.id
         comb.key = 'au'
         comb.count = 4
         comb.chance = 4.0
@@ -1211,6 +1182,44 @@ class ManualNameGen_Test(FunctionalClass):
                                     chainRules=[],
                                     end=False)
         self.assertEqual(res, 'auva')
+                
+    @FunctionalClass.descript
+    def test_makeEndingChainsRules_makingRules_expectedEndingsRules(self) -> typ.NoReturn:
+        '''
+        Testing the method of makes rules 
+        for name endings from the database analytics.
+        '''
+        genObj = ManualNameGen(11)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+        
+        endings = NameEndings()
+        endings.race = self.race.id
+        endings.gender_group = self.gender.id
+        endings.key = 'ending'
+        endings.count = 6
+        endings.chance = 6.0
+        endings.save()
+                
+        res = genObj.makeEndingChainsRules()
+        self.assertDictEqual(res, {'vowel': [{'key': 'e', 'chance': 6.0}, 
+                                             {'key': 'i', 'chance': 6.0}], 
+                                   'consonant': [{'key': 'nd', 'chance': 6.0}, 
+                                                 {'key': 'ng', 'chance': 6.0}]
+                                  })
+                
+    @FunctionalClass.descript
+    def test_makeEndingChainsRules_checkingEmptyCollection_expectedEmptyRules(self) -> typ.NoReturn:
+        '''
+        Testing the method of makes rules 
+        for name endings from the database analytics.
+        '''
+        genObj = ManualNameGen(11)
+        genObj.race = 'TestRace'
+        genObj.genderGroup = 'TestGender'
+                
+        res = genObj.makeEndingChainsRules()
+        self.assertDictEqual(res, {'vowel': [], 'consonant': []})
         
 ###FINISH FunctionalBlock
 
