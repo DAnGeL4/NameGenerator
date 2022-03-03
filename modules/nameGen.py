@@ -517,6 +517,16 @@ class ManualNameGen():
 
         return preparedData
 
+    def getRandomChainSize(self, croppedSize: int) -> int:
+        '''
+        Returns random chain size.
+        '''
+        maxSize = croppedSize
+        if croppedSize > 5:
+            maxSize = 5
+            
+        return random.randint(0, maxSize)
+
     def getChainSize(self, croppedSize: int, minMaxRange: tuple,
                      frequencyData: typ.List[dict]) -> int:
         '''
@@ -536,6 +546,9 @@ class ManualNameGen():
             frequencyRules = self.setRangeByChances(preparedData, False)
             chainSize = self.getRandomKey(None, randomRules=frequencyRules)
 
+        if chainSize is None:
+            chainSize = self.getRandomChainSize(croppedSize)
+        
         return chainSize
 
     def makeChainsOrder(self, croppedSize: int) -> typ.List[int]:
