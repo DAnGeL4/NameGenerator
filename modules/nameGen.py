@@ -56,15 +56,14 @@ class ManualNameGen_Stub():
     '''
     A stub for a simple name generator.
     '''
-
-    def __init__(self, seed: int=None):
+    def __init__(self, seed: int = None):
         '''
         Initial function.
         Seed used for tests.
         '''
         if seed is not None:
             random.seed(seed)
-    
+
     def randomNameSize(self, startRange=5, endRange=7):
         '''
         Returns a random integer #nameSize ranging 
@@ -150,7 +149,7 @@ class ManualNameGen():
     chanceFreeCombination = 25.0
     chanceCombinationLetter = 75.0
 
-    def __init__(self, seed: int=None):
+    def __init__(self, seed: int = None):
         '''
         Initial function.
         Seed used for tests.
@@ -365,7 +364,7 @@ class ManualNameGen():
             if minSize > maxSize:
                 minSize = 0
                 maxSize = 30
-                
+
             nameSize = random.randint(minSize, maxSize)
 
         return nameSize
@@ -409,7 +408,7 @@ class ManualNameGen():
         endingChances = self.getEndSizeChances(nameEndings)
         endingRules = self.convertDictToListRules(endingChances)
         nameEndSize = self.getRandomKey(None, randomRules=endingRules)
-        
+
         if nameEndSize is None:
             nameEndSize = random.randint(0, 21)
 
@@ -455,7 +454,7 @@ class ManualNameGen():
         '''
         assert chainType in self.chainTypes.values(),\
                 "ERR: Unknown chain type."
-                
+
         collectionsByTypes = dict({
             self.chainTypes['v']: {
                 'type': self.vowelsChains,
@@ -524,7 +523,7 @@ class ManualNameGen():
         maxSize = croppedSize
         if croppedSize > 5:
             maxSize = 5
-            
+
         return random.randint(1, maxSize)
 
     def getChainSize(self, croppedSize: int, minMaxRange: tuple,
@@ -548,31 +547,30 @@ class ManualNameGen():
 
         if chainSize is None:
             chainSize = self.getRandomChainSize(croppedSize)
-        
+
         return chainSize
 
     def makeChainsOrder(self, croppedSize: int) -> typ.List[int]:
         '''
         Returns the order of chains by type and length.
         '''
-        if not croppedSize: 
+        if not croppedSize:
             return []
-            
+
         chainType = self.getLetterType(self.lastLetter)
         frequencyData = self.makeFrequencyData()
         rangeByTypes = self.makeRangesByTypes(frequencyData)
 
         chainsOrder = list()
         while True:
-            chainSize = self.getChainSize(croppedSize, 
-                                          rangeByTypes[chainType],
+            chainSize = self.getChainSize(croppedSize, rangeByTypes[chainType],
                                           frequencyData[chainType])
             chainsOrder.append(chainSize)
 
             croppedSize = croppedSize - chainSize
             if croppedSize == 0:
                 break
-            assert croppedSize >= 0, "ERR: Out of range cropped size." #>0
+            assert croppedSize >= 0, "ERR: Out of range cropped size."  #>0
 
             chainType = self.getNextLetterType(chainType)
 
@@ -681,7 +679,7 @@ class ManualNameGen():
         '''
         assert lenChain is not None, "ERR: lenChain must be initialized."
         assert lenChain >= 0, "ERR: lenChain must be positive."
-                                 
+
         preparedData = list()
         for chain in chainsData:
             if len(chain['key']) == lenChain:
@@ -708,7 +706,7 @@ class ManualNameGen():
         and discards this letter from each chain.
         '''
         assert prewLetter is not None, "ERR: letter cannot be None."
-                      
+
         preparedData = list()
         for chain in chainsData:
             key = chain['key']
@@ -721,8 +719,8 @@ class ManualNameGen():
 
         return preparedData
 
-    def prepareLettersRules(
-            self, rulesData: typ.Dict[str, list]) -> typ.List[dict]:
+    def prepareLettersRules(self, rulesData: typ.Dict[str,
+                                                      list]) -> typ.List[dict]:
         '''
         Prepares rules by type for:
         probable next letter in the chain;
@@ -732,7 +730,7 @@ class ManualNameGen():
         '''
         assert all(key in rulesData for key in ['fcl', 'acl', 'anl']),\
                 "ERR: There is no one of the keys."
-                
+
         chanceLetterFirst = self.chanceLetterFirst
         if not rulesData['fcl']:
             chanceLetterFirst = 0.0
@@ -756,7 +754,7 @@ class ManualNameGen():
         for data in dataList:
             chance = data[0]
             key = None
-            
+
             if data[1]:
                 key = self.getRandomKey(None, randomRules=data[1])
             if key is None:
@@ -816,12 +814,13 @@ class ManualNameGen():
         '''
         if hasattr(self, 'tmp_gen_chain'):
             del self.tmp_gen_chain
-            
+
         if hasattr(self, 'tmp_len'):
             del self.tmp_len
-    
-    def prepareCreationChain(self, lenChain: int, chainType: str,
-                    chainsRules: typ.List[dict]) -> typ.Dict[str, list]:
+
+    def prepareCreationChain(
+            self, lenChain: int, chainType: str,
+            chainsRules: typ.List[dict]) -> typ.Dict[str, list]:
         '''
         Prepars data for chain creation.
         '''
@@ -831,19 +830,19 @@ class ManualNameGen():
 
         if not chainsRules:
             chainsRules = self.getChainsData(chainType)
-            
+
         chainsList = self.getChainsList(chainType, chainsRules)
         chainsRules = self.getGivenLengthChains(chainsRules, lenChain)
-                        
+
         if self.lastLetter:
             self.tmp_len -= 1
             chainsRules = self.cutChains(chainsRules, self.lastLetter)
             self.tmp_gen_chain += self.lastLetter
             self.lastLetter = None
-        
+
         allRulesData = dict({
-            'fcl': [], 
-            'acl': self.makeAllChainLettersData(chainsList), 
+            'fcl': [],
+            'acl': self.makeAllChainLettersData(chainsList),
             'anl': self.makeAllNamesLetters(chainType),
             'tmp': chainsRules
         })
@@ -860,7 +859,7 @@ class ManualNameGen():
         free random chance for any letter of the given type.
         '''
         allRulesData = self.prepareCreationChain(lenChain, chainType,
-                                                chainsRules)
+                                                 chainsRules)
         lenChain = self.tmp_len
         generalChain = self.tmp_gen_chain
         chainsRules = allRulesData.pop('tmp')
@@ -869,8 +868,8 @@ class ManualNameGen():
 
         for count in range(lenChain):
             firstLettersRules = self.prepareFirstChainLetters(chainsRules)
-            allRulesData['fcl'] = self.setRangeByChances(firstLettersRules,
-                                                         False)
+            allRulesData['fcl'] = self.setRangeByChances(
+                firstLettersRules, False)
 
             randomRules = self.getLettersRules(chainType, allRulesData)
             letter = self.getRandomKey(None, randomRules=randomRules)
@@ -933,8 +932,8 @@ class ManualNameGen():
         combinationRules = self.convertDictToListRules(letterChances)
         return combinationRules
 
-    def setCombinationLetter(self, 
-                             lastChain: str, 
+    def setCombinationLetter(self,
+                             lastChain: str,
                              analysisObj: object,
                              combinationsData: typ.List[dict],
                              chainType=None) -> typ.NoReturn:
@@ -984,8 +983,7 @@ class ManualNameGen():
         for lenChain in chainsOrder:
             if chain:
                 _ = self.setCombinationLetter(chain, analysisObj,
-                                              combinationsData,
-                                              chainType)
+                                              combinationsData, chainType)
 
             rules = None if not chainRules else chainRules[chainType]
             chain = self.createChain(lenChain, chainType, rules)
@@ -1106,7 +1104,7 @@ class ManualNameGen():
 @redirectOutput
 def main():
     respond = '\nName Generator: '
-    
+
     if USING_FILE_STORING_FLAG:
         nameGen = ManualNameGen_Stub()
         respond += '\n* Stub name: '
