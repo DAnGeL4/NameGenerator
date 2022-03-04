@@ -525,7 +525,7 @@ class ManualNameGen():
         if croppedSize > 5:
             maxSize = 5
             
-        return random.randint(0, maxSize)
+        return random.randint(1, maxSize)
 
     def getChainSize(self, croppedSize: int, minMaxRange: tuple,
                      frequencyData: typ.List[dict]) -> int:

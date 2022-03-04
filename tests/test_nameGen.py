@@ -129,7 +129,8 @@ class ManualNameGen_Test(FunctionalClass):
     findValidCombinations;
     createCombinationChances;
     setCombinationLetter;
-    printLogLine.
+    printLogLine;
+    getRandomChainSize.
     '''
 
     ##BEGIN ConstantBlock
@@ -1110,6 +1111,28 @@ class ManualNameGen_Test(FunctionalClass):
     
         res = testOut.getvalue()
         self.assertEqual(res, '** Test message: test_param\n')
+                
+    @FunctionalClass.descript
+    def test_getRandomChainSize_gettingRandomSize_expectedChainSize(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of getting random chain size.
+        '''
+        genObj = ManualNameGen(10)
+                
+        res = genObj.getRandomChainSize(croppedSize=3)
+        self.assertEqual(res, 3)
+                
+    @FunctionalClass.descript
+    def test_getRandomChainSize_gettingRandomSize_expectedLimitedSize(
+            self) -> typ.NoReturn:
+        '''
+        Testing the method of getting random chain size.
+        '''
+        genObj = ManualNameGen(10)
+                
+        res = genObj.getRandomChainSize(croppedSize=10)
+        self.assertEqual(res, 5)
 
 ###FINISH FunctionalBlock
 
