@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+
+{% block selectednames %}
+
+  {% for s_name in selected_names %}
+
+    <div class="list-group-item 
+                list-group-item-action 
+                py-3 lh-tight" 
+        data-toggle="tooltip">
+      <div class="d-flex flex-column 
+                  w-100 align-items-start 
+                  justify-content-between">
+        
+        <div class="container-fluid m-1">
+          
+          <form method="GET" 
+                action="{{ url_for('exclude_name', name_id=s_name['id']) }}">
+            <div class="flex-row flex-wrap row"> 
+              
+              <div class="flex-column col col-12 col-xxl-10">
+                
+                <div class="flex-row">
+                  <strong class="text-muted">Name: </strong>
+                  <strong class="mb-1">{{ s_name['name'] }}</strong>
+                </div>
+                <div class="flex-row ">
+                  <small class="text-muted">Race: </small>
+                  <small>{{ s_name['race'] }}</small>
+                </div>
+                <div class="flex-row">
+                  <small class="text-muted">Gender: </small>
+                  <small>{{ s_name['gender'] }}</small>
+                </div>
+                
+              </div>
+              
+              <div class="flex-column col col-12 col-xxl-2">
+                <button type="submit" class="btn btn-outline-danger w-100" 
+                        name="exclude_name" value="exclude_s_name" 
+                        data-toggle="tooltip" 
+                        title="Exclude name from list">
+                X
+                </button>
+              </div>
+              
+            </div>
+          </form>
+          
+        </div>
+      </div>
+    </div>
+
+  {% endfor %}
+
+{% endblock %}
+
+
+{% block generatenames %} 
+
+<div class="container border">
+  <form method="POST" action="{{ url_for('select_remove_generate') }}">
+    
+    <div class="flex-row row pt-3">
+      
+      <div class="col flex-column col-12 col-xxl-6 ">
+          <label for="raceSelect" class="form-label">Race:</label>
+          <select id="raceSelect" name="raceSelect" 
+                  class="form-select" data-toggle="tooltip" 
+                  title="Select a race of generated name">
+            
+            {% for race in generate_settings['race_list'] %}
+              <option value="{{ race }}" 
+                      {{ 'selected' if session['race'] == race else '' }}>
+                {{ race }}
+              </option>
+            {% endfor %}
+            
+          </select>
+      </div>
+      
+      <div class="col flex-column col-12 col-xxl-6 ">
+        <label for="genderSelect" class="form-label">Genders:</label>
+        <select id="genderSelect" name="genderSelect" 
+                class="form-select" data-toggle="tooltip" 
+                title="Select a gender of generated name">
+          
+          {% for gender in generate_settings['gender_list'] %}
+            <option value="{{ gender }}" 
+                    {{ 'selected' if session['gender'] == gender else '' }}>
+              {{ gender }}
+            </option>
+          {% endfor %}
+          
+        </select>
+      </div>
+  
+    </div>
+  
+    <div class="flex-row row pt-3">
+  
+      <div class="col flex-column col-12">
+        <label for="nameInput" class="form-label">Generated name:</label>
+        <input type="text" id="nameInput"
+                class="form-control" name="nameInput"
+                placeholder="Click 'Random' to generate a name" 
+                data-toggle="tooltip" title="Edit a name"
+                value="{{ session['name'] if session['name'] else '' }}">
+      </div>
+        
+    </div>
+  
+    <div class="flex-row row py-3">
+      
+      <div class="col flex-column col-12 col-xxl-4 
+                  order-2 order-xxl-1">
+          <button type="submit" class="btn btn-outline-success w-100" 
+                  name="select_name" value="select_name" 
+                  data-toggle="tooltip" 
+                  title="Add to 'Selected names' list">
+            Select
+          </button>
+      </div>
+      
+      <div class="col flex-column col-12 col-xxl-4 
+                  order-1 order-xxl-2">
+          <button type="submit" class="btn btn-outline-primary w-100" 
+                  name="generate_name" value="generate_name" 
+                  data-toggle="tooltip" title="Generate a name">
+            Random
+          </button>
+      </div>
+  
+      <div class="col flex-column col-12 col-xxl-4 
+                  order-3 order-xxl-3">
+          <button type="submit" class="btn btn-outline-danger w-100" 
+                  name="remove_name" value="remove_name" 
+                  data-toggle="tooltip" 
+                  title="Add to 'Removed names' list">
+            Remove
+          </button>
+      </div>
+        
+    </div>
+    
+  </form>
+</div>
+
+{% endblock %}
+
+
+{% block removednames %} 
+
+  {% for r_name in removed_names %}
+
+    <div class="list-group-item list-group-item-action 
+                py-3 lh-tight" data-toggle="tooltip">
+      <div class="d-flex flex-column w-100 
+                  align-items-start justify-content-between">
+        
+        <div class="container-fluid m-1">
+          <form method="GET" 
+                action="{{ url_for('exclude_name', name_id=r_name['id']) }}">
+            <div class="flex-row flex-wrap row"> 
+              
+              <div class="flex-column col col-12 col-xxl-10">
+                
+                <div class="flex-row">
+                  <strong class="text-muted">Name: </strong>
+                  <strong class="mb-1">{{ r_name['name'] }}</strong>
+                </div>
+                <div class="flex-row ">
+                  <small class="text-muted">Race: </small>
+                  <small>{{ r_name['race'] }}</small>
+                </div>
+                <div class="flex-row">
+                  <small class="text-muted">Gender: </small>
+                  <small>{{ r_name['gender'] }}</small>
+                </div>
+                
+              </div>
+              
+              <div class="flex-column col col-12 col-xxl-2">
+                <button type="submit" class="btn btn-outline-danger w-100" 
+                        name="exclude_name" value="exclude_r_name" 
+                        data-toggle="tooltip" 
+                        title="Exclude name from list">
+                X
+                </button>
+              </div>
+              
+            </div>
+          </form>
+          
+        </div>
+        
+      </div>
+    </div>
+
+  {% endfor %}
+
+{% endblock %}

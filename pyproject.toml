@@ -12,6 +12,7 @@ graphviz = "^0.16"
 mongoengine = "^0.23.1"
 keras = "^2.7.0"
 mongomock = "^3.23.0"
+Flask = "^2.1.1"
 
 [tool.poetry.dev-dependencies]
 

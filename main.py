@@ -22,6 +22,7 @@ from modules import nameGen
 from modules import nameReader
 from modules import nameAnalysis
 from modules import dbTools
+from modules.flask_module import flask_main
 
 from tests import test_Common
 
@@ -96,6 +97,7 @@ class MainService():
             nameReader.main,
             nameAnalysis.main,
             nameGen.main,
+            flask_main.main,
         ])
 
         return functionsList
