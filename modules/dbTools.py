@@ -12,8 +12,8 @@ from pymongo.database import Database
 ##customImport
 from configs.CFGNames import ME_SETTINGS
 from configs.CFGNames import CHECKSUM_DB_GLOBAL_FLAG
-from templates.templateAnalysis import TEMPLATE_GLOBAL_RACE
-from templates.templateAnalysis import TEMPLATE_LOCAL_RACE
+from py_templates.templateAnalysis import TEMPLATE_GLOBAL_RACE
+from py_templates.templateAnalysis import TEMPLATE_LOCAL_RACE
 
 from database.medbNameSchemas import Race, Female, Male
 from database.medbNameSchemas import Surnames, GenderGroups

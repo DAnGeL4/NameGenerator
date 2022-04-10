@@ -16,7 +16,7 @@ from configs.CFGNames import NAMES_BASE_INITIALIZE_FILE, CHECK_SUM_FILE
 from configs.CFGNames import DB_NAMES_FILENAME_FLAG, CHECKSUM_DB_GLOBAL_FLAG
 from configs.CFGNames import LOCAL_NAMES_LOG_FILE
 from configs.CFGNames import USING_FILE_STORING_FLAG
-from templates.templateAnalysis import TEMPLATE_LOCAL_RACE, TEMPLATE_GLOBAL_RACE
+from py_templates.templateAnalysis import TEMPLATE_LOCAL_RACE, TEMPLATE_GLOBAL_RACE
 
 from modules.dbTools import MongoDBTools, ME_DBService
 

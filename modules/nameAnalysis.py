@@ -16,10 +16,10 @@ from configs.CFGNames import GROUP_KEYS
 from configs.CFGNames import USING_FILE_STORING_FLAG
 #from configs.CFGNames import CHECKSUM_DB_GLOBAL_FLAG
 
-from templates.templateAnalysis import TEMPLATE_GLOBAL_ANALYTIC
-from templates.templateAnalysis import TEMPLATE_NAMES_ANALYTIC
-from templates.templateAnalysis import TEMPLATE_RATING_ANALYTIC
-from templates.templateAnalysis import TEMPLATE_CHAINS_ANALYTIC
+from py_templates.templateAnalysis import TEMPLATE_GLOBAL_ANALYTIC
+from py_templates.templateAnalysis import TEMPLATE_NAMES_ANALYTIC
+from py_templates.templateAnalysis import TEMPLATE_RATING_ANALYTIC
+from py_templates.templateAnalysis import TEMPLATE_CHAINS_ANALYTIC
 
 from modules.nameReader import FileTools, ChecksumTools
 from modules.dbTools import ME_DBService
