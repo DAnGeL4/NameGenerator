@@ -439,6 +439,30 @@ class ME_DBService():
         _tmpDump = pickle.dumps(template, -1)
         return pickle.loads(_tmpDump)
 
+    def getRacesList(self) -> typ.List[str]:
+        '''
+        Gets list of races from database.
+        '''
+        raceList = list([])
+
+        objsRace = Race.objects.all()
+        for race in objsRace:
+            raceList.append(str(race.race))
+
+        return raceList
+
+    def getGenderGroupsList(self) -> typ.List[str]:
+        '''
+        Gets list of gender groups from database.
+        '''
+        genderList = list([])
+        
+        objsGender = GenderGroups.objects.all()
+        for gender in objsGender:
+            genderList.append(str(gender.gender_group))
+
+        return genderList
+
     def getNamesByRace(self, raceObject: MEDocument, 
                         collection: MECollection) -> typ.List[str]:
         '''

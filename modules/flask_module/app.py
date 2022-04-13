@@ -1,23 +1,33 @@
-import random
 from flask import request, url_for
 from flask import redirect, session
 
+from modules.dbTools import ME_DBService
+from modules.nameGen import ManualNameGen
+
 def get_random_name(race, gender):
-    index = random.randint(0, 100)
-    name = "generated_name_" + str(index)
+    nameGen = ManualNameGen()
+    name = nameGen.createCharacterName(race, gender)
+    
+    if not name:
+        name = "Generation_error"
     return name
 
 def get_race_list():
-    race_list = ['py_tst_race_', 
-                'py_tst_race_2', 
-                'py_tst_race_3']
+    service = ME_DBService()
+    race_list = service.getRacesList()
+    
+    if not race_list:
+        race_list = ['Have_not_race']
+        
     return race_list
 
 def get_gender_list():
-    gender_list = ['py_tst_gender_', 
-                  'py_tst_gender_2', 
-                  'py_tst_gender_3', 
-                  'Common']
+    service = ME_DBService()
+    gender_list = service.getGenderGroupsList()
+    
+    if not gender_list:
+        gender_list = ['Have_not_gender']
+        
     return gender_list
 
 def check_name_lists():
