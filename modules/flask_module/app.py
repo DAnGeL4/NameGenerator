@@ -1,10 +1,27 @@
+###START ImportBlock
+##systemImport
 from flask import request, url_for
 from flask import redirect, session
+import typing as typ
 
+##customImport
 from modules.dbTools import ME_DBService
 from modules.nameGen import ManualNameGen
 
-def get_random_name(race, gender):
+###FINISH ImportBlock
+
+###START GlobalConstantBlock
+###FINISH GlobalConstantBlock
+
+###START DecoratorBlock
+###FINISH DecoratorBlock
+
+###START FunctionalBlock
+
+def get_random_name(race: str, gender: str) -> str:
+    '''
+    Wrapper function for name generation.
+    '''
     nameGen = ManualNameGen()
     name = nameGen.createCharacterName(race, gender)
     
@@ -12,7 +29,10 @@ def get_random_name(race, gender):
         name = "Generation_error"
     return name
 
-def get_race_list():
+def get_race_list() -> typ.List[str]:
+    '''
+    Wrapper function to get a list of races.
+    '''
     service = ME_DBService()
     race_list = service.getRacesList()
     
@@ -21,7 +41,10 @@ def get_race_list():
         
     return race_list
 
-def get_gender_list():
+def get_gender_list() -> typ.List[str]:
+    '''
+    Wrapper function to get a list of genders.
+    '''
     service = ME_DBService()
     gender_list = service.getGenderGroupsList()
     
@@ -30,7 +53,10 @@ def get_gender_list():
         
     return gender_list
 
-def check_name_lists():
+def check_name_lists() -> typ.NoReturn:
+    '''
+    Checks if session data exists.
+    '''
     if 'selected_names' not in session:
         session['selected_names'] = list([])
     if 'removed_names' not in session:
@@ -38,15 +64,21 @@ def check_name_lists():
     if 'name_id_list' not in session:
         session['name_id_list'] = 0
 
-def add_name_to(session_key):
+def add_name_to(session_key: str) -> typ.NoReturn:
+    '''
+    Adds a name to the selected or removed list 
+    in the session data.
+    '''
+    name = request.form.get('nameInput')
+    if not name: return
+        
     session['name_id_list'] += 1
-  
     data = {
         'id': session['name_id_list'],
-        'name': request.form.get('nameInput'), 
+        'name': name, 
         'race': request.form.get('raceSelect'), 
         'gender': request.form.get('genderSelect')
-    }
+    }    
   
     session['race'] = data['race']
     session['gender'] = data['gender']
@@ -55,7 +87,11 @@ def add_name_to(session_key):
     if 'name' in session:
       session.pop('name')
 
-def generate_name():
+def generate_name() -> typ.NoReturn:
+    '''
+    Gets the race and gender from the web form 
+    and generates a name.
+    '''
     race = request.form.get('raceSelect')
     gender = request.form.get('genderSelect')
   
@@ -65,8 +101,11 @@ def generate_name():
     session['race'] = race
     session['gender'] = gender
 
-def select_remove_generate():
-  
+def select_remove_generate() -> str:
+    '''
+    Processes the post request and performs selection, 
+    removing or generation of a name.
+    '''
     if request.method == 'POST':
         _ = check_name_lists()
       
@@ -83,6 +122,9 @@ def select_remove_generate():
     return redirect(url_for('general'))
 
 def exclude_by_id(name_id, session_key):
+    '''
+    Excludes a name from the specified list by id.
+    '''
     _ = check_name_lists()
   
     name_list = session[session_key]
@@ -95,6 +137,10 @@ def exclude_by_id(name_id, session_key):
     return name_list
 
 def exclude_name(name_id):
+    '''
+    Processes the post request and removes the name 
+    from the list of selected or removed names.
+    '''
     if request.args.get('exclude_name') == 'exclude_s_name':
         session['selected_names'] = exclude_by_id(name_id, 
                                                   'selected_names')
@@ -104,3 +150,8 @@ def exclude_name(name_id):
                                                  'removed_names')
   
     return redirect(url_for('general'))
+
+###FINISH FunctionalBlock
+
+###START MainBlock
+###FINISH Mainblock
